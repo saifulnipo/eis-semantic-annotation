@@ -9,6 +9,23 @@ var tableAnnotator  = {
 
     /**
      *
+     * @returns {Array}
+     */
+    getSelectedTableCellTexts : function(){
+
+        var selectedElements = tableAnnotator.getSelectedElementTags(window),
+            selectedTexts = [] ;
+        $.each( selectedElements, function( index, value ){
+            if(tableAnnotator.isDivContainText(value)) {
+//                console.log(value.textContent);
+                selectedTexts.push(value.textContent);
+            }
+        });
+        return selectedTexts;
+    },
+
+    /**
+     *
      * @param range
      * @param node
      * @returns {*}
@@ -59,7 +76,6 @@ var tableAnnotator  = {
 
             selectedElements = [treeWalker.currentNode];
             while (treeWalker.nextNode()) {
-                console.log(treeWalker.currentNode);
                 selectedElements.push(treeWalker.currentNode);
             }
         }
@@ -94,5 +110,14 @@ var tableAnnotator  = {
             }
         });
         return elements;
+    },
+
+    /**
+     *
+     * @param div
+     * @returns {boolean}
+     */
+    isDivContainText : function(div) {
+        return div.hasAttribute('data-canvas-width');
     }
 };

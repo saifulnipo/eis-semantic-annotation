@@ -46,9 +46,8 @@ var scientificAnnotation  = {
         });
 
         $("#annotateTableButton").bind("click", function () {
-
-            var selectedElements = tableAnnotator.getSelectedElementTags(window);
-            console.log(selectedElements);
+            var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
+            console.log(selectedTableCellTexts);
         });
     },
 
@@ -531,6 +530,4 @@ var scientificAnnotation  = {
 $(function () {
     scientificAnnotation.init();
     highlight.init();
-    tableAnnotator.bindMouseClickedElementEvent();
-
 });

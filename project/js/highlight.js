@@ -39,8 +39,8 @@ var highlight  = {
         var parentDivNode = $(problemNode).closest('div')[0];  //parent div node of the problem node
         var parentDivRange = rangy.createRange();
         parentDivRange.selectNode(parentDivNode); //take node as range
-        console.log("length="+parentDivRange.toString().length+": "+parentDivRange.toString());
-        console.log(parentDivRange.toHtml());
+//        console.log("length="+parentDivRange.toString().length+": "+parentDivRange.toString());
+//        console.log(parentDivRange.toHtml());
         var preCaretRange = rangy.createRange();
         preCaretRange.selectNodeContents(parentDivNode);
         preCaretRange.setEnd(problemNode, problemOffset); //move end offset till the selection
@@ -60,7 +60,7 @@ var highlight  = {
         var correctedStartPos = this.originalPosition(unstrippedRange.startContainer, unstrippedRange.startOffset);
         var correctedEndPos = this.originalPosition(unstrippedRange.endContainer, unstrippedRange.endOffset);
         var correctedPos = correctedStartPos+","+correctedEndPos;
-        console.log("Selected range when stripped of DOM modifications: "+correctedPos);
+//        console.log("Selected range when stripped of DOM modifications: "+correctedPos);
         return correctedPos;
     },
 
@@ -98,15 +98,15 @@ var highlight  = {
         var rangy_base = document.getElementById('viewer');
         //highlightRanges = new Array();
         for (i=0; i<array.length; i++) {
-            console.log("	&rangyFragment="+array[i]);
+//            console.log("	&rangyFragment="+array[i]);
             if (array[i] != undefined) { //filter out URIs without &rangyFragment parameter value
                 var r;
         if (rangy.canDeserializeRange(array[i], rangy_base)) { //BUG: potential rangy bug as it does not seem to catch deserialisation errors
             r = rangy.deserializeRange(array[i], rangy_base);
-            console.log("	isvalid="+r.isValid());
+//            console.log("	isvalid="+r.isValid());
             highlight.highlightRanges.push(r);
         } else {
-            console.log("	"+array[i]+" is not serializable!");
+//            console.log("	"+array[i]+" is not serializable!");
         }
             }
         }
@@ -126,9 +126,9 @@ var highlight  = {
             highlightRanges = highlight.deserializeArray(rangyFragments);
             cssApplier.applyToRanges(highlightRanges);
         } catch(err) {
-            console.log("There was an error during highlighting. Potentially corrupted data. "+err.message);
+//            console.log("There was an error during highlighting. Potentially corrupted data. "+err.message);
         }
-        console.log(highlight.highlightRanges.length+' highlights were applied! If some are missing there might be an overlap in which case they get discarded.');
+//        console.log(highlight.highlightRanges.length+' highlights were applied! If some are missing there might be an overlap in which case they get discarded.');
     }
     
 };
