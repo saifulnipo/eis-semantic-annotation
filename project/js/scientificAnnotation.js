@@ -32,7 +32,7 @@ var scientificAnnotation  = {
         });
 
         $("#showSimilarSearchButton").bind("click", function () {
-            scientificAnnotation.showSimilarSearchResult();
+            tableAnnotator.showSimilarSearchResult();
         });
 
         $("#queryButton").bind("click", function () {
@@ -43,6 +43,12 @@ var scientificAnnotation  = {
             sparql.showDataFromSparql();
             outputTable.fadeIn(500);
             displayFileInfoTitle.fadeIn(500);
+        });
+
+        $("#annotateTableButton").bind("click", function () {
+
+            var selectedElements = tableAnnotator.getSelectedElementTags(window);
+            console.log(selectedElements);
         });
     },
 
@@ -260,6 +266,7 @@ var scientificAnnotation  = {
      * @return void
      */
     setTextValue:function(selectedText) {
+        $('#subjectValueInput').val('');
         selectedText =selectedText.replace(/(\r\n|\n|\r)/gm,"");
         $('#subjectValueInput').val(selectedText);
     },
@@ -524,5 +531,6 @@ var scientificAnnotation  = {
 $(function () {
     scientificAnnotation.init();
     highlight.init();
+    tableAnnotator.bindMouseClickedElementEvent();
 
 });
