@@ -16,10 +16,7 @@ var tableAnnotator  = {
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
             selectedTexts = [] ;
         $.each( selectedElements, function( index, value ){
-            if(tableAnnotator.isDivContainText(value)) {
-//                console.log(value.textContent);
                 selectedTexts.push(value.textContent);
-            }
         });
         return selectedTexts;
     },
@@ -48,7 +45,7 @@ var tableAnnotator  = {
     },
 
     /**
-     *
+     * Return all the selected element inside a table
      * @param win
      * @returns {*}
      */
@@ -76,7 +73,10 @@ var tableAnnotator  = {
 
             selectedElements = [treeWalker.currentNode];
             while (treeWalker.nextNode()) {
-                selectedElements.push(treeWalker.currentNode);
+                // interested only table cells
+                if(tableAnnotator.isDivContainText(treeWalker.currentNode)) {
+                    selectedElements.push(treeWalker.currentNode);
+                }
             }
         }
         return selectedElements;
@@ -119,5 +119,49 @@ var tableAnnotator  = {
      */
     isDivContainText : function(div) {
         return div.hasAttribute('data-canvas-width');
+    },
+
+
+    /**
+     * Return true if a table is selected property. i.e proper equal row selection
+     * @returns {boolean}
+     */
+    isTableSelectionValid : function() {
+        var selectedElements = tableAnnotator.getSelectedElementTags(window),
+            cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
+            values = [];
+
+        for(var key in cellCountStruct) {
+            values.push(cellCountStruct[key]);
+        }
+
+        var uniqueArray = $.unique(values);
+
+        if(uniqueArray.length === 1){
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Return the selected table cell count data structure
+     * @param selectedElements
+     * @returns {Array} associative array
+     */
+    getTableCellSelectionCountStructure : function(selectedElements) {
+        var x , y,  tableStruct = [];
+        $.each( selectedElements, function( index, value ){
+            x = value.style.top;
+//            y = value.style.left;
+            if (x !== undefined && x !== '') {
+                if (tableStruct[x] !== undefined) {
+                    tableStruct[x]++;
+                }else{
+                    tableStruct[x] = 1;
+                }
+            }
+        });
+        return tableStruct;
     }
+
 };

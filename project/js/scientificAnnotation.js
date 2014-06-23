@@ -32,7 +32,7 @@ var scientificAnnotation  = {
         });
 
         $("#showSimilarSearchButton").bind("click", function () {
-            tableAnnotator.showSimilarSearchResult();
+            scientificAnnotation.showSimilarSearchResult();
         });
 
         $("#queryButton").bind("click", function () {
@@ -46,8 +46,13 @@ var scientificAnnotation  = {
         });
 
         $("#annotateTableButton").bind("click", function () {
-            var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
-            console.log(selectedTableCellTexts);
+//
+            if(tableAnnotator.isTableSelectionValid()) {
+                var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
+                console.log(selectedTableCellTexts);
+            } else {
+                alert('Table selection is not proper :-(');
+            }
         });
     },
 
