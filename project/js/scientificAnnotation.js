@@ -27,6 +27,10 @@ var scientificAnnotation  = {
      */
     bindClickEventForButtons: function () {
 
+        $("#simpleAnnotateButton").bind("click", function () {
+            scientificAnnotation.showSimpleAnnotatePanel($(this));
+        });
+
         $("#addAnnotationButton").bind("click", function () {
             scientificAnnotation.addAnnotation();
         });
@@ -36,24 +40,28 @@ var scientificAnnotation  = {
         });
 
         $("#queryButton").bind("click", function () {
-            var outputTable = $('#displaySparqlTableRows');
-            var displayFileInfoTitle = $('#displayTableTitle');
-            scientificAnnotation.clearSimilarSearchResult();
-            scientificAnnotation.showProgressBar('Loading data ....');
-            sparql.showDataFromSparql();
-            outputTable.fadeIn(500);
-            displayFileInfoTitle.fadeIn(500);
+            scientificAnnotation.fetchDataFromDatabase();
         });
 
         $("#annotateTableButton").bind("click", function () {
-//
-            if(tableAnnotator.isTableSelectionValid()) {
-                var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
-                console.log(selectedTableCellTexts);
-            } else {
-                alert('Table selection is not proper :-(');
-            }
+            scientificAnnotation.annotateTable();
         });
+    },
+
+
+    /**
+     * show the simple annotate panel
+     * @param button
+     */
+    showSimpleAnnotatePanel : function (button) {
+        var simpleAnnotateWindow = $('#simpleAnnotatePanel');
+        if (simpleAnnotateWindow.is(':visible')) {
+            simpleAnnotateWindow.hide();
+            button.text('Show Simple Annotate Panel');
+        } else {
+            simpleAnnotateWindow.fadeIn(500);
+            button.text('Hide Simple Annotate Panel');
+        }
     },
 
     /**
@@ -230,7 +238,7 @@ var scientificAnnotation  = {
         $("#viewer").bind("mouseup", function () {
 
             var text=scientificAnnotation.getSelectedTextFromPDF();
-            if (text!='') {
+            if (text!='' && $('#simpleAnnotatePanel').is(':visible')) {
                 scientificAnnotation.setTextValue(text);
                 scientificAnnotation.selectedTextPosition = scientificAnnotation.getSelectionCharOffsetsWithin();
             }
@@ -441,11 +449,38 @@ var scientificAnnotation  = {
     },
 
     /**
+     * Fetch the data from database
+     * @return void
+     */
+    fetchDataFromDatabase : function () {
+        var outputTable = $('#displaySparqlTableRows');
+        var displayFileInfoTitle = $('#displayTableTitle');
+        scientificAnnotation.clearSimilarSearchResult();
+        scientificAnnotation.showProgressBar('Loading data ....');
+        sparql.showDataFromSparql();
+        outputTable.fadeIn(500);
+        displayFileInfoTitle.fadeIn(500);
+    },
+
+    /**
+     *  Annotate tabular structure in pdf file
+     *  @return void
+     */
+    annotateTable : function() {
+        if(tableAnnotator.isTableSelectionValid()) {
+            var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
+            console.log(selectedTableCellTexts);
+            alert(selectedTableCellTexts);
+        } else {
+            alert('Table selection is not proper :-(');
+        }
+    },
+
+    /**
      * Display similar search
      * @return void
      */
     showSimilarSearchResult:function(){
-
         var similarPubsList = $("#similarPubsList");
         if (similarPubsList.is(':visible')) {
             similarPubsList.fadeOut(300);

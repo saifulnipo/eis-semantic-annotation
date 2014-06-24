@@ -263,32 +263,37 @@
 
     <div id="annotationToolbar" class="annotationToolbar" >
         </br>
-        <div id="annotationInputArea" >
 
-            <div class="form-inline" role="form" id="newValueForm">
-                <div class="form-group">
-                    <textarea class="form-control" id="subjectValueInput" rows="4" cols="50" placeholder="Subject" ></textarea></br></br>
-                    <input type="text" class="form-control" id="propertyValueInput" placeholder="Property" data-provide="typeahead" autocomplete="off" style="width:400px" ></br></br>
-                    <input type="text" class="form-control" id="objectValueInput" placeholder="Object" data-provide="typeahead" autocomplete="off" style="width:400px"></br></br>
+        <button id="simpleAnnotateButton" class="btn btn-default">Show Simple Annotate Panel</button>
+        <div id="simpleAnnotatePanel" style="display: none">
+            <div id="annotationInputArea" >
+
+                <div class="form-inline" role="form" id="newValueForm">
+                    <div class="form-group">
+                        <textarea class="form-control" id="subjectValueInput" rows="4" cols="50" placeholder="Subject" ></textarea></br></br>
+                        <input type="text" class="form-control" id="propertyValueInput" placeholder="Property" data-provide="typeahead" autocomplete="off" style="width:400px" ></br></br>
+                        <input type="text" class="form-control" id="objectValueInput" placeholder="Object" data-provide="typeahead" autocomplete="off" style="width:400px"></br></br>
+                    </div>
+
                 </div>
-
+                </br>
             </div>
-            </br>
+
+            <!-- message boxes start -->
+            <div class="alert alert-success" style="display: none"></div>
+            <div class="alert alert-danger" style="display: none"></div>
+            <div class="alert alert-warning" style="display: none"></div>
+            <!-- message boxes end -->
+
+
+
+            <button id="addAnnotationButton" class="btn btn-info"><span class="glyphicon glyphicon-pencil"></span> Add annotation</button>
+            <button id="queryButton" class="btn btn-info"><span class="glyphicon "></span> Fetch annotations</button>
+            <button id="showSimilarSearchButton" class="btn btn-default"> Find Similar</button>
+            <br> <br>
         </div>
 
-        <!-- message boxes start -->
-        <div class="alert alert-success" style="display: none"></div>
-        <div class="alert alert-danger" style="display: none"></div>
-        <div class="alert alert-warning" style="display: none"></div>
-        <!-- message boxes end -->
-
-
-
-        <button id="addAnnotationButton" class="btn btn-info"><span class="glyphicon glyphicon-pencil"></span> Add annotation</button>
-        <button id="queryButton" class="btn btn-info"><span class="glyphicon "></span> Fetch annotations</button>
-        <button id="showSimilarSearchButton" class="btn btn-default"> Find Similar</button>
-        <br> <br>
-        <button id="annotateTableButton" class="btn btn-info"><span class="glyphicon glyphicon-pencil"></span>  Annotate table</button>
+        <button id="annotateTableButton" class="btn btn-info"><span class="glyphicon glyphicon-pencil"></span>Annotate table</button>
 
         <!-- progress bar start -->
         <div class="progress progress-striped active" style="width: 55%; display: none">

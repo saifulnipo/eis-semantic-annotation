@@ -1,22 +1,24 @@
 /**
  * This js file contains functionality for table annotation.
  *
- * @authors : A Q M Saiful Islam, Jaana Takis
+ * @authors : A Q M Saiful Islam
  * @dependency: none
  */
 
 var tableAnnotator  = {
 
     /**
-     *
+     * Return the selected text of the table cell
      * @returns {Array}
      */
     getSelectedTableCellTexts : function(){
 
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
             selectedTexts = [] ;
-        $.each( selectedElements, function( index, value ){
+        $.each( selectedElements, function( index, value ) {
+            if(tableAnnotator.isDivContainText(value)) {
                 selectedTexts.push(value.textContent);
+            }
         });
         return selectedTexts;
     },
@@ -73,47 +75,44 @@ var tableAnnotator  = {
 
             selectedElements = [treeWalker.currentNode];
             while (treeWalker.nextNode()) {
-                // interested only table cells
-                if(tableAnnotator.isDivContainText(treeWalker.currentNode)) {
-                    selectedElements.push(treeWalker.currentNode);
-                }
+                selectedElements.push(treeWalker.currentNode);
             }
         }
         return selectedElements;
     },
 
-    /**
-     *
-     * @param selector
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @returns {Array}
-     */
-    rectangleSelect : function(selector, x1, y1, x2, y2) {
-        var elements = [];
-        jQuery(selector).each(function() {
-            var $this = jQuery(this);
-            var offset = $this.offset();
-            var x = offset.left;
-            var y = offset.top;
-            var w = $this.width();
-            var h = $this.height();
+//    /**
+//     *
+//     * @param selector
+//     * @param x1
+//     * @param y1
+//     * @param x2
+//     * @param y2
+//     * @returns {Array}
+//     */
+//    rectangleSelect : function(selector, x1, y1, x2, y2) {
+//        var elements = [];
+//        jQuery(selector).each(function() {
+//            var $this = jQuery(this);
+//            var offset = $this.offset();
+//            var x = offset.left;
+//            var y = offset.top;
+//            var w = $this.width();
+//            var h = $this.height();
+//
+//            if (x >= x1
+//                && y >= y1
+//                && x + w <= x2
+//                && y + h <= y2) {
+//                // this element fits inside the selection rectangle
+//                elements.push($this.get(0));
+//            }
+//        });
+//        return elements;
+//    },
 
-            if (x >= x1
-                && y >= y1
-                && x + w <= x2
-                && y + h <= y2) {
-                // this element fits inside the selection rectangle
-                elements.push($this.get(0));
-            }
-        });
-        return elements;
-    },
-
     /**
-     *
+     * Check if the selected div contain the text items
      * @param div
      * @returns {boolean}
      */
@@ -150,18 +149,19 @@ var tableAnnotator  = {
      */
     getTableCellSelectionCountStructure : function(selectedElements) {
         var x , y,  tableStruct = [];
-        $.each( selectedElements, function( index, value ){
-            x = value.style.top;
-//            y = value.style.left;
-            if (x !== undefined && x !== '') {
-                if (tableStruct[x] !== undefined) {
-                    tableStruct[x]++;
-                }else{
-                    tableStruct[x] = 1;
+        $.each( selectedElements, function( index, value ) {
+            if(tableAnnotator.isDivContainText(value)) {
+                x = value.style.top;
+//                y = value.style.left;
+                if (x !== undefined && x !== '') {
+                    if (tableStruct[x] !== undefined) {
+                        tableStruct[x]++;
+                    }else{
+                        tableStruct[x] = 1;
+                    }
                 }
             }
         });
         return tableStruct;
     }
-
 };
