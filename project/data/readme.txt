@@ -1,0 +1,1 @@
+this folder contain sparql data structure related files
