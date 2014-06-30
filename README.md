@@ -22,9 +22,17 @@ For EIS table annotation, the project is in very early stage.
 ## Documentation
 - [Complete Documentation](https://github.com/saifulnipo/eis-semantic-annotation/wiki)
 
+## Javascript Static code analyser
+- [JsLint](http://www.jslint.com/)
+- [jsHint](http://www.jshint.com/)
+
 ## Used libraries
 
 [PDF.js](http://mozilla.github.io/pdf.js/) - Viewer Example is used as a base for the project  
 [Twitter bootstrap](http://getbootstrap.com/) - used for UI  
 [jQuery](http://jquery.com/) - used for DOM manipulations, required by Twitter bootstrap  
 [Typeahead.js](https://github.com/twitter/typeahead.js) - used for autosuggestion in input boxes  
+
+
+## Backend Database Used
+- [virtuoso](http://virtuoso.openlinksw.com/)
