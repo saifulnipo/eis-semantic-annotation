@@ -32,7 +32,7 @@ For EIS table annotation, the project is in very early stage.
 [Twitter bootstrap](http://getbootstrap.com/) - used for UI  
 [jQuery](http://jquery.com/) - used for DOM manipulations, required by Twitter bootstrap  
 [Typeahead.js](https://github.com/twitter/typeahead.js) - used for autosuggestion in input boxes  
-
+[Ranjy](https://code.google.com/p/rangy/) - A cross-browser JavaScript range and selection library.
 
 ## Backend Database Used
 - [virtuoso](http://virtuoso.openlinksw.com/)

@@ -24,7 +24,7 @@ var tableAnnotator  = {
     },
 
     /**
-     *
+     * Return intersected Nodes
      * @param range
      * @param node
      * @returns {*}
