@@ -24,7 +24,7 @@ For EIS table annotation, the project is in very early stage.
 
 ## Javascript Static code analyser
 - [JsLint](http://www.jslint.com/)
-- [jsHint](http://www.jshint.com/)
+- [JsHint](http://www.jshint.com/)
 
 ## Used libraries
 
