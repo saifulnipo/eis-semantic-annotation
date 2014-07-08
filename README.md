@@ -1,23 +1,23 @@
 # Semantic Annotation Tool for EIS related PDF documents
 
-It is a web-based semantic annotation tool for PDF documents, focusing on EIS (Enterprise Information Systems) related documents.<br>
-Using this tools one can annotate any text in the form of RDF triples.<br>
-Storing annotations is available in the format of JSON, as pseudo-triples `( {s: {p: [o1, o2]}} )`
+It is a web-based semantic annotation tool for pdf documents, focusing on EIS related documents.<br>
+Using this tools one can annotate any text in the form of tripple.<br>
+Storing annotations is available in the format of json, as pseudo-triples ( {s: {p: [o1, o2]}} )
 
 ## Project Current state
 Following are the working features and ongoing works details.<br>
-For EIS table annotation, the project is in a very early stage.
+For EIS table annotation, the project is in very early stage.
 
 ### Currently working features:
 - Load and render a PDF file within half-page and render other half with custom GUI.
-- Detect selected text on the page using `window.getSelection()` method and add a new annotation for snippet.
-- [Add annotation](https://github.com/saifulnipo/eis-semantic-annotation/wiki/Documentation#how-to-add-annotations)
+- Detect selected text on the page using window.getSelection() method and add a new annotation for snippet.
+- [Add annotation] (https://github.com/saifulnipo/eis-semantic-annotation/wiki/Documentation#how-to-add-annotations)
 - [View available annotation of currently loaded documents](https://github.com/saifulnipo/eis-semantic-annotation/wiki/Documentation#how-to-fetch-existing-annotations)
 - [Find similar publications](https://github.com/saifulnipo/eis-semantic-annotation/wiki/Documentation#find-similar-publications)
 
-### Work in progress:
-- Focusing on annotating tables. Which will be mainly EIS related  documents. [Issue](https://github.com/saifulnipo/eis-semantic-annotation/issues/3)
-- Adding rows and column info in terms of the W3C [Data Cube Vocabulary](http://www.w3.org/TR/vocab-data-cube/).  [Issue](https://github.com/saifulnipo/eis-semantic-annotation/issues/2)
+### Work on progress:
+- Focusing on annotate table annotation. Which will be mainly EIS related  documents. [Issue](https://github.com/saifulnipo/eis-semantic-annotation/issues/3)
+- Adding rows and column info via data cube structure. [Issue](https://github.com/saifulnipo/eis-semantic-annotation/issues/2)
 
 ## Documentation
 - [Complete Documentation](https://github.com/saifulnipo/eis-semantic-annotation/wiki)

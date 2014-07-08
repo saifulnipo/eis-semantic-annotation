@@ -8,8 +8,9 @@
     scientificAnnotation.js
     highlight.js
  }
-
  */
+
+/*global scientificAnnotation :false */
 
 
 var sparql  = {
