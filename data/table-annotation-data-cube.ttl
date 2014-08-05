@@ -54,6 +54,11 @@ ex:row a rdf:Property, qb:DimensionProperty ;
 ex:column a rdf:Property, qb:DimensionProperty ;
   rdfs:subPropertyOf semann:column .
 
+# Our sample table looks as follows:
+# 
+# ID, Country, Confederation
+# 1, Spain, UEFA
+
 # Let's use spreadsheet-style names for table cells for now.  Row 1 does not contain values, but column headers, so we start from row 2.
 ex:table1A2 a qb:Observation ;
   qb:dataSet ex:table1 ;
@@ -73,8 +78,7 @@ ex:table1C2 a qb:Observation ;
   ex:column 3 ;
   semann:value "UEFA" .
 
-# ID, Country, Confederation
-# 1, Spain, UEFA
+# The original example from http://www.w3.org/TR/vocab-data-cube/ follows below:
 
 # @prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
 # @prefix owl:      <http://www.w3.org/2002/07/owl#> .
