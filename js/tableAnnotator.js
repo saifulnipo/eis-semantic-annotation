@@ -81,36 +81,6 @@ var tableAnnotator  = {
         return selectedElements;
     },
 
-//    /**
-//     *
-//     * @param selector
-//     * @param x1
-//     * @param y1
-//     * @param x2
-//     * @param y2
-//     * @returns {Array}
-//     */
-//    rectangleSelect : function(selector, x1, y1, x2, y2) {
-//        var elements = [];
-//        jQuery(selector).each(function() {
-//            var $this = jQuery(this);
-//            var offset = $this.offset();
-//            var x = offset.left;
-//            var y = offset.top;
-//            var w = $this.width();
-//            var h = $this.height();
-//
-//            if (x >= x1
-//                && y >= y1
-//                && x + w <= x2
-//                && y + h <= y2) {
-//                // this element fits inside the selection rectangle
-//                elements.push($this.get(0));
-//            }
-//        });
-//        return elements;
-//    },
-
     /**
      * Check if the selected div contain the text items
      * @param div
@@ -128,15 +98,22 @@ var tableAnnotator  = {
     isTableSelectionValid : function() {
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
-            values = [];
+            values = [],
+            cellCountStructX = cellCountStruct['X'],
+            cellCountStructY = cellCountStruct['Y'];
 
-        for(var key in cellCountStruct) {
-            values.push(cellCountStruct[key]);
+        for(var key in cellCountStructX) {
+            values.push(cellCountStructX[key]);
         }
+        var uniqueArrayX = $.unique(values);
 
-        var uniqueArray = $.unique(values);
+        values = [];
+        for(var key in cellCountStructY) {
+            values.push(cellCountStructY[key]);
+        }
+        var uniqueArrayY = $.unique(values);
 
-        if(uniqueArray.length === 1){
+        if(uniqueArrayX.length === 1 && uniqueArrayY.length === 1){
             return true;
         }
         return false;
@@ -148,20 +125,32 @@ var tableAnnotator  = {
      * @returns {Array} associative array
      */
     getTableCellSelectionCountStructure : function(selectedElements) {
-        var x , y,  tableStruct = [];
+        var x , y,  tableStructX = [],tableStructY = [],tableStruct = {};
         $.each( selectedElements, function( index, value ) {
             if(tableAnnotator.isDivContainText(value)) {
                 x = value.style.top;
-//                y = value.style.left;
+                y = value.style.left;
+
+
                 if (x !== undefined && x !== '') {
-                    if (tableStruct[x] !== undefined) {
-                        tableStruct[x]++;
+                    if (tableStructX[x] !== undefined) {
+                        tableStructX[x]++;
                     }else{
-                        tableStruct[x] = 1;
+                        tableStructX[x] = 1;
+                    }
+                }
+
+                if (y !== undefined && y !== '') {
+                    if (tableStructY[y] !== undefined) {
+                        tableStructY[y]++;
+                    }else{
+                        tableStructY[y] = 1;
                     }
                 }
             }
         });
+        tableStruct['X'] = tableStructX;
+        tableStruct['Y'] = tableStructY;
         return tableStruct;
     }
 };
