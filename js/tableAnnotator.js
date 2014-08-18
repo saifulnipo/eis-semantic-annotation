@@ -11,7 +11,6 @@ var tableAnnotator  = {
      *
      */
     annotateSelectedTable : function() {
-        console.log('ha ha ha');
 
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
@@ -19,13 +18,13 @@ var tableAnnotator  = {
 
 
         if (cellCountStruct === null){
-            alert('No pdf table to annotate!! Please open a pdf file');
+            scientificAnnotation.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
             return;
         }
 
 
         if ($.isEmptyObject(cellCountStruct)){
-            alert('Please select table rows to annotate and try again!!');
+            scientificAnnotation.showErrorMessage('Please select table rows to annotate and try again!!',true);
             return;
         }
 
@@ -55,7 +54,8 @@ var tableAnnotator  = {
             console.log(selectedTableCellTexts);
             alert(selectedTableCellTexts);
         } else {
-            alert('Table selection is not proper :-(');
+            scientificAnnotation.showErrorMessage('Table selection is not proper!! Please select rows correctly!!',true);
+
         }
     },
 
@@ -235,8 +235,8 @@ var tableAnnotator  = {
             expectedSelectedCells =  maxValue * length,
             actualSelectedCells = sum;
 
-        console.log(expectedSelectedCells);
-        console.log(actualSelectedCells);
+//        console.log(expectedSelectedCells);
+//        console.log(actualSelectedCells);
 
         if ((expectedSelectedCells - actualSelectedCells) === 1) {
             return true;
