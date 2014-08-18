@@ -116,6 +116,7 @@ var tableAnnotator  = {
         if(uniqueArrayX.length === 1 && uniqueArrayY.length === 1){
             return true;
         }
+
         return false;
     },
 
