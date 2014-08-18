@@ -467,13 +467,7 @@ var scientificAnnotation  = {
      *  @return void
      */
     annotateTable : function() {
-        if(tableAnnotator.isTableSelectionValid()) {
-            var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
-            console.log(selectedTableCellTexts);
-            alert(selectedTableCellTexts);
-        } else {
-            alert('Table selection is not proper :-(');
-        }
+        tableAnnotator.annotateSelectedTable();
     },
 
     /**

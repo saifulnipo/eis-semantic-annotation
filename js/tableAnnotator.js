@@ -8,6 +8,58 @@
 var tableAnnotator  = {
 
     /**
+     *
+     */
+    annotateSelectedTable : function() {
+        console.log('ha ha ha');
+
+        var selectedElements = tableAnnotator.getSelectedElementTags(window),
+            cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
+            isSelectionSuggestionAvailable = false, isConfirmSuggestion = false;
+
+
+        if (cellCountStruct === null){
+            alert('No pdf table to annotate!! Please open a pdf file');
+            return;
+        }
+
+
+        if ($.isEmptyObject(cellCountStruct)){
+            alert('Please select table rows to annotate and try again!!');
+            return;
+        }
+
+
+
+        if (tableAnnotator.isSuggestionPossible(cellCountStruct)) {
+            isConfirmSuggestion =  confirm('Your selection is part of a full rows;\ndid you intend to select the whole row?');
+            if (isConfirmSuggestion) {
+                var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
+                console.log(selectedTableCellTexts);
+            } else {
+                tableAnnotator.validateTableSelection(cellCountStruct);
+            }
+        } else {
+            tableAnnotator.validateTableSelection(cellCountStruct);
+        }
+
+    },
+
+    /**
+     *
+     * @param cellCountStruct
+     */
+    validateTableSelection : function (cellCountStruct) {
+        if (tableAnnotator.isTableSelectionValid(cellCountStruct)) {
+            var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
+            console.log(selectedTableCellTexts);
+            alert(selectedTableCellTexts);
+        } else {
+            alert('Table selection is not proper :-(');
+        }
+    },
+
+    /**
      * Return the selected text of the table cell
      * @returns {Array}
      */
@@ -95,12 +147,12 @@ var tableAnnotator  = {
      * Return true if a table is selected property. i.e proper equal row selection
      * @returns {boolean}
      */
-    isTableSelectionValid : function() {
-        var selectedElements = tableAnnotator.getSelectedElementTags(window),
-            cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
-            values = [],
+    isTableSelectionValid : function(cellCountStruct) {
+        var values = [],
             cellCountStructX = cellCountStruct['X'],
             cellCountStructY = cellCountStruct['Y'];
+
+        tableAnnotator.isSuggestionPossible(cellCountStructX);
 
         for(var key in cellCountStructX) {
             values.push(cellCountStructX[key]);
@@ -126,6 +178,10 @@ var tableAnnotator  = {
      * @returns {Array} associative array
      */
     getTableCellSelectionCountStructure : function(selectedElements) {
+
+        if(selectedElements === undefined) {
+          return null;
+        }
         var x , y,  tableStructX = [],tableStructY = [],tableStruct = {};
         $.each( selectedElements, function( index, value ) {
             if(tableAnnotator.isDivContainText(value)) {
@@ -150,8 +206,43 @@ var tableAnnotator  = {
                 }
             }
         });
-        tableStruct['X'] = tableStructX;
-        tableStruct['Y'] = tableStructY;
+
+
+        if (!$.isEmptyObject(tableStructX) && !$.isEmptyObject(tableStructX)) {
+            tableStruct['X'] = tableStructX;
+            tableStruct['Y'] = tableStructY;
+        }
+
         return tableStruct;
+    },
+
+    /**
+     *
+     * @param tableStructX
+     */
+    isSuggestionPossible : function(cellCountStruct) {
+
+        var cellCountStructX = cellCountStruct['X'],
+            length = 0 ,sum = 0,values = [],rows = 0;
+
+        for (var key in cellCountStructX) {
+            values.push(cellCountStructX[key]);
+            sum += cellCountStructX[key];
+            length++;
+        }
+
+        var maxValue = Math.max.apply(Math, values),
+            expectedSelectedCells =  maxValue * length,
+            actualSelectedCells = sum;
+
+        console.log(expectedSelectedCells);
+        console.log(actualSelectedCells);
+
+        if ((expectedSelectedCells - actualSelectedCells) === 1) {
+            return true;
+        }
+
+        return false;
+
     }
 };
