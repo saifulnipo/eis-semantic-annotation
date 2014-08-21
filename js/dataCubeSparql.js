@@ -28,7 +28,10 @@ var dataCubeSparql  = {
      *
      * @return void
      */
-    addAnnotation:function(){
+    addAnnotation:function(selectedTableCellTexts){
+
+        console.log('data receive for annotate...');
+        console.log(selectedTableCellTexts);
 
         var insertQuery =
             'prefix qb: <'+dataCubeSparql.PREFIX_CUBE+'>' +'\n'+

@@ -1,48 +1,46 @@
 /**
  * This js file contains functionality for table annotation.
  *
- * @authors : A Q M Saiful Islam
+ * @authors : A Q M Saiful Islam (Nipo)
  * @dependency: none
  */
 
 var tableAnnotator  = {
 
+    ITEM_POSITION_FIRST : 'first',
+    ITEM_POSITION_LAST : 'last',
+
     /**
-     *
+     * Add table annotation as data cube vocabulary
+     * @return void
      */
     annotateSelectedTable : function() {
 
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
-            isSelectionSuggestionAvailable = false, isConfirmSuggestion = false;
-
+            isConfirmSuggestion = false;
 
         if (cellCountStruct === null){
             scientificAnnotation.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
             return;
         }
 
-
         if ($.isEmptyObject(cellCountStruct)){
             scientificAnnotation.showErrorMessage('Please select table rows to annotate and try again!!',true);
             return;
         }
 
-
-
         if (tableAnnotator.isSuggestionPossible(cellCountStruct)) {
-            isConfirmSuggestion =  confirm('Your selection is part of a full rows;\ndid you intend to select the whole row?');
+            isConfirmSuggestion =  confirm('Your selection is part of a full rows.\nDid you intend to select the whole row?');
             if (isConfirmSuggestion) {
-                var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
-                console.log(selectedTableCellTexts);
-                alert(selectedTableCellTexts);
+                var selectedTableCellTexts = tableAnnotator.getSelectedTextWithSuggestedItem(selectedElements);
+                dataCubeSparql.addAnnotation(selectedTableCellTexts);
             } else {
                 tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
             }
         } else {
             tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
         }
-
     },
 
     /**
@@ -52,9 +50,7 @@ var tableAnnotator  = {
     validateTableSelectionToAddAnnotation : function (cellCountStruct) {
         if (tableAnnotator.isTableSelectionValid(cellCountStruct)) {
             var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
-            console.log(selectedTableCellTexts);
-            dataCubeSparql.addAnnotation();
-//            alert(selectedTableCellTexts);
+            dataCubeSparql.addAnnotation(selectedTableCellTexts);
         } else {
             scientificAnnotation.showErrorMessage('Table selection is not proper!! Please select rows correctly!!',true);
 
@@ -154,8 +150,6 @@ var tableAnnotator  = {
             cellCountStructX = cellCountStruct['X'],
             cellCountStructY = cellCountStruct['Y'];
 
-        tableAnnotator.isSuggestionPossible(cellCountStructX);
-
         for(var key in cellCountStructX) {
             values.push(cellCountStructX[key]);
         }
@@ -219,8 +213,9 @@ var tableAnnotator  = {
     },
 
     /**
-     *
-     * @param tableStructX
+     * Return boolean if the table missing cell selection is possible to suggest
+     * @param cellCountStruct
+     * @returns {boolean}
      */
     isSuggestionPossible : function(cellCountStruct) {
 
@@ -237,14 +232,63 @@ var tableAnnotator  = {
             expectedSelectedCells =  maxValue * length,
             actualSelectedCells = sum;
 
-//        console.log(expectedSelectedCells);
-//        console.log(actualSelectedCells);
-
         if ((expectedSelectedCells - actualSelectedCells) === 1) {
             return true;
         }
 
         return false;
 
+    },
+
+    /**
+     * Get the missing selected item
+     * @param selectedElement
+     * @returns {mix}
+     */
+    getMissingSelectionElement: function(selectedElement) {
+
+        if (selectedElement.length < 1){
+            return null;
+        }
+
+        var firstElement = $(selectedElement[1]),
+            lastElement = $(selectedElement[selectedElement.length -1]),
+            itemBeforeFirst = $(firstElement.prev()),
+            itemAfterLast = $(lastElement.next()),
+            missingSelectedItem = null,position = null;
+
+        if(itemBeforeFirst.css('top') === firstElement.css('top')) {
+            missingSelectedItem = itemBeforeFirst;
+            position = tableAnnotator.ITEM_POSITION_FIRST;
+        }
+
+        if(lastElement.css('top') === itemAfterLast.css('top')) {
+            missingSelectedItem = itemAfterLast;
+            position = tableAnnotator.ITEM_POSITION_LAST;
+        }
+
+        return {
+            item  : missingSelectedItem,
+            position : position
+        }
+    },
+
+
+    /**
+     * Return the new selected text after applying the suggested elements
+     * @param selectedElements
+     * @returns {Array}
+     */
+    getSelectedTextWithSuggestedItem: function (selectedElements) {
+        var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts(),
+            missingItemObj = tableAnnotator.getMissingSelectionElement(selectedElements);
+        if (missingItemObj !== null) {
+            if(missingItemObj.position === tableAnnotator.ITEM_POSITION_FIRST) {
+                selectedTableCellTexts.unshift(missingItemObj.item.text());
+            } else {
+                selectedTableCellTexts.push(missingItemObj.item.text());
+            }
+        }
+        return selectedTableCellTexts;
     }
 };
