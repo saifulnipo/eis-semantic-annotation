@@ -35,11 +35,12 @@ var tableAnnotator  = {
             if (isConfirmSuggestion) {
                 var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
                 console.log(selectedTableCellTexts);
+                alert(selectedTableCellTexts);
             } else {
-                tableAnnotator.validateTableSelection(cellCountStruct);
+                tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
             }
         } else {
-            tableAnnotator.validateTableSelection(cellCountStruct);
+            tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
         }
 
     },
@@ -48,11 +49,12 @@ var tableAnnotator  = {
      *
      * @param cellCountStruct
      */
-    validateTableSelection : function (cellCountStruct) {
+    validateTableSelectionToAddAnnotation : function (cellCountStruct) {
         if (tableAnnotator.isTableSelectionValid(cellCountStruct)) {
             var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
             console.log(selectedTableCellTexts);
-            alert(selectedTableCellTexts);
+            dataCubeSparql.addAnnotation();
+//            alert(selectedTableCellTexts);
         } else {
             scientificAnnotation.showErrorMessage('Table selection is not proper!! Please select rows correctly!!',true);
 
