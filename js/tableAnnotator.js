@@ -18,7 +18,7 @@ var tableAnnotator  = {
 
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
-            isConfirmSuggestion = false;
+            isConfirmSuggestion = false,selectedRows = 0, selectedColumns = 0;
 
         if (cellCountStruct === null){
             scientificAnnotation.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
@@ -30,27 +30,34 @@ var tableAnnotator  = {
             return;
         }
 
+        selectedRows = tableAnnotator.getSelectedRowCount(cellCountStruct),
+        selectedColumns = tableAnnotator.getSelectedColumnCount(cellCountStruct);
+
         if (tableAnnotator.isSuggestionPossible(cellCountStruct)) {
             isConfirmSuggestion =  confirm('Your selection is part of a full rows.\nDid you intend to select the whole row?');
             if (isConfirmSuggestion) {
                 var selectedTableCellTexts = tableAnnotator.getSelectedTextWithSuggestedItem(selectedElements);
-                dataCubeSparql.addAnnotation(selectedTableCellTexts);
+                dataCubeSparql.addAnnotation(selectedTableCellTexts,selectedRows, selectedColumns+1); // for the missing selection
             } else {
-                tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
+                tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct, selectedRows, selectedColumns);
             }
         } else {
-            tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
+            tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct,selectedRows, selectedColumns);
         }
     },
 
     /**
      *
      * @param cellCountStruct
+     * @param selectedRows
+     * @param selectedColumns
      */
-    validateTableSelectionToAddAnnotation : function (cellCountStruct) {
+    validateTableSelectionToAddAnnotation : function (cellCountStruct, selectedRows, selectedColumns) {
         if (tableAnnotator.isTableSelectionValid(cellCountStruct)) {
-            var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts();
-            dataCubeSparql.addAnnotation(selectedTableCellTexts);
+            var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts(),
+                rows = tableAnnotator.getSelectedRowCount(cellCountStruct),
+                columns = tableAnnotator.getSelectedColumnCount(cellCountStruct);
+            dataCubeSparql.addAnnotation(selectedTableCellTexts,selectedRows, selectedColumns);
         } else {
             scientificAnnotation.showErrorMessage('Table selection is not proper!! Please select rows correctly!!',true);
 
@@ -147,17 +154,17 @@ var tableAnnotator  = {
      */
     isTableSelectionValid : function(cellCountStruct) {
         var values = [],
-            cellCountStructX = cellCountStruct['X'],
-            cellCountStructY = cellCountStruct['Y'];
+            cellCountStructRow = cellCountStruct['col'],
+            cellCountStructColumn = cellCountStruct['row'];
 
-        for(var key in cellCountStructX) {
-            values.push(cellCountStructX[key]);
+        for(var key in cellCountStructRow) {
+            values.push(cellCountStructRow[key]);
         }
         var uniqueArrayX = $.unique(values);
 
         values = [];
-        for(var key in cellCountStructY) {
-            values.push(cellCountStructY[key]);
+        for(var key in cellCountStructColumn) {
+            values.push(cellCountStructColumn[key]);
         }
         var uniqueArrayY = $.unique(values);
 
@@ -205,8 +212,8 @@ var tableAnnotator  = {
 
 
         if (!$.isEmptyObject(tableStructX) && !$.isEmptyObject(tableStructX)) {
-            tableStruct['X'] = tableStructX;
-            tableStruct['Y'] = tableStructY;
+            tableStruct['col'] = tableStructX;
+            tableStruct['row'] = tableStructY;
         }
 
         return tableStruct;
@@ -219,12 +226,12 @@ var tableAnnotator  = {
      */
     isSuggestionPossible : function(cellCountStruct) {
 
-        var cellCountStructX = cellCountStruct['X'],
+        var cellCountStructRow = cellCountStruct['col'],
             length = 0 ,sum = 0,values = [],rows = 0;
 
-        for (var key in cellCountStructX) {
-            values.push(cellCountStructX[key]);
-            sum += cellCountStructX[key];
+        for (var key in cellCountStructRow) {
+            values.push(cellCountStructRow[key]);
+            sum += cellCountStructRow[key];
             length++;
         }
 
@@ -290,5 +297,33 @@ var tableAnnotator  = {
             }
         }
         return selectedTableCellTexts;
+    },
+
+    /**
+     * Get the max row count
+     * @param cellCountStruct
+     */
+    getSelectedRowCount:function(cellCountStruct) {
+        var cellCountStructRow = cellCountStruct['row'],max = 0;
+        for (var key in cellCountStructRow) {
+            if (cellCountStructRow[key] > max) {
+                max = cellCountStructRow[key];
+            }
+        }
+        return max;
+    },
+
+    /**
+     * Get max column count
+     * @param cellCountStruct
+     */
+    getSelectedColumnCount:function(cellCountStruct){
+        var cellCountStructCol = cellCountStruct['col'],max = 0;
+        for (var key in cellCountStructCol) {
+            if(cellCountStructCol[key] > max){
+                max = cellCountStructCol[key];
+            }
+        }
+        return max;
     }
 };

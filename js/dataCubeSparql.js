@@ -25,13 +25,16 @@ var dataCubeSparql  = {
 
     /**
      * prepare and send the ajax request for add annotation as a data cube
-     *
-     * @return void
+     * @param selectedTableCellTexts
+     * @param selectedRows
+     * @param selectedColumns
      */
-    addAnnotation:function(selectedTableCellTexts){
+    addAnnotation:function(selectedTableCellTexts, selectedRows, selectedColumns){
 
-        console.log('data receive for annotate...');
+        console.log('selectedRows::: '+selectedRows);
+        console.log('selectedColumns:: '+selectedColumns);
         console.log(selectedTableCellTexts);
+
 
         var insertQuery =
             'prefix qb: <'+dataCubeSparql.PREFIX_CUBE+'>' +'\n'+
@@ -123,7 +126,7 @@ var dataCubeSparql  = {
         if (jqXHR.status === 0) {
             errorTxt = errorTxt + '<br>Not connected. Verify network.';
         } else if (jqXHR.status == 404) {
-            errorTxt = errorTxt + '<br>Request cannot be fulfilled by the server. Check whether the \n(a) sparql endpoint is available at the above address \n(b) query contains bad syntax.';
+            errorTxt = errorTxt + '<br>Request cannot be fulfilled by the server. Check whether the <br />(a) sparql endpoint is available at the above address <br>(b) query contains bad syntax.';
         } else if (jqXHR.status == 500) {
             errorTxt = errorTxt + '<br>Internal server error [500].';
         } else if (exception === 'parsererror') {
