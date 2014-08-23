@@ -11,11 +11,12 @@
 
 # each annotated table is a data set
 ex:table1 a qb:DataSet ;
-  # the table is part of the whole document that we annotate
+  # the table is part of the whole document that we annotate, the uri of the document
   dct:isPartOf <.../TheDocument> ;
   # the dataset in the table has a certain structure (see below)
   qb:structure ex:dsdTable1 ;
   # we have a slice (of the data cube) for each column.  Once we know more about what real-world concepts the rows represent (here, each row represents a concrete football team), we will also have a slice for each row.
+  # no of slice = no fo column (sliceC1,sliceC2.....)
   qb:slice ex:sliceA, ex:sliceB, ex:sliceC .
 
 # definition of the data structure of this table
@@ -47,11 +48,15 @@ semann:value a rdf:Property, qb:MeasureProperty ;
   rdfs:comment "the value of a table cell"@en ;
   rdfs:range rdfs:Literal .
 
-# now come the _specific_ row and column types for _this_ table.  I.e. a row is not just a "row", but it has a more specific meaning.  Right now we don't know that in our example table a row corresponds to the real-world concept of a "football team", as this will require further input from the user – but in future we will know it.  These specific properties are therefore placeholders to which this "further information" from the user will eventually be attached.
-ex:row a rdf:Property, qb:DimensionProperty ;
+# now come the _specific_ row and column types for _this_ table.
+#I.e. a row is not just a "row", but it has a more specific meaning.
+#Right now we don't know that in our example table a row corresponds to the real-world concept of a "football team",
+#as this will require further input from the user – but in future we will know it.  These specific properties are therefore placeholders to which this "further information" from the user will eventually be attached.
+
+ex:table1Row a rdf:Property, qb:DimensionProperty ;
   rdfs:subPropertyOf semann:row .
 
-ex:column a rdf:Property, qb:DimensionProperty ;
+ex:table1Column a rdf:Property, qb:DimensionProperty ;
   rdfs:subPropertyOf semann:column .
 
 # Our sample table looks as follows:
@@ -62,20 +67,20 @@ ex:column a rdf:Property, qb:DimensionProperty ;
 # Let's use spreadsheet-style names for table cells for now.  Row 1 does not contain values, but column headers, so we start from row 2.
 ex:table1A2 a qb:Observation ;
   qb:dataSet ex:table1 ;
-  ex:row 2 ;
-  ex:column 1;
+  ex:table1Row 2 ;
+  ex:table1Column 1;
   semann:value "1" .
 
 ex:table1B2 a qb:Observation ;
   qb:dataSet ex:table1 ;
-  ex:row 2 ;
-  ex:column 2 ;
+  ex:table1Row 2 ;
+  ex:table1Column 2 ;
   semann:value "Spain" .
 
 ex:table1C2 a qb:Observation ;
   qb:dataSet ex:table1 ;
-  ex:row 2 ;
-  ex:column 3 ;
+  ex:table1Row 2 ;
+  ex:table1Column 3 ;
   semann:value "UEFA" .
 
 # The original example from http://www.w3.org/TR/vocab-data-cube/ follows below:

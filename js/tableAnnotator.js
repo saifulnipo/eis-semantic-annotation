@@ -7,8 +7,9 @@
 
 var tableAnnotator  = {
 
-    ITEM_POSITION_FIRST : 'first',
-    ITEM_POSITION_LAST : 'last',
+    ITEM_POSITION_FIRST     : 'first',
+    ITEM_POSITION_LAST      : 'last',
+    TABLE_ANNOTATION_COUNT  : 1,
 
     /**
      * Add table annotation as data cube vocabulary
@@ -19,6 +20,9 @@ var tableAnnotator  = {
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
             isConfirmSuggestion = false,selectedRows = 0, selectedColumns = 0;
+
+//        console.log(tableAnnotator.getSelectedTextWithSuggestedItem(selectedElements));
+//        return;
 
         if (cellCountStruct === null){
             scientificAnnotation.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
@@ -37,7 +41,7 @@ var tableAnnotator  = {
             isConfirmSuggestion =  confirm('Your selection is part of a full rows.\nDid you intend to select the whole row?');
             if (isConfirmSuggestion) {
                 var selectedTableCellTexts = tableAnnotator.getSelectedTextWithSuggestedItem(selectedElements);
-                dataCubeSparql.addAnnotation(selectedTableCellTexts,selectedRows, selectedColumns+1); // for the missing selection
+                dataCubeSparql.addAnnotation(selectedTableCellTexts,selectedRows, selectedColumns); // for the missing selection
             } else {
                 tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct, selectedRows, selectedColumns);
             }
@@ -154,21 +158,28 @@ var tableAnnotator  = {
      */
     isTableSelectionValid : function(cellCountStruct) {
         var values = [],
-            cellCountStructRow = cellCountStruct['col'],
-            cellCountStructColumn = cellCountStruct['row'];
+            cellCountStructColumn = cellCountStruct['col'],
+            cellCountStructRow = cellCountStruct['row'];
 
         for(var key in cellCountStructRow) {
             values.push(cellCountStructRow[key]);
         }
-        var uniqueArrayX = $.unique(values);
+        var uniqueArrayCol = $.unique(values);
+        console.log('uniqueArrayCol::' + uniqueArrayCol.length);
 
         values = [];
         for(var key in cellCountStructColumn) {
             values.push(cellCountStructColumn[key]);
         }
-        var uniqueArrayY = $.unique(values);
+        var uniqueArrayRow = $.unique(values);
 
-        if(uniqueArrayX.length === 1 && uniqueArrayY.length === 1){
+        console.log('uniqueArrayRow::' + uniqueArrayRow.length);
+
+//        if(uniqueArrayCol.length === 1 && uniqueArrayRow.length === 1){
+//            return true;
+//        }
+
+        if(uniqueArrayRow.length === 1){
             return true;
         }
 
@@ -289,7 +300,7 @@ var tableAnnotator  = {
     getSelectedTextWithSuggestedItem: function (selectedElements) {
         var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts(),
             missingItemObj = tableAnnotator.getMissingSelectionElement(selectedElements);
-        if (missingItemObj !== null) {
+        if (missingItemObj !== null && missingItemObj.item !== null) {
             if(missingItemObj.position === tableAnnotator.ITEM_POSITION_FIRST) {
                 selectedTableCellTexts.unshift(missingItemObj.item.text());
             } else {

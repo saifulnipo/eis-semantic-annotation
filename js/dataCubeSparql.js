@@ -29,37 +29,39 @@ var dataCubeSparql  = {
      * @param selectedRows
      * @param selectedColumns
      */
-    addAnnotation:function(selectedTableCellTexts, selectedRows, selectedColumns){
+    addAnnotation:function(selectedTableCellTexts, selectedRows, selectedColumns) {
 
-        console.log('selectedRows::: '+selectedRows);
-        console.log('selectedColumns:: '+selectedColumns);
-        console.log(selectedTableCellTexts);
-
-
-        var insertQuery =
+//        console.log(selectedRows);
+//        console.log(selectedColumns);
+//        console.log(selectedTableCellTexts);
+        var query =
             'prefix qb: <'+dataCubeSparql.PREFIX_CUBE+'>' +'\n'+
-            'prefix dct: <'+dataCubeSparql.PREFIX_SEMANN+'>' +'\n'+
-            'prefix rdf: <'+dataCubeSparql.PREFIX_SEMANN+'>' +'\n'+
-            'prefix rdfs: <'+dataCubeSparql.PREFIX_SEMANN+'>' +'\n'+
-            'prefix xsd: <'+dataCubeSparql.PREFIX_SEMANN+'>' +'\n'+
+            'prefix dct: <'+dataCubeSparql.PREFIX_DCT+'>' +'\n'+
+            'prefix rdf: <'+dataCubeSparql.PREFIX_RDF+'>' +'\n'+
+            'prefix rdfs: <'+dataCubeSparql.PREFIX_RDFS+'>' +'\n'+
+            'prefix xsd: <'+dataCubeSparql.PREFIX_XSD+'>' +'\n'+
             'prefix semann: <'+dataCubeSparql.PREFIX_SEMANN+'>'+'\n'+
             'prefix ex: <'+dataCubeSparql.PREFIX_EX+'>'+'\n'+
 
             'INSERT IN ' + '<'+scientificAnnotation.GRAPH_NAME_EIS+'> ' +'\n'+
             '{ ' +'\n'+
 
-                dataCubeSparql.getDataSet()+'\n'+
+                dataCubeSparql.getDataSet(selectedColumns)+'\n'+
                 dataCubeSparql.getDataStructureDefinition()+'\n'+
+                // part of annoation proprty... no need ot insert everytime
                 dataCubeSparql.getDimensionAndProperty()+'\n'+
-                dataCubeSparql.getObservations()+'\n'+
+                dataCubeSparql.getObservations(selectedTableCellTexts, selectedRows, selectedColumns)+'\n'+
 
             '}';
+
+        console.log(query);
+//        return;
 
         $.ajax({
             type: "GET",
             url: sparql.SERVER_ADDRESS,
             data: {
-                query: insertQuery,
+                query: query,
                 format: "application/json"
             },
             async: true,
@@ -67,11 +69,10 @@ var dataCubeSparql  = {
             crossDomain: true,
             cache: false,
             success: function(response){
-//                sparql.bindAutoCompleteProperty();
-//                sparql.bindAutoCompleteObject();
                 scientificAnnotation.hideAnnotationDisplayTable();
                 scientificAnnotation.hideProgressBar();
                 scientificAnnotation.showSuccessMessage('Table annotation successfully added');
+                tableAnnotator.TABLE_ANNOTATION_COUNT++;
             },
             error: function(jqXHR, exception){
                 var errorTxt= sparql.getStandardErrorMessage(jqXHR ,exception);
@@ -81,37 +82,15 @@ var dataCubeSparql  = {
         });
     },
 
-
     /**
-     * Return the camelCase of a sentences (Hello World --> helloWorld)
-     *
-     * @param str
-     * @returns {XML|string|void|*}
+     * Return the document URI with name
+     * @returns {string}
      */
-    camelCase :function (str){
-        str     = $.camelCase(str.replace(/[_ ]/g, '-')).replace(/-/g, '');
-        return  str;
-    },
-    
-    /**
-     * Return the URI of resources to be used in sparql queries.
-     *
-     * @param optional file fragment location 
-     * @returns object with resources you can use in sparql queries.
-     */
-    resource :function (fragment) {
-
-        var fileURI = sparql.PREFIX_FILE + encodeURI(document.title.toString());
-        var excerptURI = fileURI + fragment;
-        var hasExcerptURI = sparql.PREFIX_PUB + 'hasExcerpt';
-
-        return {
-            File:			'<'+fileURI+'>',
-            hasExcerpt:	'<'+hasExcerptURI+'>',
-            label:			'<'+sparql.PREFIX_RDFS+'label>',
-            Publication:		'<'+sparql.PREFIX_PUB+'Publication>',
-            Excerpt:		'<'+excerptURI+'>'
-        }
+    getDocumentURI :function () {
+        var pageNumber = '#page='+$('#pageNumber').val(),
+            tableName = '?name=table'+tableAnnotator.TABLE_ANNOTATION_COUNT,
+            documentURI = sparql.PREFIX_FILE + encodeURI(document.title.toString())+pageNumber+tableName;
+        return documentURI
     },
 
     /**
@@ -142,18 +121,26 @@ var dataCubeSparql  = {
         return errorTxt;
     },
 
-
     /**
      * Return the data set fo the data cube structure
+     * @param {int} selectedColumns
+     * @param {int} tableNameCounter
      * @returns {string}
      */
-    getDataSet: function() {
-        var query =
-            'ex:table1 a qb:DataSet ;' +'\n'+
-            'dct:isPartOf <.../TheDocument> ;' +'\n'+
-            'qb:structure ex:dsdTable1 ;' +'\n'+
-            'qb:slice ex:sliceA, ex:sliceB, ex:sliceC .';
+    getDataSet: function(selectedColumns) {
 
+        var slices = '',
+            query = '',
+            documentURI = dataCubeSparql.getDocumentURI();
+        for (var i= 0; i < selectedColumns; i++) {
+            slices += 'ex:sliceC'+(i+1)+',';
+        }
+        slices = slices.substring(0,slices.length-1);
+        query =
+            'ex:table1 a qb:DataSet ;' + '\n' +
+            'dct:isPartOf <' + documentURI + '> ;' + '\n' +
+            'qb:structure ex:dsdTable1 ;' + '\n' +
+            'qb:slice ' + slices + ' .';
         return query;
     },
 
@@ -164,8 +151,8 @@ var dataCubeSparql  = {
     getDataStructureDefinition: function () {
         var query =
             'ex:dsdTable1 a qb:DataStructureDefinition ;' +'\n'+
-            'qb:component [ qb:dimension ex:row ; qb:order 1 ];' +'\n'+
-            'qb:component [ qb:dimension ex:column ;qb:order 2 ];' +'\n'+
+            'qb:component [ qb:dimension ex:table1Row ; qb:order 1 ];' +'\n'+
+            'qb:component [ qb:dimension ex:table1Column ;qb:order 2 ];' +'\n'+
             'qb:component [ qb:measure semann:value ] .';
 
         return query;
@@ -192,10 +179,10 @@ var dataCubeSparql  = {
             'rdfs:comment "the value of a table cell"@en ;' +'\n'+
             'rdfs:range rdfs:Literal .' +'\n'+
 
-            'ex:row a rdf:Property, qb:DimensionProperty ;' +'\n'+
+            'ex:table1Row a rdf:Property, qb:DimensionProperty ;' +'\n'+
             'rdfs:subPropertyOf semann:row .' +'\n'+
 
-            'ex:column a rdf:Property, qb:DimensionProperty ;' +'\n'+
+            'ex:table1Column a rdf:Property, qb:DimensionProperty ;' +'\n'+
             'rdfs:subPropertyOf semann:column .';
 
         return query;
@@ -203,29 +190,30 @@ var dataCubeSparql  = {
 
     /**
      * Get the observation based on selection
+     * @param selectedTableCellTexts
+     * @param selectedRows
+     * @param selectedColumns
      * @returns {string}
      */
-    getObservations: function () {
-        var query =
-            'ex:table1A2 a qb:Observation ;' +'\n'+
-            'qb:dataSet ex:table1 ;' +'\n'+
-            'ex:row 2 ;' +'\n'+
-            'ex:column 1;' +'\n'+
-            'semann:value "1" .' +'\n'+
+    getObservations: function (selectedTableCellTexts, selectedRows, selectedColumns) {
 
-            'ex:table1B2 a qb:Observation ;' +'\n'+
-            'qb:dataSet ex:table1 ;' +'\n'+
-            'ex:row 2 ;' +'\n'+
-            'ex:column 2 ;' +'\n'+
-            'semann:value "Spain" .' +'\n'+
+        var index = selectedColumns,// skipping the 1st row, we assume that 1st row is the column names
+            observationTitle = '',
+            observationQuery = '';
 
-            'ex:table1C2 a qb:Observation ;' +'\n'+
-            'qb:dataSet ex:table1 ;' +'\n'+
-            'ex:row 2 ;' +'\n'+
-            'ex:column 3 ;' +'\n'+
-            'semann:value "UEFA" .';
+        for(var i = 1; i<selectedRows; i++) {  // i = 1, because we skip the 1st row so there will be one less loop
+            for(var j = 0; j<selectedColumns; j++) {
+                observationTitle = 'R' + i + 'C' + (j+1);
 
-        return query;
+                observationQuery +=
+                    'ex:'+ observationTitle +' a qb:Observation ;' +'\n'+
+                    'qb:dataSet ex:table1 ;' +'\n'+
+                    'ex:table1Row '+ (i+1) +' ;' +'\n'+
+                    'ex:table1Column '+ (j+1) +' ;' +'\n'+
+                    'semann:value "'+ selectedTableCellTexts[index++] +'" .' +'\n';
+            }
+        }
+        return observationQuery;
     }
 
 };
