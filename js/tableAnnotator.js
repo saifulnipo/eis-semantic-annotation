@@ -78,7 +78,7 @@ var tableAnnotator  = {
             selectedTexts = [] ;
         $.each( selectedElements, function( index, value ) {
             if(tableAnnotator.isDivContainText(value)) {
-                selectedTexts.push(value.textContent);
+                selectedTexts.push(value.textContent.trim());
             }
         });
         return selectedTexts;
@@ -165,15 +165,12 @@ var tableAnnotator  = {
             values.push(cellCountStructRow[key]);
         }
         var uniqueArrayCol = $.unique(values);
-        console.log('uniqueArrayCol::' + uniqueArrayCol.length);
 
         values = [];
         for(var key in cellCountStructColumn) {
             values.push(cellCountStructColumn[key]);
         }
         var uniqueArrayRow = $.unique(values);
-
-        console.log('uniqueArrayRow::' + uniqueArrayRow.length);
 
 //        if(uniqueArrayCol.length === 1 && uniqueArrayRow.length === 1){
 //            return true;

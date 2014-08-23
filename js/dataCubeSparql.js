@@ -34,6 +34,8 @@ var dataCubeSparql  = {
 //        console.log(selectedRows);
 //        console.log(selectedColumns);
 //        console.log(selectedTableCellTexts);
+//        return;
+        scientificAnnotation.showProgressBar('Adding annotation to the selected table...');
         var query =
             'prefix qb: <'+dataCubeSparql.PREFIX_CUBE+'>' +'\n'+
             'prefix dct: <'+dataCubeSparql.PREFIX_DCT+'>' +'\n'+
@@ -55,19 +57,14 @@ var dataCubeSparql  = {
             '}';
 
         console.log(query);
-//        return;
 
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: sparql.SERVER_ADDRESS,
             data: {
                 query: query,
                 format: "application/json"
             },
-            async: true,
-            dataType: "jsonp",
-            crossDomain: true,
-            cache: false,
             success: function(response){
                 scientificAnnotation.hideAnnotationDisplayTable();
                 scientificAnnotation.hideProgressBar();
