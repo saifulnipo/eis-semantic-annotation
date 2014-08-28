@@ -35,7 +35,7 @@ var dataCubeSparql  = {
 //        console.log(selectedColumns);
 //        console.log(selectedTableCellTexts);
 //        return;
-        scientificAnnotation.showProgressBar('Adding annotation to the selected table...');
+        progressbar.showProgressBar('Adding annotation to the selected table...');
         var query =
             'prefix qb: <'+dataCubeSparql.PREFIX_CUBE+'>' +'\n'+
             'prefix dct: <'+dataCubeSparql.PREFIX_DCT+'>' +'\n'+
@@ -67,14 +67,14 @@ var dataCubeSparql  = {
             },
             success: function(response){
                 scientificAnnotation.hideAnnotationDisplayTable();
-                scientificAnnotation.hideProgressBar();
-                scientificAnnotation.showSuccessMessage('Table annotation successfully added');
+                progressbar.hideProgressBar();
+                messageHandler.showSuccessMessage('Table annotation successfully added');
                 tableAnnotator.TABLE_ANNOTATION_COUNT++;
             },
             error: function(jqXHR, exception){
                 var errorTxt= sparql.getStandardErrorMessage(jqXHR ,exception);
-                scientificAnnotation.hideProgressBar();
-                scientificAnnotation.showErrorMessage(errorTxt);
+                progressbar.hideProgressBar();
+                messageHandler.showErrorMessage(errorTxt);
             }
         });
     },

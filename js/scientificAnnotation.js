@@ -120,7 +120,7 @@ var scientificAnnotation  = {
             }
             similarPubsList.fadeIn(500);// show the result
         } else {
-            scientificAnnotation.showWarningMessage('No similar result found.');
+            messageHandler.showWarningMessage('No similar result found.');
         }
 
     },
@@ -325,12 +325,12 @@ var scientificAnnotation  = {
         }
 	
        if(propertyValue != '' && subjectValue!= '' && objectValue!= '') {
-           scientificAnnotation.showProgressBar('Adding annotation...');
+           progressbar.showProgressBar('Adding annotation...');
            scientificAnnotation.appendAnnotationInDisplayPanel(propertyValue,subjectValue, objectValue);
            sparql.addAnnotation(propertyValue,subjectValue, objectValue, startPos, endPos, rangyPage, rangyFragment);
            scientificAnnotation.clearInputField();
        } else {
-           scientificAnnotation.showErrorMessage('Empty fields. Please filled up all and try again',true);
+           messageHandler.showErrorMessage('Empty fields. Please filled up all and try again',true);
        }
     },
 
@@ -436,8 +436,8 @@ var scientificAnnotation  = {
      * @return void
      */
     noAvailableAnnotationFromSparql:function(){
-        scientificAnnotation.showWarningMessage('No available annotation found  of this file');
-        scientificAnnotation.hideProgressBar();
+        messageHandler.showWarningMessage('No available annotation found  of this file');
+        progressbar.hideProgressBar();
     },
 
     /**
@@ -457,7 +457,7 @@ var scientificAnnotation  = {
         var outputTable = $('#displaySparqlTableRows');
         var displayFileInfoTitle = $('#displayTableTitle');
         scientificAnnotation.clearSimilarSearchResult();
-        scientificAnnotation.showProgressBar('Loading data ....');
+        progressbar.showProgressBar('Loading data ....');
         sparql.showDataFromSparql();
         outputTable.fadeIn(500);
         displayFileInfoTitle.fadeIn(500);
@@ -481,69 +481,9 @@ var scientificAnnotation  = {
             similarPubsList.fadeOut(300);
         }
 
-        scientificAnnotation.showProgressBar('Finding similar result...');
+        progressbar.showProgressBar('Finding similar result...');
         sparql.findSimilarFiles();
 
-    },
-
-    /**
-     * Display success message
-     * @param message
-     * @return void
-     */
-    showSuccessMessage:function (message) {
-        var selector = '.alert-success';
-        $(selector).html(message);
-        $(selector).fadeIn(1000);
-        $(selector).delay(1500).fadeOut();
-    },
-
-    /**
-     * Display error message
-     * @param message
-     * @return void
-     */
-    showErrorMessage:function (message, isHide) {
-
-        var isHide = isHide || false;
-        var selector = '.alert-danger';
-        $(selector).html(message);
-        $(selector).fadeIn(500);
-        if(isHide == true) {
-            $(selector).delay(1500).fadeOut();
-        }else {
-            $(selector).show();
-        }
-    },
-
-    /**
-     * Display warning message
-     * @param message
-     */
-    showWarningMessage:function (message) {
-        var selector = '.alert-warning';
-        $(selector).html(message);
-        $(selector).fadeIn(500);
-        $(selector).delay(1500).fadeOut();
-    },
-
-
-    /**
-     * Show progress bar
-     * @param message
-     * @return void
-     */
-    showProgressBar: function(message){
-        $('.progress-bar').html(message);
-        $('.progress').fadeIn();
-    },
-
-    /**
-     * Hide progress bar
-     * @return void
-     */
-    hideProgressBar: function(){
-        $('.progress').fadeOut();
     },
 
     /**

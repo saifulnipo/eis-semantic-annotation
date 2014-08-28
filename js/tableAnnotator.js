@@ -25,12 +25,12 @@ var tableAnnotator  = {
 //        return;
 
         if (cellCountStruct === null){
-            scientificAnnotation.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
+            messageHandler.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
             return;
         }
 
         if ($.isEmptyObject(cellCountStruct)){
-            scientificAnnotation.showErrorMessage('Please select table rows to annotate and try again!!',true);
+            messageHandler.showErrorMessage('Please select table rows to annotate and try again!!',true);
             return;
         }
 
@@ -63,7 +63,7 @@ var tableAnnotator  = {
                 columns = tableAnnotator.getSelectedColumnCount(cellCountStruct);
             dataCubeSparql.addAnnotation(selectedTableCellTexts,selectedRows, selectedColumns);
         } else {
-            scientificAnnotation.showErrorMessage('Table selection is not proper!! Please select rows correctly!!',true);
+            messageHandler.showErrorMessage('Table selection is not proper!! Please select rows correctly!!',true);
 
         }
     },
