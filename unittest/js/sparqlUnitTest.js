@@ -12,3 +12,13 @@ var sparqlUnitTest = {
         return (sparql.SERVER_ADDRESS === serverUrl);
     }
 };
+var sparqlrResource = {
+	var test = findSimilarFiles ();
+
+};
+
+
+
+
+
+
