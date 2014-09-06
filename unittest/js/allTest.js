@@ -17,3 +17,28 @@ QUnit.test( "Response Parser", function( assert ) {
     assert.ok( false === sparqlResponseParserUnitTest.testIsParsePropertySuccess(), "Parsing failed!" );
 });
 
+QUnit.module( "Camel Case Unit Test" );
+QUnit.test( " Minimize letters ", function( assert ) {
+    var actual = "Hello World";
+    var expected = "helloWorld";
+    assert.ok( true === test.testSmth(actual, expected), "test success!" );
+    assert.ok( true === test.similarFilesResposeIsNotNull(), "similar files Response is not null!" );
+    assert.ok( true === test.numberOfSimilarFilesLimit(), "Number of similar files less than ...!" );
+});
+
+QUnit.module( "Progress Bar Unit Test" );
+QUnit.test( " Progress Bar  ", function( assert ) {
+    assert.ok( true === progress.progressbar(), "test success!" );
+    assert.ok( false === progress.progressbar(), "test failed!" );
+    
+});
+
+QUnit.module( "Progress Bar Unit Test" );
+QUnit.test( " Hide Progress Bar  ", function( assert ) {
+    assert.ok( true === progress.progressbar(), "hided successfully!" );
+    assert.ok( false === progress.progressbar(), "Hiding failed!" );
+    
+});
+
+
+
