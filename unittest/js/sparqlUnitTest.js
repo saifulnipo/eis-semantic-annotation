@@ -10,6 +10,14 @@ var sparqlUnitTest = {
 
     testIsSparqlServerUrlValid : function(serverUrl) {
         return (sparql.SERVER_ADDRESS === serverUrl);
+    },
+
+    convertCamelCaseSuccessTest : function() {
+        return (sparql.camelCase('Hello World') === 'helloWorld');
+    },
+
+    convertCamelCaseFailTest : function() {
+        return (sparql.camelCase('Hello World') === 'hello World');
     }
 };
 

@@ -293,8 +293,9 @@ var sparql  = {
      * @returns {XML|string|void|*}
      */
     camelCase :function (str){
-        str     = $.camelCase(str.replace(/[_ ]/g, '-')).replace(/-/g, '');
-        return  str;
+        return str.replace(/^.|-| ./g, function(letter, index) {
+            return index == 0 ? letter.toLowerCase() : letter.substr(1).toUpperCase();
+        });
     },
     
     /**
