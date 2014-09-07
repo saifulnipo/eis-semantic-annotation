@@ -39,5 +39,17 @@ QUnit.test( " Camel Case test ", function( assert ) {
 //
 //});
 
+QUnit.module( "test param" );
+QUnit.test( "get param ", function( assert ) {
+    var actual = "Hello World";
+    var expected = "HelloWorld";
+    
+    var url = "http://example.com?a=1&b=2";
 
+    assert.ok( null != test.getParam(url, "a"), "not null check" );
+    assert.ok( 1 == test.getParam(url, "a"), "param " );
+    // assert.ok( expected === test.testSmth(actual), "test success!" );
+    // assert.ok( true === test.similarFilesResposeIsNotNull(), "similar files Response is not null!" );
+     // assert.ok( true === test.numberOfSimilarFilesLimit(), "Number of similar files less than ...!" );
+});
 
