@@ -1,7 +1,7 @@
 /**
  * This file contain the unit test of libs/sparql.js file
  *
- * @authors : A Q M Saiful Islam
+ * @authors : A Q M Saiful Islam, Mirsattar Seyidov
  *
  */
 /*global QUnit:false, sparql :false */
@@ -21,6 +21,8 @@ var sparqlUnitTest = {
     }
 };
 
+   
+ 
 
 
 
