@@ -21,10 +21,13 @@ var tableAnnotator  = {
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
             isConfirmSuggestion = false,selectedRows = 0, selectedColumns = 0;
 
-//        tableAnnotator.getProperSelectedTableInfo(selectedElements);
+//        tableAnnotator.makeTableSelectionSuggestion(selectedElements);
 //        return;
 
-        if (cellCountStruct === null){
+
+        selectionAnalyser.isUserSelectionIsTableArea(selectedElements);
+
+        if (cellCountStruct === null) {
             messageHandler.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
             return;
         }
@@ -34,20 +37,21 @@ var tableAnnotator  = {
             return;
         }
 
-        selectedRows = tableAnnotator.getSelectedRowCount(cellCountStruct),
-        selectedColumns = tableAnnotator.getSelectedColumnCount(cellCountStruct);
+        var tableSelectionInfo = tableAnnotator.getProperSelectedTableInfo(selectedElements);
+        dataCubeSparql.addAnnotation(tableSelectionInfo); // for the missing selection
 
-        if (tableAnnotator.isSuggestionPossible(cellCountStruct)) {
-            isConfirmSuggestion =  confirm('Your selection is part of a full rows.\nDid you intend to select the whole row?');
-            if (isConfirmSuggestion) {
-                var selectedTableCellTexts = tableAnnotator.getSelectedTextWithSuggestedItem(selectedElements);
-                dataCubeSparql.addAnnotation(selectedTableCellTexts,selectedRows, selectedColumns); // for the missing selection
-            } else {
-                tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct, selectedRows, selectedColumns);
-            }
-        } else {
-            tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct,selectedRows, selectedColumns);
-        }
+
+//        if (tableAnnotator.isSuggestionPossible(cellCountStruct)) {
+//            isConfirmSuggestion =  confirm('Your selection is part of a full rows.\nDid you intend to select the whole row?');
+//            if (isConfirmSuggestion) {
+//                var selectedTableCellTexts = tableAnnotator.getProperSelectedTableInfo(selectedElements);
+//                dataCubeSparql.addAnnotation(selectedTableCellTexts); // for the missing selection
+//            } else {
+//                tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
+//            }
+//        } else {
+//            tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
+//        }
     },
 
     /**
@@ -56,12 +60,12 @@ var tableAnnotator  = {
      * @param selectedRows
      * @param selectedColumns
      */
-    validateTableSelectionToAddAnnotation : function (cellCountStruct, selectedRows, selectedColumns) {
+    validateTableSelectionToAddAnnotation : function (cellCountStruct) {
         if (tableAnnotator.isTableSelectionValid(cellCountStruct)) {
             var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts(),
                 rows = tableAnnotator.getSelectedRowCount(cellCountStruct),
                 columns = tableAnnotator.getSelectedColumnCount(cellCountStruct);
-            dataCubeSparql.addAnnotation(selectedTableCellTexts,selectedRows, selectedColumns);
+            dataCubeSparql.addAnnotation(selectedTableCellTexts);
         } else {
             messageHandler.showErrorMessage('Table selection is not proper!! Please select rows correctly!!',true);
 
@@ -342,14 +346,25 @@ var tableAnnotator  = {
     getProperSelectedTableInfo:function (selectedElements) {
 
         if(selectedElements === undefined) {
-            return null;
+            return [];
         }
 
         var tableStruct = tableAnnotator.getTableColumnStructureForEveryRows(selectedElements),
             columnStartPoints = tableAnnotator.getRefinedColumnStructure(tableStruct),
-            selectedTableInfo = tableAnnotator.getSelectedRowsWithColumnValues(tableStruct,columnStartPoints);
-        
+            selectedTableInfo = tableAnnotator.getSelectedRowsWithColumnValues(tableStruct,columnStartPoints),
+            tableRowsAndColumn = [];
+
         console.log(selectedTableInfo);
+
+        for (var rows in selectedTableInfo) {
+            tableRowsAndColumn.push(
+                selectedTableInfo[rows]
+            );
+        }
+
+        return tableRowsAndColumn;
+        
+//        console.log(tableRowsAndColumn);
     },
 
 
@@ -412,7 +427,7 @@ var tableAnnotator  = {
      */
     getSelectedRowsWithColumnValues : function (tableStruct, columnStartPoints) {
         var indexCount = 0, currentColumn = 0, nextColumn = 0, 
-            tempStr = '',columnValue = '',tempCol = 0, 
+            tempStr = '',columnValue = '',tempCol = 0,
             selectedRowsAndColumn = {};
         for (var rows in tableStruct) {
             var cols = tableStruct[rows];
@@ -424,7 +439,7 @@ var tableAnnotator  = {
                 tempStr = columnStartPoints[indexCount];
                 currentColumn = tableAnnotator.getIntegerValue(tempStr);
 
-                nextColumn = 10000;
+                nextColumn = 10000; // assigned a big(unrealistic ) value
                 if(columnStartPoints[indexCount+1] !== undefined) {
                     tempStr = columnStartPoints[indexCount+1];
                     nextColumn = tableAnnotator.getIntegerValue(tempStr);
@@ -462,6 +477,72 @@ var tableAnnotator  = {
         }
 
         return parseInt(str.substr(0, str.length-2));
+    },
+
+    /**
+     *
+     * @param selectedElements
+     */
+    makeTableSelectionSuggestion : function (selectedElement) {
+
+        if ($.isEmptyObject(selectedElement)){
+            return null;
+        }
+
+        var firstElement = $(selectedElement[0]),
+            lastElement = $(selectedElement[selectedElement.length -1]),
+            itemBeforeFirst = $(firstElement.prev()),
+            itemAfterLast = $(lastElement.next()),
+            missingSelectedItem = null,
+            position = null;
+
+
+        var canvas = firstElement.get(0);
+
+        console.log(canvas);
+
+        return;
+
+
+//        for (var i = 0; i < 3; i++) {
+
+            var count = 0;
+
+            while (firstElement !== undefined && itemBeforeFirst !== undefined
+                && firstElement.css('top') === itemBeforeFirst.css('top')) {
+
+                console.log(itemBeforeFirst.css('left') + '::' + itemBeforeFirst.text());
+                itemBeforeFirst = $(itemBeforeFirst.prev());
+//                break;
+                count++;
+            }
+
+            while (lastElement !== undefined && itemAfterLast !== undefined
+                && lastElement.css('top') === itemAfterLast.css('top')) {
+
+                console.log(itemAfterLast.css('left') + '::' + itemAfterLast.text());
+                itemAfterLast = $(itemAfterLast.next());
+                count++;
+            }
+
+            firstElement = itemBeforeFirst;
+            lastElement = itemAfterLast;
+
+//        if(itemBeforeFirst.css('top') === firstElement.css('top')) {
+//            missingSelectedItem = itemBeforeFirst;
+//            position = tableAnnotator.ITEM_POSITION_FIRST;
+//        }
+//
+//        if(lastElement.css('top') === itemAfterLast.css('top')) {
+//            missingSelectedItem = itemAfterLast;
+//            position = tableAnnotator.ITEM_POSITION_LAST;
+//        }
+//
+//        return {
+//            item  : missingSelectedItem,
+//            position : position
+//        }
+
     }
 
 };

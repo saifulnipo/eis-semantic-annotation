@@ -26,15 +26,17 @@ var dataCubeSparql  = {
     /**
      * prepare and send the ajax request for add annotation as a data cube
      * @param selectedTableCellTexts
-     * @param selectedRows
-     * @param selectedColumns
+     *
+     * @return void
      */
-    addAnnotation:function(selectedTableCellTexts, selectedRows, selectedColumns) {
+    addAnnotation:function(selectedTableCellTexts) {
 
-//        console.log(selectedRows);
-//        console.log(selectedColumns);
-//        console.log(selectedTableCellTexts);
-//        return;
+        if ($.isEmptyObject(selectedTableCellTexts)) {
+            return;
+        }
+
+        var selectedColumns = selectedTableCellTexts[0].length;
+
         progressbar.showProgressBar('Adding annotation to the selected table...');
         var query =
             'prefix qb: <'+dataCubeSparql.PREFIX_CUBE+'>' +'\n'+
@@ -52,7 +54,7 @@ var dataCubeSparql  = {
                 dataCubeSparql.getDataStructureDefinition()+'\n'+
                 // part of annoation proprty... no need ot insert everytime
                 dataCubeSparql.getDimensionAndProperty()+'\n'+
-                dataCubeSparql.getObservations(selectedTableCellTexts, selectedRows, selectedColumns)+'\n'+
+                dataCubeSparql.getObservations(selectedTableCellTexts)+'\n'+
 
             '}';
 
@@ -188,26 +190,25 @@ var dataCubeSparql  = {
     /**
      * Get the observation based on selection
      * @param selectedTableCellTexts
-     * @param selectedRows
-     * @param selectedColumns
      * @returns {string}
      */
-    getObservations: function (selectedTableCellTexts, selectedRows, selectedColumns) {
+    getObservations: function (selectedTableCellTexts) {
 
-        var index = selectedColumns,// skipping the 1st row, we assume that 1st row is the column names
-            observationTitle = '',
+        var observationTitle = '',
             observationQuery = '';
 
-        for(var i = 1; i<selectedRows; i++) {  // i = 1, because we skip the 1st row so there will be one less loop
-            for(var j = 0; j<selectedColumns; j++) {
+        // i = 1, because we skip the 1st row so there will be one less loop
+        for(var i = 1; i<selectedTableCellTexts.length; i++) {
+            for(var j = 0; j<selectedTableCellTexts[j].length; j++) {
                 observationTitle = 'R' + i + 'C' + (j+1);
+//                console.log(selectedTableCellTexts[i][j]);
 
                 observationQuery +=
                     'ex:'+ observationTitle +' a qb:Observation ;' +'\n'+
                     'qb:dataSet ex:table1 ;' +'\n'+
                     'ex:table1Row '+ (i+1) +' ;' +'\n'+
                     'ex:table1Column '+ (j+1) +' ;' +'\n'+
-                    'semann:value "'+ selectedTableCellTexts[index++] +'" .' +'\n';
+                    'semann:value "'+ selectedTableCellTexts[i][j] +'" .' +'\n';
             }
         }
         return observationQuery;
