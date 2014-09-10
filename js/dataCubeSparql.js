@@ -29,7 +29,7 @@ var dataCubeSparql  = {
      *
      * @return void
      */
-    addAnnotation:function(selectedTableCellTexts) {
+    addAnnotation: function (selectedTableCellTexts) {
 
         if ($.isEmptyObject(selectedTableCellTexts)) {
             return;
@@ -39,26 +39,24 @@ var dataCubeSparql  = {
 
         progressbar.showProgressBar('Adding annotation to the selected table...');
         var query =
-            'prefix qb: <'+dataCubeSparql.PREFIX_CUBE+'>' +'\n'+
-            'prefix dct: <'+dataCubeSparql.PREFIX_DCT+'>' +'\n'+
-            'prefix rdf: <'+dataCubeSparql.PREFIX_RDF+'>' +'\n'+
-            'prefix rdfs: <'+dataCubeSparql.PREFIX_RDFS+'>' +'\n'+
-            'prefix xsd: <'+dataCubeSparql.PREFIX_XSD+'>' +'\n'+
-            'prefix semann: <'+dataCubeSparql.PREFIX_SEMANN+'>'+'\n'+
-            'prefix ex: <'+dataCubeSparql.PREFIX_EX+'>'+'\n'+
+            'prefix qb: <' + dataCubeSparql.PREFIX_CUBE + '>' + '\n' +
+            'prefix dct: <' + dataCubeSparql.PREFIX_DCT + '>' + '\n' +
+            'prefix rdf: <' + dataCubeSparql.PREFIX_RDF + '>' + '\n' +
+            'prefix rdfs: <' + dataCubeSparql.PREFIX_RDFS + '>' + '\n' +
+            'prefix xsd: <' + dataCubeSparql.PREFIX_XSD + '>' + '\n' +
+            'prefix semann: <' + dataCubeSparql.PREFIX_SEMANN + '>' + '\n' +
+            'prefix ex: <' + dataCubeSparql.PREFIX_EX + '>' + '\n' +
 
-            'INSERT IN ' + '<'+scientificAnnotation.GRAPH_NAME_EIS+'> ' +'\n'+
-            '{ ' +'\n'+
+            'INSERT IN ' + '<' + scientificAnnotation.GRAPH_NAME_EIS +'> ' + '\n' +
+            '{ ' + '\n' +
 
-                dataCubeSparql.getDataSet(selectedColumns)+'\n'+
-                dataCubeSparql.getDataStructureDefinition()+'\n'+
-                // part of annoation proprty... no need ot insert everytime
-                dataCubeSparql.getDimensionAndProperty()+'\n'+
-                dataCubeSparql.getObservations(selectedTableCellTexts)+'\n'+
+                dataCubeSparql.getDataSet(selectedColumns) + '\n' +
+                dataCubeSparql.getDataStructureDefinition() + '\n' +
+                dataCubeSparql.getObservations(selectedTableCellTexts) + '\n' +
 
             '}';
 
-        console.log(query);
+//        console.log(query);
 
         $.ajax({
             type: "POST",
@@ -67,14 +65,14 @@ var dataCubeSparql  = {
                 query: query,
                 format: "application/json"
             },
-            success: function(response){
+            success: function (response) {
                 scientificAnnotation.hideAnnotationDisplayTable();
                 progressbar.hideProgressBar();
                 messageHandler.showSuccessMessage('Table annotation successfully added');
                 tableAnnotator.TABLE_ANNOTATION_COUNT++;
             },
-            error: function(jqXHR, exception){
-                var errorTxt= sparql.getStandardErrorMessage(jqXHR ,exception);
+            error: function(jqXHR, exception) {
+                var errorTxt= sparql.getStandardErrorMessage(jqXHR, exception);
                 progressbar.hideProgressBar();
                 messageHandler.showErrorMessage(errorTxt);
             }
@@ -85,11 +83,11 @@ var dataCubeSparql  = {
      * Return the document URI with name
      * @returns {string}
      */
-    getDocumentURI :function () {
-        var pageNumber = '#page='+$('#pageNumber').val(),
-            tableName = '?name=table'+tableAnnotator.TABLE_ANNOTATION_COUNT,
-            documentURI = sparql.PREFIX_FILE + encodeURI(document.title.toString())+pageNumber+tableName;
-        return documentURI
+    getDocumentURI : function () {
+        var pageNumber = '#page=' + $('#pageNumber').val(),
+            tableName = '?name=table' + tableAnnotator.TABLE_ANNOTATION_COUNT,
+            documentURI = sparql.PREFIX_FILE + encodeURI(document.title.toString()) + pageNumber + tableName;
+        return documentURI;
     },
 
     /**
@@ -98,14 +96,14 @@ var dataCubeSparql  = {
      * @param exception
      * @param jqXHR
      */
-    getStandardErrorMessage:function(jqXHR, exception){
+    getStandardErrorMessage : function (jqXHR, exception) {
         var errorTxt = "Error occurred when sending data to the server: "+ sparql.SERVER_ADDRESS;
 
         if (jqXHR.status === 0) {
             errorTxt = errorTxt + '<br>Not connected. Verify network.';
-        } else if (jqXHR.status == 404) {
+        } else if (jqXHR.status === 404) {
             errorTxt = errorTxt + '<br>Request cannot be fulfilled by the server. Check whether the <br />(a) sparql endpoint is available at the above address <br>(b) query contains bad syntax.';
-        } else if (jqXHR.status == 500) {
+        } else if (jqXHR.status === 500) {
             errorTxt = errorTxt + '<br>Internal server error [500].';
         } else if (exception === 'parsererror') {
             errorTxt = errorTxt + '<br>Requested JSON parse failed.';
@@ -126,7 +124,7 @@ var dataCubeSparql  = {
      * @param {int} tableNameCounter
      * @returns {string}
      */
-    getDataSet: function(selectedColumns) {
+    getDataSet: function (selectedColumns) {
 
         var slices = '',
             query = '',
@@ -153,36 +151,6 @@ var dataCubeSparql  = {
             'qb:component [ qb:dimension ex:table1Row ; qb:order 1 ];' +'\n'+
             'qb:component [ qb:dimension ex:table1Column ;qb:order 2 ];' +'\n'+
             'qb:component [ qb:measure semann:value ] .';
-
-        return query;
-    },
-
-    /**
-     * Get the dimension and properties of the data cube
-     * @returns {string}
-     */
-    getDimensionAndProperty: function () {
-        var query =
-            'semann:row a rdf:Property, qb:DimensionProperty ;' +'\n'+
-            'rdfs:label "row"@en ;' +'\n'+
-            'rdfs:comment "a row of a table"@en ;' +'\n'+
-            'rdfs:range xsd:nonNegativeInteger .' +'\n'+
-
-            'semann:column a rdf:Property, qb:DimensionProperty ;' +'\n'+
-            'rdfs:label "column"@en ;' +'\n'+
-            'rdfs:comment "a column of a table"@en ;' +'\n'+
-            'rdfs:range xsd:nonNegativeInteger .' +'\n'+
-
-            'semann:value a rdf:Property, qb:MeasureProperty ;' +'\n'+
-            'rdfs:label "value"@en ;' +'\n'+
-            'rdfs:comment "the value of a table cell"@en ;' +'\n'+
-            'rdfs:range rdfs:Literal .' +'\n'+
-
-            'ex:table1Row a rdf:Property, qb:DimensionProperty ;' +'\n'+
-            'rdfs:subPropertyOf semann:row .' +'\n'+
-
-            'ex:table1Column a rdf:Property, qb:DimensionProperty ;' +'\n'+
-            'rdfs:subPropertyOf semann:column .';
 
         return query;
     },

@@ -503,6 +503,7 @@ var scientificAnnotation  = {
  * document on ready method
  */
 $(function () {
+    applicationSettings.setUp();
     scientificAnnotation.init();
     highlight.init();
 });
