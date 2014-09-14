@@ -10,6 +10,7 @@ var tableAnnotator  = {
     ITEM_POSITION_FIRST     : 'first',
     ITEM_POSITION_LAST      : 'last',
     TABLE_ANNOTATION_COUNT  : 1,
+    INF : 100000,
 
     /**
      * Add table annotation as data cube vocabulary
@@ -21,12 +22,14 @@ var tableAnnotator  = {
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
             isConfirmSuggestion = false,selectedRows = 0, selectedColumns = 0;
 
-//        tableAnnotator.makeTableSelectionSuggestion(selectedElements);
+////        tableAnnotator.makeTableSelectionSuggestion(selectedElements);
+////        return;
+//
+//        var tableSelectionInfo = tableAnnotator.getProperSelectedTableInfo(selectedElements);
 //        return;
-
-
-        selectionAnalyser.isUserSelectionIsTableArea(selectedElements);
-
+//
+//        selectionAnalyser.isUserSelectionIsTableArea(selectedElements);
+//
         if (cellCountStruct === null) {
             messageHandler.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
             return;
@@ -351,48 +354,54 @@ var tableAnnotator  = {
 
         var tableStruct = tableAnnotator.getTableColumnStructureForEveryRows(selectedElements),
             columnStartPoints = tableAnnotator.getRefinedColumnStructure(tableStruct),
-            selectedTableInfo = tableAnnotator.getSelectedRowsWithColumnValues(tableStruct,columnStartPoints),
+            selectedTableInfo = tableAnnotator.getSelectedRowsWithColumnValues(tableStruct, columnStartPoints),
             tableRowsAndColumn = [];
-
-        console.log(selectedTableInfo);
 
         for (var rows in selectedTableInfo) {
             tableRowsAndColumn.push(
                 selectedTableInfo[rows]
             );
+            console.log(selectedTableInfo[rows]);
         }
 
         return tableRowsAndColumn;
-        
-//        console.log(tableRowsAndColumn);
     },
 
 
     /**
      * Get the all the broken columns structures of every selected rows 
      * @param selectedElements
-     * @returns {{}}
+     * @returns array of objects
      */
-    getTableColumnStructureForEveryRows : function (selectedElements) {
-        var x , y, tempX, tableStruct = {};
+     getTableColumnStructureForEveryRows : function (selectedElements) {
+        var x , y, tableStruct = {}, lastInsertedKey = null;
         $.each( selectedElements, function( index, value ) {
 
             if(tableAnnotator.isDivContainText(value)) {
                 x = value.style.top;
                 y = value.style.left;
 
-                if(tableStruct[x] === undefined ) {
-                    tableStruct[x] = [];
-                }
-                tableStruct[x].push(
-                    {
-                        y    : y,
-                        cellText : value.textContent
+                if (tableStruct[x] === undefined ) {
+                    lastInsertedKey = tableAnnotator.getLastInsertedKey(tableStruct);
+
+                    var currentX = tableAnnotator.getIntegerValue(x),
+                        lastX = tableAnnotator.getIntegerValue(lastInsertedKey),
+                        currentY = tableAnnotator.getIntegerValue(y);
+                        if (tableStruct[lastInsertedKey] !== undefined) {
+                            var lastY = tableAnnotator.getIntegerValue(tableStruct[lastInsertedKey][0].y);
+                        }
+
+                    if (lastInsertedKey !== null && (currentX !== lastX) && (currentY > lastY)) {
+                        tableStruct[lastInsertedKey].push({ y : y, cellText : value.textContent } );
+                        return true; // works as loop continuation, here skipping the loop
+                    } else {
+                        tableStruct[x] = [];
                     }
-                );
+                }
+                tableStruct[x].push({ y : y, cellText : value.textContent } );
             }
         });
-        
+
         return tableStruct;
     },
 
@@ -404,20 +413,21 @@ var tableAnnotator  = {
      */
     getRefinedColumnStructure : function (tableStruct) {
 
-        var cols = [], columnStartPoints = [], allColumnsIndex = [];
+        var cols = [], columnStartPoints = [], allColumnsIndex = [], previous = '';
         for(var keys in tableStruct) {
             cols = tableStruct[keys];
             $.each( cols, function( index, value ) {
                 var searchedItem = $.grep(allColumnsIndex, function(obj) { return obj.y === value.y; });
-                if (!$.isEmptyObject(searchedItem)) {
+                if (!$.isEmptyObject(searchedItem) && value.y !== previous) {
                     columnStartPoints.push(value.y);
+                    previous = value.y;
                 }
             });
             allColumnsIndex = cols;
         }
+
         return columnStartPoints;
     },
-
 
     /**
      * 
@@ -426,7 +436,8 @@ var tableAnnotator  = {
      * @returns {{}}
      */
     getSelectedRowsWithColumnValues : function (tableStruct, columnStartPoints) {
-        var indexCount = 0, currentColumn = 0, nextColumn = 0, 
+
+        var indexCount = 0, currentColumn = 0, nextColumn = 0,
             tempStr = '',columnValue = '',tempCol = 0,
             selectedRowsAndColumn = {};
         for (var rows in tableStruct) {
@@ -436,25 +447,28 @@ var tableAnnotator  = {
             selectedRowsAndColumn[rows] = [];
             $.each( cols, function( index, column ) {
 
+                currentColumn = tableAnnotator.INF; // assigned a big(unrealistic ) value
                 tempStr = columnStartPoints[indexCount];
-                currentColumn = tableAnnotator.getIntegerValue(tempStr);
+                if (tempStr !== undefined) {
+                    currentColumn = tableAnnotator.getIntegerValue(tempStr);
+                }
 
-                nextColumn = 10000; // assigned a big(unrealistic ) value
+                nextColumn = tableAnnotator.INF; // assigned a big(unrealistic ) value
                 if(columnStartPoints[indexCount+1] !== undefined) {
                     tempStr = columnStartPoints[indexCount+1];
                     nextColumn = tableAnnotator.getIntegerValue(tempStr);
                 }
 
                 tempCol = tableAnnotator.getIntegerValue(column.y);
-//                console.log(tempCol+','+currentColumn+','+nextColumn+','+column.y+','+indexCount);
+//                console.log(column.cellText + ',' + tempCol+','+currentColumn+','+nextColumn+','+column.y+','+indexCount);
 
-                if (tempCol >= currentColumn && tempCol < nextColumn) {
+                if (tempCol >= currentColumn && tempCol < nextColumn ) {
                     columnValue += column.cellText;
                 } else {
 //                    console.log(columnValue);
                     selectedRowsAndColumn[rows].push(columnValue);
                     columnValue = '';
-                    columnValue +=column.cellText;
+                    columnValue += column.cellText;
                     indexCount++;
                 }
             });
@@ -472,11 +486,26 @@ var tableAnnotator  = {
      */
     getIntegerValue : function(str) {
 
-        if (str === undefined || str.trim() === ''){
+        if (str === null || str === undefined || $.trim(str) === ''){
             return -1;
         }
 
         return parseInt(str.substr(0, str.length-2));
+    },
+
+    /**
+     *
+     * @param tableStruct
+     * @returns {*}
+     */
+    getLastInsertedKey : function (tableStruct) {
+
+        if ($.isEmptyObject(tableStruct)){
+            return null;
+        }
+
+        var keys = Object.keys(tableStruct);
+        return keys[keys.length - 1];
     },
 
     /**
