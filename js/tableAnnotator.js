@@ -22,10 +22,11 @@ var tableAnnotator  = {
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
             isConfirmSuggestion = false,selectedRows = 0, selectedColumns = 0;
 
-////        tableAnnotator.makeTableSelectionSuggestion(selectedElements);
-////        return;
+//        tableAnnotator.makeTableSelectionSuggestion(selectedElements);
+//        return;
 //
-//        var tableSelectionInfo = tableAnnotator.getProperSelectedTableInfo(selectedElements);
+//        var tableInfo = tableAnnotator.getSelectedTableInfo(selectedElements);
+//        console.log(tableInfo);
 //        return;
 //
 //        selectionAnalyser.isUserSelectionIsTableArea(selectedElements);
@@ -40,14 +41,14 @@ var tableAnnotator  = {
             return;
         }
 
-        var tableSelectionInfo = tableAnnotator.getProperSelectedTableInfo(selectedElements);
-        dataCubeSparql.addAnnotation(tableSelectionInfo); // for the missing selection
+        var tableInfo = tableAnnotator.getSelectedTableInfo(selectedElements);
+        dataCubeSparql.addAnnotation(tableInfo);
 
 
 //        if (tableAnnotator.isSuggestionPossible(cellCountStruct)) {
 //            isConfirmSuggestion =  confirm('Your selection is part of a full rows.\nDid you intend to select the whole row?');
 //            if (isConfirmSuggestion) {
-//                var selectedTableCellTexts = tableAnnotator.getProperSelectedTableInfo(selectedElements);
+//                var selectedTableCellTexts = tableAnnotator.getSelectedTableInfo(selectedElements);
 //                dataCubeSparql.addAnnotation(selectedTableCellTexts); // for the missing selection
 //            } else {
 //                tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
@@ -155,7 +156,7 @@ var tableAnnotator  = {
      * @returns {boolean}
      */
     isDivContainText : function(div) {
-        return div.hasAttribute('data-canvas-width');
+        return div.hasAttribute('data-font-name');
     },
 
 
@@ -346,7 +347,7 @@ var tableAnnotator  = {
      *
      * @param selectedElements
      */
-    getProperSelectedTableInfo:function (selectedElements) {
+    getSelectedTableInfo:function (selectedElements) {
 
         if(selectedElements === undefined) {
             return [];
@@ -361,7 +362,6 @@ var tableAnnotator  = {
             tableRowsAndColumn.push(
                 selectedTableInfo[rows]
             );
-            console.log(selectedTableInfo[rows]);
         }
 
         return tableRowsAndColumn;
@@ -418,62 +418,76 @@ var tableAnnotator  = {
             cols = tableStruct[keys];
             $.each( cols, function( index, value ) {
                 var searchedItem = $.grep(allColumnsIndex, function(obj) { return obj.y === value.y; });
+               // console.log(searchedItem);
                 if (!$.isEmptyObject(searchedItem) && value.y !== previous) {
-                    columnStartPoints.push(value.y);
+                    if (columnStartPoints[value.y] === undefined) {
+                        columnStartPoints[value.y] = 1;
+                    } else {
+                        columnStartPoints[value.y]++;
+                    }
                     previous = value.y;
                 }
             });
             allColumnsIndex = cols;
         }
 
-        return columnStartPoints;
+        return tableAnnotator.discardUnwantedStartPoints(columnStartPoints);
     },
 
     /**
-     * 
+     *  Return the selected text based on refined column values
      * @param tableStruct
      * @param columnStartPoints
      * @returns {{}}
      */
     getSelectedRowsWithColumnValues : function (tableStruct, columnStartPoints) {
 
-        var indexCount = 0, currentColumn = 0, nextColumn = 0,
-            tempStr = '',columnValue = '',tempCol = 0,
+        var indexCount = 0, 
+            previousColumnStartPoint = 0, 
+            nextColumnStartPoint = 0,
+            tempColumnStartPoint = '', 
+            columnValue = '',
+            currentColumnStartPoint = 0,
             selectedRowsAndColumn = {};
+        
         for (var rows in tableStruct) {
             var cols = tableStruct[rows];
             indexCount = 0;
             columnValue = '';
             selectedRowsAndColumn[rows] = [];
+
+            previousColumnStartPoint = tableAnnotator.INF; // assigned a big(unrealistic ) value
+            tempColumnStartPoint = columnStartPoints[indexCount];
+            if (tempColumnStartPoint !== undefined) {
+                previousColumnStartPoint = tableAnnotator.getIntegerValue(tempColumnStartPoint);
+            }
+
             $.each( cols, function( index, column ) {
 
-                currentColumn = tableAnnotator.INF; // assigned a big(unrealistic ) value
-                tempStr = columnStartPoints[indexCount];
-                if (tempStr !== undefined) {
-                    currentColumn = tableAnnotator.getIntegerValue(tempStr);
+                nextColumnStartPoint = tableAnnotator.INF; // assigned a big(unrealistic ) value
+                tempColumnStartPoint = columnStartPoints[indexCount+1];
+                if(tempColumnStartPoint !== undefined) {
+                    nextColumnStartPoint = tableAnnotator.getIntegerValue(tempColumnStartPoint);
                 }
 
-                nextColumn = tableAnnotator.INF; // assigned a big(unrealistic ) value
-                if(columnStartPoints[indexCount+1] !== undefined) {
-                    tempStr = columnStartPoints[indexCount+1];
-                    nextColumn = tableAnnotator.getIntegerValue(tempStr);
-                }
+                currentColumnStartPoint = tableAnnotator.getIntegerValue(column.y);
 
-                tempCol = tableAnnotator.getIntegerValue(column.y);
-//                console.log(column.cellText + ',' + tempCol+','+currentColumn+','+nextColumn+','+column.y+','+indexCount);
-
-                if (tempCol >= currentColumn && tempCol < nextColumn ) {
+                if (currentColumnStartPoint >= previousColumnStartPoint && currentColumnStartPoint < nextColumnStartPoint ) {
                     columnValue += column.cellText;
                 } else {
-//                    console.log(columnValue);
-                    selectedRowsAndColumn[rows].push(columnValue);
+                    if ($.trim(columnValue) !== '') {
+                        selectedRowsAndColumn[rows].push(columnValue);
+                    }
                     columnValue = '';
-                    columnValue += column.cellText;
+                    columnValue +=  column.cellText;
+                    previousColumnStartPoint = nextColumnStartPoint;
                     indexCount++;
                 }
             });
-//            console.log(columnValue);
-            selectedRowsAndColumn[rows].push(columnValue);
+
+            if ($.trim(columnValue) !== '') {
+                selectedRowsAndColumn[rows].push(columnValue);
+            }
         }
         return selectedRowsAndColumn;
     },
@@ -494,7 +508,7 @@ var tableAnnotator  = {
     },
 
     /**
-     *
+     * Get the last inserted key of the associated array
      * @param tableStruct
      * @returns {*}
      */
@@ -526,33 +540,50 @@ var tableAnnotator  = {
             position = null;
 
 
-        var canvas = firstElement.get(0);
-
-        console.log(canvas);
-
-        return;
+//        var canvas = firstElement.get(0);
+//        console.log(canvas);
+//        return;
 
 
 //        for (var i = 0; i < 3; i++) {
 
             var count = 0;
 
-            while (firstElement !== undefined && itemBeforeFirst !== undefined
-                && firstElement.css('top') === itemBeforeFirst.css('top')) {
+//            while (firstElement !== undefined && itemBeforeFirst !== undefined
+//                && firstElement.css('top') === itemBeforeFirst.css('top') && item) {
+//
+//                console.log(itemBeforeFirst.css('left') + '::' + itemBeforeFirst.text());
+//                itemBeforeFirst = $(itemBeforeFirst.prev());
+////                break;
+//                count++;
+//            }
 
-                console.log(itemBeforeFirst.css('left') + '::' + itemBeforeFirst.text());
-                itemBeforeFirst = $(itemBeforeFirst.prev());
-//                break;
-                count++;
-            }
+        var minLeft = tableAnnotator.getIntegerValue(lastElement.css('left')),
+            maxLeft = minLeft,
+            minTop = tableAnnotator.getIntegerValue(lastElement.css('top')),
+            maxTop = minTop;
 
-            while (lastElement !== undefined && itemAfterLast !== undefined
-                && lastElement.css('top') === itemAfterLast.css('top')) {
 
-                console.log(itemAfterLast.css('left') + '::' + itemAfterLast.text());
+        for (var i = 0; i < 10; i++) {
+
+            if (itemAfterLast !== undefined && tableAnnotator.isDivContainText(itemAfterLast[0])) {
+
+                var left = tableAnnotator.getIntegerValue(itemAfterLast.css('left')),
+                    top = tableAnnotator.getIntegerValue(itemAfterLast.css('top'));
+
+                if (left > maxLeft) {
+                    maxLeft = left;
+                }
+
+                if (top > maxTop) {
+                    maxTop = top;
+                }
+
+                console.log('leftMin: '+ minLeft + ' leftMex: '+ maxTop + ' topMin: '+minTop + ' topMax: ' + maxTop + ' ' + itemAfterLast.text());
+
                 itemAfterLast = $(itemAfterLast.next());
-                count++;
             }
+        }
 
             firstElement = itemBeforeFirst;
             lastElement = itemAfterLast;
@@ -572,6 +603,31 @@ var tableAnnotator  = {
 //            position : position
 //        }
 
-    }
+    },
 
+
+    /**
+     * Removed the less frequent item for column start points
+     * @param columnStartPoints
+     * @returns {Array}
+     */
+    discardUnwantedStartPoints : function (columnStartPoints) {
+
+        var max = 0, value = 0, refinedValue = [];
+        for (var keys in columnStartPoints) {
+            value = columnStartPoints[keys];
+            if (value > max) {
+                max = value;
+            }
+        }
+
+        for (var keys in columnStartPoints) {
+            value = columnStartPoints[keys];
+            if (value === max) {
+                refinedValue.push(keys)
+            }
+        }
+
+        return refinedValue;
+    }
 };
