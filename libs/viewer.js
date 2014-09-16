@@ -561,8 +561,7 @@ var PDFView = {
   open: function pdfViewOpen(url, scale, password,
                              pdfDataRangeTransport, args) {
 
-      scientificAnnotation.clearAnnotationDisplayPanel();
-      scientificAnnotation.clearSimilarSearchResult();
+      scientificAnnotation.refreshOnNewPdfFileLoad();
 
     var parameters = {password: password};
     if (typeof url === 'string') { // URL

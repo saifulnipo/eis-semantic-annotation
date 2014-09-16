@@ -354,6 +354,15 @@ var scientificAnnotation  = {
     },
 
     /**
+     *  Reset and refresh necessary parameter and variable once new pdf file has been laoded
+     */
+    refreshOnNewPdfFileLoad : function () {
+        tableAnnotator.TABLE_ANNOTATION_COUNT = 1;
+        scientificAnnotation.clearAnnotationDisplayPanel();
+        scientificAnnotation.clearSimilarSearchResult();
+    },
+
+    /**
      * clear available annotations
      */
     clearAnnotationDisplayPanel:function (){

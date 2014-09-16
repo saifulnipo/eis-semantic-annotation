@@ -38,6 +38,13 @@ var tableAnnotator  = {
         }
 
         var validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
+//        var tableInfo = tableAnnotator.getSelectedTableInfo(validatedTableInfo.selectedElements);
+//        var isSameColumnSize  = tableAnnotator.isSelectedTableInfoConsistent(tableInfo);
+//
+//        if (isSameColumnSize === false) {
+//            messageHandler.showErrorMessage('Table selection is not valid.' +'<br>Try to select table only!!');
+//            return;
+//        }
 
         if (validatedTableInfo.isGetTableRangeSuccess === false) {
             messageHandler.showErrorMessage('Table selection does not seems proper. ' +
@@ -50,16 +57,23 @@ var tableAnnotator  = {
 
             isConfirmSuggestion =  confirm('Your selection is part of a full table.\nDid you intend to select the whole table?');
             if (isConfirmSuggestion) {
-                var tableInfo = tableAnnotator.getSelectedTableInfo(validatedTableInfo.selectedElements);
-                dataCubeSparql.addAnnotation(tableInfo);
-//                console.log(tableInfo);
+                tableAnnotator.insertToDataCube(validatedTableInfo.selectedElements);
             }
         } else {
-
-            var tableInfo = tableAnnotator.getSelectedTableInfo(validatedTableInfo.selectedElements);
-            dataCubeSparql.addAnnotation(tableInfo);
-//            console.log(tableInfo);
+            tableAnnotator.insertToDataCube(validatedTableInfo.selectedElements);
         }
+    },
+
+    /**
+     * Prepare the selected table info into data cube.
+     *
+     * @param selectedElements
+     * @return {void}
+     */
+    insertToDataCube : function (selectedElements) {
+        var tableInfo = tableAnnotator.getSelectedTableInfo(selectedElements);
+        dataCubeSparql.addAnnotation(tableInfo);
+//        console.log(tableInfo);
     },
 
     /**
@@ -577,5 +591,31 @@ var tableAnnotator  = {
             min : min,
             max : max
         }
-    }
+    },
+
+//    /**
+//     * Return is all the selected rows have same column size or not
+//     *
+//     * @param selectedElements
+//     */
+//    isSelectedTableInfoConsistent : function (selectedElements) {
+//
+//        console.log(selectedElements);
+//
+//
+//        var tempLength = selectedElements[0].length, isSameColumnSize = true;
+//        for (var i = 1; i < selectedElements.length; i++) {
+//
+//            console.log(selectedElements[i]);
+//
+//            if (tempLength !== selectedElements[i].length) {
+//                isSameColumnSize = false;
+//                break;
+//            }
+//        }
+//
+//        console.log('isSameColumnSize::' + isSameColumnSize);
+//
+//        return isSameColumnSize;
+//    }
 };
