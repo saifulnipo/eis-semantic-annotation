@@ -10,10 +10,13 @@ var tableAnnotator  = {
     ITEM_POSITION_FIRST     : 'first',
     ITEM_POSITION_LAST      : 'last',
     TABLE_ANNOTATION_COUNT  : 1,
-    INF : 100000,
+    INF                     : 100000,
+    TABLE_SELECTION_ABORT   : 2000,
+    INVALID                 : -1,
 
     /**
      * Add table annotation as data cube vocabulary
+     *
      * @return void
      */
     annotateSelectedTable : function() {
@@ -22,78 +25,46 @@ var tableAnnotator  = {
             cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
             isConfirmSuggestion = false,selectedRows = 0, selectedColumns = 0;
 
-//        tableAnnotator.makeTableSelectionSuggestion(selectedElements);
-//        return;
-//
-//        var tableInfo = tableAnnotator.getSelectedTableInfo(selectedElements);
-//        console.log(tableInfo);
-//        return;
-//
-//        selectionAnalyser.isUserSelectionIsTableArea(selectedElements);
-//
+        messageHandler.clearMessage();
+
         if (cellCountStruct === null) {
             messageHandler.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
             return;
         }
 
         if ($.isEmptyObject(cellCountStruct)){
-            messageHandler.showErrorMessage('Please select table rows to annotate and try again!!',true);
+            messageHandler.showErrorMessage('Please select table to annotate and try again!!',true);
             return;
         }
 
-        var tableInfo = tableAnnotator.getSelectedTableInfo(selectedElements);
-        dataCubeSparql.addAnnotation(tableInfo);
+        var validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
 
-
-//        if (tableAnnotator.isSuggestionPossible(cellCountStruct)) {
-//            isConfirmSuggestion =  confirm('Your selection is part of a full rows.\nDid you intend to select the whole row?');
-//            if (isConfirmSuggestion) {
-//                var selectedTableCellTexts = tableAnnotator.getSelectedTableInfo(selectedElements);
-//                dataCubeSparql.addAnnotation(selectedTableCellTexts); // for the missing selection
-//            } else {
-//                tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
-//            }
-//        } else {
-//            tableAnnotator.validateTableSelectionToAddAnnotation(cellCountStruct);
-//        }
-    },
-
-    /**
-     *
-     * @param cellCountStruct
-     * @param selectedRows
-     * @param selectedColumns
-     */
-    validateTableSelectionToAddAnnotation : function (cellCountStruct) {
-        if (tableAnnotator.isTableSelectionValid(cellCountStruct)) {
-            var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts(),
-                rows = tableAnnotator.getSelectedRowCount(cellCountStruct),
-                columns = tableAnnotator.getSelectedColumnCount(cellCountStruct);
-            dataCubeSparql.addAnnotation(selectedTableCellTexts);
-        } else {
-            messageHandler.showErrorMessage('Table selection is not proper!! Please select rows correctly!!',true);
-
+        if (validatedTableInfo.isGetTableRangeSuccess === false) {
+            messageHandler.showErrorMessage('Table selection does not seems proper. ' +
+                '<br> Please select atleast first 3 rows includeing column names ' +
+                '<br> and try again!!');
+            return;
         }
-    },
 
-    /**
-     * Return the selected text of the table cell
-     * @returns {Array}
-     */
-    getSelectedTableCellTexts : function(){
+        if (validatedTableInfo.isSelectionSuggestionPossible === true) {
 
-        var selectedElements = tableAnnotator.getSelectedElementTags(window),
-            selectedTexts = [] ;
-        $.each( selectedElements, function( index, value ) {
-            if(tableAnnotator.isDivContainText(value)) {
-                selectedTexts.push(value.textContent.trim());
+            isConfirmSuggestion =  confirm('Your selection is part of a full table.\nDid you intend to select the whole table?');
+            if (isConfirmSuggestion) {
+                var tableInfo = tableAnnotator.getSelectedTableInfo(validatedTableInfo.selectedElements);
+                dataCubeSparql.addAnnotation(tableInfo);
+//                console.log(tableInfo);
             }
-        });
-        return selectedTexts;
+        } else {
+
+            var tableInfo = tableAnnotator.getSelectedTableInfo(validatedTableInfo.selectedElements);
+            dataCubeSparql.addAnnotation(tableInfo);
+//            console.log(tableInfo);
+        }
     },
 
     /**
      * Return intersected Nodes
+     *
      * @param range
      * @param node
      * @returns {*}
@@ -110,18 +81,19 @@ var tableAnnotator  = {
                 nodeRange.selectNodeContents(node);
             }
 
-            return range.compareBoundaryPoints(Range.END_TO_START, nodeRange) == -1 &&
+            return range.compareBoundaryPoints(Range.END_TO_START, nodeRange) == tableAnnotator.INVALID &&
                 range.compareBoundaryPoints(Range.START_TO_END, nodeRange) == 1;
         }
     },
 
     /**
      * Return all the selected element inside a table
+     *
      * @param win
      * @returns {*}
      */
     getSelectedElementTags:function(win) {
-        var range, sel, selectedElements, treeWalker, containerElement;
+        var range, sel, selectedElements = [], treeWalker, containerElement;
         sel = win.getSelection();
         if (sel.rangeCount > 0) {
             range = sel.getRangeAt(0);
@@ -142,9 +114,12 @@ var tableAnnotator  = {
                 false
             );
 
-            selectedElements = [treeWalker.currentNode];
-            while (treeWalker.nextNode()) {
+            if (tableAnnotator.isDivContainText(treeWalker.currentNode)) {
                 selectedElements.push(treeWalker.currentNode);
+            }
+
+            while (treeWalker.nextNode()) {
+                    selectedElements.push(treeWalker.currentNode);
             }
         }
         return selectedElements;
@@ -152,47 +127,22 @@ var tableAnnotator  = {
 
     /**
      * Check if the selected div contain the text items
+     *
      * @param div
      * @returns {boolean}
      */
     isDivContainText : function(div) {
+
+        if (div === undefined || div === null) {
+            return false;
+        }
+
         return div.hasAttribute('data-font-name');
-    },
-
-
-    /**
-     * Return true if a table is selected property. i.e proper equal row selection
-     * @returns {boolean}
-     */
-    isTableSelectionValid : function(cellCountStruct) {
-        var values = [],
-            cellCountStructColumn = cellCountStruct['col'],
-            cellCountStructRow = cellCountStruct['row'];
-
-        for(var key in cellCountStructRow) {
-            values.push(cellCountStructRow[key]);
-        }
-        var uniqueArrayCol = $.unique(values);
-
-        values = [];
-        for(var key in cellCountStructColumn) {
-            values.push(cellCountStructColumn[key]);
-        }
-        var uniqueArrayRow = $.unique(values);
-
-//        if(uniqueArrayCol.length === 1 && uniqueArrayRow.length === 1){
-//            return true;
-//        }
-
-        if(uniqueArrayRow.length === 1){
-            return true;
-        }
-
-        return false;
     },
 
     /**
      * Return the selected table cell count data structure
+     *
      * @param selectedElements
      * @returns {Array} associative array
      */
@@ -203,25 +153,23 @@ var tableAnnotator  = {
         }
         var x , y,  tableStructX = [],tableStructY = [],tableStruct = {};
         $.each( selectedElements, function( index, value ) {
-            if(tableAnnotator.isDivContainText(value)) {
-                x = value.style.top;
-                y = value.style.left;
+            x = value.style.top;
+            y = value.style.left;
 
 
-                if (x !== undefined && x !== '') {
-                    if (tableStructX[x] !== undefined) {
-                        tableStructX[x]++;
-                    }else{
-                        tableStructX[x] = 1;
-                    }
+            if (x !== undefined && x !== '') {
+                if (tableStructX[x] !== undefined) {
+                    tableStructX[x]++;
+                }else{
+                    tableStructX[x] = 1;
                 }
+            }
 
-                if (y !== undefined && y !== '') {
-                    if (tableStructY[y] !== undefined) {
-                        tableStructY[y]++;
-                    }else{
-                        tableStructY[y] = 1;
-                    }
+            if (y !== undefined && y !== '') {
+                if (tableStructY[y] !== undefined) {
+                    tableStructY[y]++;
+                }else{
+                    tableStructY[y] = 1;
                 }
             }
         });
@@ -236,116 +184,10 @@ var tableAnnotator  = {
     },
 
     /**
-     * Return boolean if the table missing cell selection is possible to suggest
-     * @param cellCountStruct
-     * @returns {boolean}
-     */
-    isSuggestionPossible : function(cellCountStruct) {
-
-        var cellCountStructRow = cellCountStruct['col'],
-            length = 0 ,sum = 0,values = [],rows = 0;
-
-        for (var key in cellCountStructRow) {
-            values.push(cellCountStructRow[key]);
-            sum += cellCountStructRow[key];
-            length++;
-        }
-
-        var maxValue = Math.max.apply(Math, values),
-            expectedSelectedCells =  maxValue * length,
-            actualSelectedCells = sum;
-
-        if ((expectedSelectedCells - actualSelectedCells) === 1) {
-            return true;
-        }
-
-        return false;
-
-    },
-
-    /**
-     * Get the missing selected item
-     * @param selectedElement
-     * @returns {mix}
-     */
-    getMissingSelectionElement: function(selectedElement) {
-
-        if (selectedElement.length < 1){
-            return null;
-        }
-
-        var firstElement = $(selectedElement[1]),
-            lastElement = $(selectedElement[selectedElement.length -1]),
-            itemBeforeFirst = $(firstElement.prev()),
-            itemAfterLast = $(lastElement.next()),
-            missingSelectedItem = null,position = null;
-
-        if(itemBeforeFirst.css('top') === firstElement.css('top')) {
-            missingSelectedItem = itemBeforeFirst;
-            position = tableAnnotator.ITEM_POSITION_FIRST;
-        }
-
-        if(lastElement.css('top') === itemAfterLast.css('top')) {
-            missingSelectedItem = itemAfterLast;
-            position = tableAnnotator.ITEM_POSITION_LAST;
-        }
-
-        return {
-            item  : missingSelectedItem,
-            position : position
-        }
-    },
-
-
-    /**
-     * Return the new selected text after applying the suggested elements
-     * @param selectedElements
-     * @returns {Array}
-     */
-    getSelectedTextWithSuggestedItem: function (selectedElements) {
-        var selectedTableCellTexts = tableAnnotator.getSelectedTableCellTexts(),
-            missingItemObj = tableAnnotator.getMissingSelectionElement(selectedElements);
-        if (missingItemObj !== null && missingItemObj.item !== null) {
-            if(missingItemObj.position === tableAnnotator.ITEM_POSITION_FIRST) {
-                selectedTableCellTexts.unshift(missingItemObj.item.text());
-            } else {
-                selectedTableCellTexts.push(missingItemObj.item.text());
-            }
-        }
-        return selectedTableCellTexts;
-    },
-
-    /**
-     * Get the max row count
-     * @param cellCountStruct
-     */
-    getSelectedRowCount:function(cellCountStruct) {
-        var cellCountStructRow = cellCountStruct['row'],max = 0;
-        for (var key in cellCountStructRow) {
-            if (cellCountStructRow[key] > max) {
-                max = cellCountStructRow[key];
-            }
-        }
-        return max;
-    },
-
-    /**
-     * Get max column count
-     * @param cellCountStruct
-     */
-    getSelectedColumnCount:function(cellCountStruct){
-        var cellCountStructCol = cellCountStruct['col'],max = 0;
-        for (var key in cellCountStructCol) {
-            if(cellCountStructCol[key] > max){
-                max = cellCountStructCol[key];
-            }
-        }
-        return max;
-    },
-
-    /**
+     * Get total selected table information
      *
      * @param selectedElements
+     * @returns {Array}
      */
     getSelectedTableInfo:function (selectedElements) {
 
@@ -369,7 +211,8 @@ var tableAnnotator  = {
 
 
     /**
-     * Get the all the broken columns structures of every selected rows 
+     * Get the all the broken columns structures of every selected rows
+     *
      * @param selectedElements
      * @returns array of objects
      */
@@ -377,29 +220,27 @@ var tableAnnotator  = {
         var x , y, tableStruct = {}, lastInsertedKey = null;
         $.each( selectedElements, function( index, value ) {
 
-            if(tableAnnotator.isDivContainText(value)) {
-                x = value.style.top;
-                y = value.style.left;
+            x = value.style.top;
+            y = value.style.left;
 
-                if (tableStruct[x] === undefined ) {
-                    lastInsertedKey = tableAnnotator.getLastInsertedKey(tableStruct);
+            if (tableStruct[x] === undefined ) {
+                lastInsertedKey = tableAnnotator.getLastInsertedKey(tableStruct);
 
-                    var currentX = tableAnnotator.getIntegerValue(x),
-                        lastX = tableAnnotator.getIntegerValue(lastInsertedKey),
-                        currentY = tableAnnotator.getIntegerValue(y);
-                        if (tableStruct[lastInsertedKey] !== undefined) {
-                            var lastY = tableAnnotator.getIntegerValue(tableStruct[lastInsertedKey][0].y);
-                        }
-
-                    if (lastInsertedKey !== null && (currentX !== lastX) && (currentY > lastY)) {
-                        tableStruct[lastInsertedKey].push({ y : y, cellText : value.textContent } );
-                        return true; // works as loop continuation, here skipping the loop
-                    } else {
-                        tableStruct[x] = [];
+                var currentX = tableAnnotator.getIntegerValue(x),
+                    lastX = tableAnnotator.getIntegerValue(lastInsertedKey),
+                    currentY = tableAnnotator.getIntegerValue(y);
+                    if (tableStruct[lastInsertedKey] !== undefined) {
+                        var lastY = tableAnnotator.getIntegerValue(tableStruct[lastInsertedKey][0].y);
                     }
+
+                if (lastInsertedKey !== null && (currentX !== lastX) && (currentY > lastY)) {
+                    tableStruct[lastInsertedKey].push({ y : y, cellText : value.textContent } );
+                    return true; // works as loop continuation, here skipping the loop
+                } else {
+                    tableStruct[x] = [];
                 }
-                tableStruct[x].push({ y : y, cellText : value.textContent } );
             }
+            tableStruct[x].push({ y : y, cellText : value.textContent } );
         });
 
         return tableStruct;
@@ -408,6 +249,7 @@ var tableAnnotator  = {
 
     /**
      * Return the refined news column structure for all the rows
+     *
      * @param tableStruct
      * @returns {Array}
      */
@@ -435,7 +277,8 @@ var tableAnnotator  = {
     },
 
     /**
-     *  Return the selected text based on refined column values
+     * Return the selected text based on refined column values
+     *
      * @param tableStruct
      * @param columnStartPoints
      * @returns {{}}
@@ -494,6 +337,7 @@ var tableAnnotator  = {
 
     /**
      * Get the integer value of a pixel representation
+     *
      * i.e 165.12px = 165
      * @param str
      * @returns {*}
@@ -501,7 +345,7 @@ var tableAnnotator  = {
     getIntegerValue : function(str) {
 
         if (str === null || str === undefined || $.trim(str) === ''){
-            return -1;
+            return tableAnnotator.INVALID;
         }
 
         return parseInt(str.substr(0, str.length-2));
@@ -509,6 +353,7 @@ var tableAnnotator  = {
 
     /**
      * Get the last inserted key of the associated array
+     *
      * @param tableStruct
      * @returns {*}
      */
@@ -523,91 +368,142 @@ var tableAnnotator  = {
     },
 
     /**
+     * Validate the table selection and return necessary boundary value checking
      *
      * @param selectedElements
+     * @returns {*}
      */
-    makeTableSelectionSuggestion : function (selectedElement) {
+    getValidatedTableSelectedInfo : function (selectedElements) {
 
-        if ($.isEmptyObject(selectedElement)){
+        var isGetTableRangeSuccess = true,
+            isSelectionSuggestionPossible = false;
+        
+        if ($.isEmptyObject(selectedElements)) {
             return null;
         }
 
-        var firstElement = $(selectedElement[0]),
-            lastElement = $(selectedElement[selectedElement.length -1]),
-            itemBeforeFirst = $(firstElement.prev()),
-            itemAfterLast = $(lastElement.next()),
-            missingSelectedItem = null,
-            position = null;
+        var selectedTableRange = tableAnnotator.getSelectedTableRange(selectedElements),
+            traversedUpItems = null, traversedDownItems = null;
 
+        if (selectedTableRange.min === tableAnnotator.INVALID && selectedTableRange.max === tableAnnotator.INVALID ) {
+            isGetTableRangeSuccess= false;
 
-//        var canvas = firstElement.get(0);
-//        console.log(canvas);
-//        return;
-
-
-//        for (var i = 0; i < 3; i++) {
-
-            var count = 0;
-
-//            while (firstElement !== undefined && itemBeforeFirst !== undefined
-//                && firstElement.css('top') === itemBeforeFirst.css('top') && item) {
-//
-//                console.log(itemBeforeFirst.css('left') + '::' + itemBeforeFirst.text());
-//                itemBeforeFirst = $(itemBeforeFirst.prev());
-////                break;
-//                count++;
-//            }
-
-        var minLeft = tableAnnotator.getIntegerValue(lastElement.css('left')),
-            maxLeft = minLeft,
-            minTop = tableAnnotator.getIntegerValue(lastElement.css('top')),
-            maxTop = minTop;
-
-
-        for (var i = 0; i < 10; i++) {
-
-            if (itemAfterLast !== undefined && tableAnnotator.isDivContainText(itemAfterLast[0])) {
-
-                var left = tableAnnotator.getIntegerValue(itemAfterLast.css('left')),
-                    top = tableAnnotator.getIntegerValue(itemAfterLast.css('top'));
-
-                if (left > maxLeft) {
-                    maxLeft = left;
-                }
-
-                if (top > maxTop) {
-                    maxTop = top;
-                }
-
-                console.log('leftMin: '+ minLeft + ' leftMex: '+ maxTop + ' topMin: '+minTop + ' topMax: ' + maxTop + ' ' + itemAfterLast.text());
-
-                itemAfterLast = $(itemAfterLast.next());
-            }
+            return {
+                isGetTableRangeSuccess        : isGetTableRangeSuccess,
+                isSelectionSuggestionPossible : isSelectionSuggestionPossible,
+                selectedElements              : selectedElements
+            };
         }
 
-            firstElement = itemBeforeFirst;
-            lastElement = itemAfterLast;
+        traversedUpItems = tableAnnotator.traverseTableUp(selectedElements[0], selectedTableRange);
+        traversedDownItems = tableAnnotator.traverseTableDown(
+            selectedElements[selectedElements.length - 1], selectedTableRange
+        );
 
-//        if(itemBeforeFirst.css('top') === firstElement.css('top')) {
-//            missingSelectedItem = itemBeforeFirst;
-//            position = tableAnnotator.ITEM_POSITION_FIRST;
-//        }
-//
-//        if(lastElement.css('top') === itemAfterLast.css('top')) {
-//            missingSelectedItem = itemAfterLast;
-//            position = tableAnnotator.ITEM_POSITION_LAST;
-//        }
-//
-//        return {
-//            item  : missingSelectedItem,
-//            position : position
-//        }
+        if (!$.isEmptyObject(traversedUpItems) || !$.isEmptyObject(traversedDownItems)) {
+            isSelectionSuggestionPossible = true;
+        }
 
+        selectedElements = $.merge(traversedUpItems, selectedElements);
+        selectedElements = $.merge(selectedElements, traversedDownItems);
+
+        return {
+            isGetTableRangeSuccess        : isGetTableRangeSuccess,
+            isSelectionSuggestionPossible : isSelectionSuggestionPossible,
+            selectedElements              : selectedElements
+        };
     },
 
+    /**
+     * Traverse upward until the  table top and return all the selected element inside the table
+     *
+     * @param selectedElements
+     * @param selectedTableRange
+     * @returns {Array}
+     */
+    traverseTableUp : function (firstElement, selectedTableRange) {
+
+        var firstElement = $(firstElement),
+            itemBeforeFirst = $(firstElement.prev()),
+            itemLeftPositionBeforeFirstSelectedItem = 0,safeCount = 0,
+            hasMore = true, selectedItem = [];
+
+        while (hasMore) {
+
+            if (itemBeforeFirst === undefined) {
+                hasMore = false;
+                break;
+            }
+
+            itemLeftPositionBeforeFirstSelectedItem = tableAnnotator.getIntegerValue(itemBeforeFirst.css('left'));
+
+            if (itemLeftPositionBeforeFirstSelectedItem === tableAnnotator.INVALID || 
+                itemLeftPositionBeforeFirstSelectedItem < selectedTableRange.min) {
+                hasMore = false;
+                break;
+            }
+//            console.log('pre::' +  itemLeftPositionBeforeFirstSelectedItem + ' txt:: ' + itemBeforeFirst.next());
+
+            selectedItem.push(itemBeforeFirst[0]);
+            itemBeforeFirst = $(itemBeforeFirst.prev());
+
+            if (safeCount === tableAnnotator.TABLE_SELECTION_ABORT) {
+                messageHandler.showErrorMessage('Error is table selection!!!');
+                break;
+            }
+            safeCount++;
+        }
+
+        return selectedItem.reverse();
+    },
+
+    /**
+     * Traverse downward until the table bottom and return all the traverse elements inside the table
+     *
+     * @param selectedElements
+     * @param selectedTableRange
+     * @returns {Array}
+     */
+    traverseTableDown : function (lastItem, selectedTableRange) {
+
+        var lastElement = $(lastItem),
+            itemAfterLast = $(lastElement.next()),
+            itemLeftPositionAfterLastSelectedItem = 0, safeCount = 0,
+            hasMore = true, selectedItem = [];
+
+        while (hasMore) {
+            if (itemAfterLast === undefined) {
+                hasMore = false;
+                break;
+            }
+
+            itemLeftPositionAfterLastSelectedItem = tableAnnotator.getIntegerValue(itemAfterLast.css('left'));
+            if (itemLeftPositionAfterLastSelectedItem === tableAnnotator.INVALID ||
+                itemLeftPositionAfterLastSelectedItem < selectedTableRange.min ||
+                itemLeftPositionAfterLastSelectedItem > selectedTableRange.max) {
+
+                hasMore = false;
+                break;
+            }
+
+//            console.log('next:: ' +  itemLeftPositionAfterLastSelectedItem + ' txt:: ' + itemAfterLast.next());
+
+            selectedItem.push(itemAfterLast[0]);
+            itemAfterLast = $(itemAfterLast.next());
+
+            if (safeCount === tableAnnotator.TABLE_SELECTION_ABORT) {
+                messageHandler.showErrorMessage('Error is table selection!!!');
+                break;
+            }
+            safeCount++;
+        }
+
+        return selectedItem;
+    },
 
     /**
      * Removed the less frequent item for column start points
+     *
      * @param columnStartPoints
      * @returns {Array}
      */
@@ -629,5 +525,57 @@ var tableAnnotator  = {
         }
 
         return refinedValue;
+    },
+
+    /**
+     * Return the range of the selected table
+     *
+     * @param selectedElements
+     * @returns {{min: number, max: number}}
+     */
+    getSelectedTableRange: function (selectedElements) {
+
+        var left = 0,
+            min = tableAnnotator.INF,
+            max = 0,
+            itemIndex = [],
+            leftPix = '',
+            isEnoughInformationFount = false;
+
+        for (var i = 0; i < selectedElements.length; i++) {
+
+            leftPix = selectedElements[i].style.left;
+            left = tableAnnotator.getIntegerValue(leftPix);
+
+            if (min > left) {
+                min = left;
+            }
+
+            if (max < left) {
+                max = left;
+            }
+
+            if (itemIndex[leftPix] === undefined) {
+                itemIndex[leftPix] = {count : 0, left : left};
+            }
+
+            itemIndex[leftPix].count++;
+
+            if (itemIndex[leftPix].count === 2) {
+                isEnoughInformationFount = true;
+                break;
+            }
+
+        }
+
+        if (!isEnoughInformationFount) {
+            min = tableAnnotator.INVALID;
+            max = tableAnnotator.INVALID;
+        }
+
+        return {
+            min : min,
+            max : max
+        }
     }
 };
