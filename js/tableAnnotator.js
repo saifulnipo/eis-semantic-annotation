@@ -13,6 +13,7 @@ var tableAnnotator  = {
     INF                     : 100000,
     TABLE_SELECTION_ABORT   : 2000,
     INVALID                 : -1,
+    storedData              : null,
 
     /**
      * Add table annotation as data cube vocabulary
@@ -22,20 +23,15 @@ var tableAnnotator  = {
     annotateSelectedTable : function() {
 
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
-            cellCountStruct = tableAnnotator.getTableCellSelectionCountStructure(selectedElements),
             isConfirmSuggestion = false,selectedRows = 0, selectedColumns = 0;
 
         messageHandler.clearMessage();
 
-        if (cellCountStruct === null) {
-            messageHandler.showErrorMessage('No pdf table to annotate!! Please open a pdf file',true);
+        if ($.isEmptyObject(selectedElements)){
+            messageHandler.showErrorMessage('Please open pdf file and select a table to annotate and try again!!', true);
             return;
         }
 
-        if ($.isEmptyObject(cellCountStruct)){
-            messageHandler.showErrorMessage('Please select table to annotate and try again!!',true);
-            return;
-        }
 
         var validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
 //        var tableInfo = tableAnnotator.getSelectedTableInfo(validatedTableInfo.selectedElements);
@@ -57,10 +53,10 @@ var tableAnnotator  = {
 
             isConfirmSuggestion =  confirm('Your selection is part of a full table.\nDid you intend to select the whole table?');
             if (isConfirmSuggestion) {
-                tableAnnotator.insertToDataCube(validatedTableInfo.selectedElements);
+                tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
             }
         } else {
-            tableAnnotator.insertToDataCube(validatedTableInfo.selectedElements);
+            tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
         }
     },
 
@@ -70,10 +66,11 @@ var tableAnnotator  = {
      * @param selectedElements
      * @return {void}
      */
-    insertToDataCube : function (selectedElements) {
+    displayInfoIntoTable : function (selectedElements) {
         var tableInfo = tableAnnotator.getSelectedTableInfo(selectedElements);
-        dataCubeSparql.addAnnotation(tableInfo);
-//        console.log(tableInfo);
+        tableAnnotator.storedData = tableInfo;
+
+        tableAnnotator.generateHtmlTableForSelectedInfo(tableInfo);
     },
 
     /**
@@ -155,49 +152,6 @@ var tableAnnotator  = {
     },
 
     /**
-     * Return the selected table cell count data structure
-     *
-     * @param selectedElements
-     * @returns {Array} associative array
-     */
-    getTableCellSelectionCountStructure : function(selectedElements) {
-
-        if(selectedElements === undefined) {
-          return null;
-        }
-        var x , y,  tableStructX = [],tableStructY = [],tableStruct = {};
-        $.each( selectedElements, function( index, value ) {
-            x = value.style.top;
-            y = value.style.left;
-
-
-            if (x !== undefined && x !== '') {
-                if (tableStructX[x] !== undefined) {
-                    tableStructX[x]++;
-                }else{
-                    tableStructX[x] = 1;
-                }
-            }
-
-            if (y !== undefined && y !== '') {
-                if (tableStructY[y] !== undefined) {
-                    tableStructY[y]++;
-                }else{
-                    tableStructY[y] = 1;
-                }
-            }
-        });
-
-
-        if (!$.isEmptyObject(tableStructX) && !$.isEmptyObject(tableStructX)) {
-            tableStruct['col'] = tableStructX;
-            tableStruct['row'] = tableStructY;
-        }
-
-        return tableStruct;
-    },
-
-    /**
      * Get total selected table information
      *
      * @param selectedElements
@@ -218,6 +172,8 @@ var tableAnnotator  = {
             tableRowsAndColumn.push(
                 selectedTableInfo[rows]
             );
+
+            console.log(selectedTableInfo[rows]);
         }
 
         return tableRowsAndColumn;
@@ -617,5 +573,60 @@ var tableAnnotator  = {
 //        console.log('isSameColumnSize::' + isSameColumnSize);
 //
 //        return isSameColumnSize;
-//    }
+//    },
+
+
+    /**
+     * Display the selected information in the table
+     * @param selectedElements
+     */
+    generateHtmlTableForSelectedInfo : function (selectedElements) {
+
+        if ($.isEmptyObject(selectedElements)) {
+            messageHandler.showErrorMessage('No selected data found to display', true);
+            return;
+        }
+
+        console.log(selectedElements);
+
+        $("#annotateTableButton").text('Confirm annotation');
+        $('#resetAnnotationButton').show();
+        $('#viewSelectedInfoFromPfdTable').empty();
+        $('#viewSelectedInfoFromPfdTable').show();
+
+        var columnNames = selectedElements[0], tableHeader = '',
+            i = 0, j = 0, rowArrayValues = null, rows = '';
+
+        for (i = 0; i < columnNames.length; i++) {
+            tableHeader += "<th class = 'showResult'>" + columnNames[i] + "</th>";
+        }
+
+        $('#viewSelectedInfoFromPfdTable').append('<br><br>');
+        $('#viewSelectedInfoFromPfdTable').append(
+            "<table id='selectedInfoViewer' class = 'showResult' width='100%' >"+
+                "<tr class = 'showResult'>"+
+                    tableHeader +
+                "</tr>" +
+            "</table>"
+        );
+
+        i = 0;
+        j = 0;
+        for (i = 1; i < selectedElements.length; i++) {
+
+            rowArrayValues = selectedElements[i];
+            rows = '';
+            console.log(rowArrayValues);
+
+            for (j = 0; j < rowArrayValues.length; j++) {
+                rows += "<td class = 'showResult' >" + rowArrayValues[j] + "</td>";
+            }
+
+            $('#selectedInfoViewer tr:last').after(
+                "<tr class = 'showResult'>"+
+                    rows +
+                "</tr>"
+            );
+        }
+    }
 };

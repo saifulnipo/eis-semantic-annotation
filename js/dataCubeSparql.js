@@ -70,6 +70,7 @@ var dataCubeSparql  = {
                 progressbar.hideProgressBar();
                 messageHandler.showSuccessMessage('Table annotation successfully added');
                 tableAnnotator.TABLE_ANNOTATION_COUNT++;
+                tableAnnotator.storedData = null;
             },
             error: function(jqXHR, exception) {
                 var errorTxt= sparql.getStandardErrorMessage(jqXHR, exception);

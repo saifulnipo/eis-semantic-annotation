@@ -45,8 +45,14 @@ var scientificAnnotation  = {
         });
 
         $("#annotateTableButton").bind("click", function () {
-            scientificAnnotation.annotateTable();
+            scientificAnnotation.annotateTable($(this));
         });
+
+        $("#resetAnnotationButton").bind("click", function () {
+            scientificAnnotation.resetAnnotation($(this));
+        });
+
+
     },
 
 
@@ -476,8 +482,29 @@ var scientificAnnotation  = {
      *  Annotate tabular structure in pdf file
      *  @return void
      */
-    annotateTable : function() {
-        tableAnnotator.annotateSelectedTable();
+    annotateTable : function(button) {
+
+        var displaySelectedTable = $('#viewSelectedInfoFromPfdTable');
+        if (!displaySelectedTable.is(':visible')) {
+            tableAnnotator.annotateSelectedTable();
+        } else {
+            button.text('Annotate table');
+            $('#resetAnnotationButton').hide();
+            displaySelectedTable.hide();
+
+            if (tableAnnotator.storedData !== null) {
+                dataCubeSparql.addAnnotation(tableAnnotator.storedData);
+            }
+        }
+    },
+
+
+    resetAnnotation : function(button) {
+        $('#viewSelectedInfoFromPfdTable').empty();
+        $('#viewSelectedInfoFromPfdTable').hide();
+        $('#annotateTableButton').text('Annotate table');
+        tableAnnotator.storedData = null;
+        button.hide();
     },
 
     /**
