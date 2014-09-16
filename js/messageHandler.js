@@ -48,7 +48,19 @@ var messageHandler  = {
         $(selector).html(message);
         $(selector).fadeIn(500);
         $(selector).delay(1500).fadeOut();
-    }
+    },
 
+    /**
+     * Clear all the messages
+     */
+    clearMessage : function() {
+        var selector = '.alert-danger';
+        $(selector).html('');
+        $(selector).hide();
+
+        selector = '.alert-warning';
+        $(selector).html('');
+        $(selector).hide();
+    }
 };
 
