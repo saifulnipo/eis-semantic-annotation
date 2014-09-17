@@ -11,13 +11,13 @@
 
 # each annotated table is a data set
 ex:table1 a qb:DataSet ;
-  # the table is part of the whole document that we annotate, the uri of the document
+  # the table is part of the whole document that we annotate (i.e. the URI of the document)
   dct:isPartOf <.../TheDocument> ;
   # the dataset in the table has a certain structure (see below)
   qb:structure ex:dsdTable1 ;
   # we have a slice (of the data cube) for each column.  Once we know more about what real-world concepts the rows represent (here, each row represents a concrete football team), we will also have a slice for each row.
-  # no of slice = no fo column (sliceC1,sliceC2.....)
-  qb:slice ex:sliceA, ex:sliceB, ex:sliceC .
+  # no of slice = no of column
+  qb:slice ex:sliceC1, ex:sliceC2, ex:sliceC3 .
 
 # definition of the data structure of this table
 # (very simple for now: first we have rows, then we have columns)
@@ -64,20 +64,20 @@ ex:table1Column a rdf:Property, qb:DimensionProperty ;
 # ID, Country, Confederation
 # 1, Spain, UEFA
 
-# Let's use spreadsheet-style names for table cells for now.  Row 1 does not contain values, but column headers, so we start from row 2.
-ex:table1A2 a qb:Observation ;
+# Let's use spreadsheet-style names for table cells for now.  But not A1, B2, etc., but R1C1, R2C2, as that's easier to scale.  Row 1 does not contain values, but column headers, so we start from row 2.
+ex:table1R2C1 a qb:Observation ;
   qb:dataSet ex:table1 ;
   ex:table1Row 2 ;
   ex:table1Column 1;
   semann:value "1" .
 
-ex:table1B2 a qb:Observation ;
+ex:table1R2C2 a qb:Observation ;
   qb:dataSet ex:table1 ;
   ex:table1Row 2 ;
   ex:table1Column 2 ;
   semann:value "Spain" .
 
-ex:table1C2 a qb:Observation ;
+ex:table1R2C3 a qb:Observation ;
   qb:dataSet ex:table1 ;
   ex:table1Row 2 ;
   ex:table1Column 3 ;
