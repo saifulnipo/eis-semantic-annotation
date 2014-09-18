@@ -18,7 +18,7 @@ ex:table1 a qb:DataSet ;
   qb:structure ex:dsdTable1 ;
   # we have a slice (of the data cube) for each column.  Once we know more about what real-world concepts the rows represent (here, each row represents a concrete football team), we will also have a slice for each row.
   # no of slice = no of column
-  qb:slice ex:sliceC1, ex:sliceC2, ex:sliceC3 .
+  qb:slice ex:table1SliceC1, ex:table1SliceC2, ex:table1SliceC3 .
 
 # definition of the data structure of this table
 # (very simple for now: first we have rows, then we have columns)
@@ -95,21 +95,22 @@ ex:table1R1C3 a qb:Observation ;
 
 # We use slices to connect the data in a column to their column headers:
 
-ex:sliceC1 a qb:Slice ;
+ex:table1SliceC1 a qb:Slice ;
   qb:sliceStructure ex:sliceTable1ByRow ;
   semann:columnHeader "ID" ;
+  # This slice fixes the "column" dimension to 1.
   ex:table1Column 1 ;
   qb:observation ex:table1R1C1 .
   # once we have more observations, i.e. more rows in this column, we add triples like
   # "ex:sliceC1 qb:observation ex:table1R3C1"
 
-ex:sliceC2 a qb:Slice ;
+ex:table1SliceC2 a qb:Slice ;
   qb:sliceStructure ex:sliceTable1ByRow ;
   semann:columnHeader "Country" ;
   ex:table1Column 2 ;
   qb:observation ex:table1R1C2 .
 
-ex:sliceC3 a qb:Slice ;
+ex:table1SliceC3 a qb:Slice ;
   qb:sliceStructure ex:sliceTable1ByRow ;
   semann:columnHeader "Confederation" ;
   ex:table1Column 3 ;
