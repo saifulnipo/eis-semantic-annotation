@@ -4,6 +4,10 @@
  * @authors : A Q M Saiful Islam (Nipo)
  * @dependency: none
  */
+/*global scientificAnnotation :false, confirm: false,
+ progressbar : false, sparql:false, messageHandler:false, plusplus: false  */
+
+/*jslint plusplus: true */
 
 var tableAnnotator  = {
 
@@ -20,27 +24,21 @@ var tableAnnotator  = {
      *
      * @return void
      */
-    annotateSelectedTable : function() {
+    annotateSelectedTable : function () {
 
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
-            isConfirmSuggestion = false,selectedRows = 0, selectedColumns = 0;
+            isConfirmSuggestion = false,
+            validatedTableInfo = null;
 
         messageHandler.clearMessage();
 
-        if ($.isEmptyObject(selectedElements)){
+        if ($.isEmptyObject(selectedElements)) {
             messageHandler.showErrorMessage('Please open pdf file and select a table to annotate and try again!!', true);
             return;
         }
 
 
-        var validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
-//        var tableInfo = tableAnnotator.getSelectedTableInfo(validatedTableInfo.selectedElements);
-//        var isSameColumnSize  = tableAnnotator.isSelectedTableInfoConsistent(tableInfo);
-//
-//        if (isSameColumnSize === false) {
-//            messageHandler.showErrorMessage('Table selection is not valid.' +'<br>Try to select table only!!');
-//            return;
-//        }
+        validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
 
         if (validatedTableInfo.isGetTableRangeSuccess === false) {
             messageHandler.showErrorMessage('Table selection does not seems proper. ' +
@@ -80,7 +78,7 @@ var tableAnnotator  = {
      * @param node
      * @returns {*}
      */
-    rangeIntersectsNode:function(range, node) {
+    rangeIntersectsNode: function (range, node) {
         var nodeRange;
         if (range.intersectsNode) {
             return range.intersectsNode(node);
@@ -92,8 +90,8 @@ var tableAnnotator  = {
                 nodeRange.selectNodeContents(node);
             }
 
-            return range.compareBoundaryPoints(Range.END_TO_START, nodeRange) == tableAnnotator.INVALID &&
-                range.compareBoundaryPoints(Range.START_TO_END, nodeRange) == 1;
+            return range.compareBoundaryPoints(Range.END_TO_START, nodeRange) === tableAnnotator.INVALID &&
+                range.compareBoundaryPoints(Range.START_TO_END, nodeRange) === 1;
         }
     },
 
@@ -103,7 +101,7 @@ var tableAnnotator  = {
      * @param win
      * @returns {*}
      */
-    getSelectedElementTags:function(win) {
+    getSelectedElementTags: function (win) {
         var range, sel, selectedElements = [], treeWalker, containerElement;
         sel = win.getSelection();
         if (sel.rangeCount > 0) {
@@ -112,14 +110,14 @@ var tableAnnotator  = {
 
         if (range) {
             containerElement = range.commonAncestorContainer;
-            if (containerElement.nodeType != 1) {
+            if (containerElement.nodeType !== 1) {
                 containerElement = containerElement.parentNode;
             }
 
             treeWalker = win.document.createTreeWalker(
                 containerElement,
                 NodeFilter.SHOW_ELEMENT,
-                function(node) {
+                function (node) {
                     return tableAnnotator.rangeIntersectsNode(range, node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 },
                 false
@@ -130,7 +128,7 @@ var tableAnnotator  = {
             }
 
             while (treeWalker.nextNode()) {
-                    selectedElements.push(treeWalker.currentNode);
+                selectedElements.push(treeWalker.currentNode);
             }
         }
         return selectedElements;
@@ -142,7 +140,7 @@ var tableAnnotator  = {
      * @param div
      * @returns {boolean}
      */
-    isDivContainText : function(div) {
+    isDivContainText : function (div) {
 
         if (div === undefined || div === null) {
             return false;
@@ -157,23 +155,23 @@ var tableAnnotator  = {
      * @param selectedElements
      * @returns {Array}
      */
-    getSelectedTableInfo:function (selectedElements) {
+    getSelectedTableInfo: function (selectedElements) {
 
-        if(selectedElements === undefined) {
+        if (selectedElements === undefined) {
             return [];
         }
 
         var tableStruct = tableAnnotator.getTableColumnStructureForEveryRows(selectedElements),
             columnStartPoints = tableAnnotator.getRefinedColumnStructure(tableStruct),
             selectedTableInfo = tableAnnotator.getSelectedRowsWithColumnValues(tableStruct, columnStartPoints),
-            tableRowsAndColumn = [];
+            tableRowsAndColumn = [], rows = '';
 
-        for (var rows in selectedTableInfo) {
+        for (rows in selectedTableInfo) {
             tableRowsAndColumn.push(
                 selectedTableInfo[rows]
             );
 
-            console.log(selectedTableInfo[rows]);
+//            console.log(selectedTableInfo[rows]);
         }
 
         return tableRowsAndColumn;
@@ -186,31 +184,33 @@ var tableAnnotator  = {
      * @param selectedElements
      * @returns array of objects
      */
-     getTableColumnStructureForEveryRows : function (selectedElements) {
-        var x , y, tableStruct = {}, lastInsertedKey = null;
-        $.each( selectedElements, function( index, value ) {
+    getTableColumnStructureForEveryRows : function (selectedElements) {
+        var x, y, tableStruct = {}, lastInsertedKey = null;
+        $.each(selectedElements, function (index, value) {
 
             x = value.style.top;
             y = value.style.left;
 
-            if (tableStruct[x] === undefined ) {
+            if (tableStruct[x] === undefined) {
                 lastInsertedKey = tableAnnotator.getLastInsertedKey(tableStruct);
 
                 var currentX = tableAnnotator.getIntegerValue(x),
                     lastX = tableAnnotator.getIntegerValue(lastInsertedKey),
-                    currentY = tableAnnotator.getIntegerValue(y);
-                    if (tableStruct[lastInsertedKey] !== undefined) {
-                        var lastY = tableAnnotator.getIntegerValue(tableStruct[lastInsertedKey][0].y);
-                    }
+                    currentY = tableAnnotator.getIntegerValue(y),
+                    lastY = -1;
+
+                if (tableStruct[lastInsertedKey] !== undefined) {
+                    lastY = tableAnnotator.getIntegerValue(tableStruct[lastInsertedKey][0].y);
+                }
 
                 if (lastInsertedKey !== null && (currentX !== lastX) && (currentY > lastY)) {
-                    tableStruct[lastInsertedKey].push({ y : y, cellText : value.textContent } );
+                    tableStruct[lastInsertedKey].push({ y : y, cellText : value.textContent });
                     return true; // works as loop continuation, here skipping the loop
                 } else {
                     tableStruct[x] = [];
                 }
             }
-            tableStruct[x].push({ y : y, cellText : value.textContent } );
+            tableStruct[x].push({ y : y, cellText : value.textContent });
         });
 
         return tableStruct;
@@ -225,11 +225,12 @@ var tableAnnotator  = {
      */
     getRefinedColumnStructure : function (tableStruct) {
 
-        var cols = [], columnStartPoints = [], allColumnsIndex = [], previous = '';
-        for(var keys in tableStruct) {
+        var cols = [], columnStartPoints = [],
+            allColumnsIndex = [], previous = '', keys = '';
+        for (keys in tableStruct) {
             cols = tableStruct[keys];
-            $.each( cols, function( index, value ) {
-                var searchedItem = $.grep(allColumnsIndex, function(obj) { return obj.y === value.y; });
+            $.each(cols, function (index, value) {
+                var searchedItem = $.grep(allColumnsIndex, function (obj) { return obj.y === value.y; });
                // console.log(searchedItem);
                 if (!$.isEmptyObject(searchedItem) && value.y !== previous) {
                     if (columnStartPoints[value.y] === undefined) {
@@ -255,16 +256,17 @@ var tableAnnotator  = {
      */
     getSelectedRowsWithColumnValues : function (tableStruct, columnStartPoints) {
 
-        var indexCount = 0, 
-            previousColumnStartPoint = 0, 
+        var indexCount = 0,
+            previousColumnStartPoint = 0,
             nextColumnStartPoint = 0,
-            tempColumnStartPoint = '', 
+            tempColumnStartPoint = '',
             columnValue = '',
+            rows = '', cols = null,
             currentColumnStartPoint = 0,
             selectedRowsAndColumn = {};
         
-        for (var rows in tableStruct) {
-            var cols = tableStruct[rows];
+        for (rows in tableStruct) {
+            cols = tableStruct[rows];
             indexCount = 0;
             columnValue = '';
             selectedRowsAndColumn[rows] = [];
@@ -275,11 +277,11 @@ var tableAnnotator  = {
                 previousColumnStartPoint = tableAnnotator.getIntegerValue(tempColumnStartPoint);
             }
 
-            $.each( cols, function( index, column ) {
+            $.each(cols, function (index, column) {
 
                 nextColumnStartPoint = tableAnnotator.INF; // assigned a big(unrealistic ) value
-                tempColumnStartPoint = columnStartPoints[indexCount+1];
-                if(tempColumnStartPoint !== undefined) {
+                tempColumnStartPoint = columnStartPoints[indexCount + 1];
+                if (tempColumnStartPoint !== undefined) {
                     nextColumnStartPoint = tableAnnotator.getIntegerValue(tempColumnStartPoint);
                 }
 
@@ -312,13 +314,13 @@ var tableAnnotator  = {
      * @param str
      * @returns {*}
      */
-    getIntegerValue : function(str) {
+    getIntegerValue : function (str) {
 
-        if (str === null || str === undefined || $.trim(str) === ''){
+        if (str === null || str === undefined || $.trim(str) === '') {
             return tableAnnotator.INVALID;
         }
 
-        return parseInt(str.substr(0, str.length-2));
+        return parseInt(str.substr(0, str.length - 2));
     },
 
     /**
@@ -329,7 +331,7 @@ var tableAnnotator  = {
      */
     getLastInsertedKey : function (tableStruct) {
 
-        if ($.isEmptyObject(tableStruct)){
+        if ($.isEmptyObject(tableStruct)) {
             return null;
         }
 
@@ -346,17 +348,19 @@ var tableAnnotator  = {
     getValidatedTableSelectedInfo : function (selectedElements) {
 
         var isGetTableRangeSuccess = true,
-            isSelectionSuggestionPossible = false;
+            isSelectionSuggestionPossible = false,
+            selectedTableRange = null,
+            traversedUpItems = null,
+            traversedDownItems = null;
         
         if ($.isEmptyObject(selectedElements)) {
             return null;
         }
 
-        var selectedTableRange = tableAnnotator.getSelectedTableRange(selectedElements),
-            traversedUpItems = null, traversedDownItems = null;
+        selectedTableRange = tableAnnotator.getSelectedTableRange(selectedElements);
 
-        if (selectedTableRange.min === tableAnnotator.INVALID && selectedTableRange.max === tableAnnotator.INVALID ) {
-            isGetTableRangeSuccess= false;
+        if (selectedTableRange.min === tableAnnotator.INVALID && selectedTableRange.max === tableAnnotator.INVALID) {
+            isGetTableRangeSuccess = false;
 
             return {
                 isGetTableRangeSuccess        : isGetTableRangeSuccess,
@@ -393,9 +397,10 @@ var tableAnnotator  = {
      */
     traverseTableUp : function (firstElement, selectedTableRange) {
 
-        var firstElement = $(firstElement),
-            itemBeforeFirst = $(firstElement.prev()),
-            itemLeftPositionBeforeFirstSelectedItem = 0,safeCount = 0,
+        firstElement = $(firstElement);
+
+        var itemBeforeFirst = $(firstElement.prev()),
+            itemLeftPositionBeforeFirstSelectedItem = 0, safeCount = 0,
             hasMore = true, selectedItem = [];
 
         while (hasMore) {
@@ -407,7 +412,7 @@ var tableAnnotator  = {
 
             itemLeftPositionBeforeFirstSelectedItem = tableAnnotator.getIntegerValue(itemBeforeFirst.css('left'));
 
-            if (itemLeftPositionBeforeFirstSelectedItem === tableAnnotator.INVALID || 
+            if (itemLeftPositionBeforeFirstSelectedItem === tableAnnotator.INVALID ||
                 itemLeftPositionBeforeFirstSelectedItem < selectedTableRange.min) {
                 hasMore = false;
                 break;
@@ -455,7 +460,6 @@ var tableAnnotator  = {
                 hasMore = false;
                 break;
             }
-
 //            console.log('next:: ' +  itemLeftPositionAfterLastSelectedItem + ' txt:: ' + itemAfterLast.next());
 
             selectedItem.push(itemAfterLast[0]);
@@ -479,18 +483,18 @@ var tableAnnotator  = {
      */
     discardUnwantedStartPoints : function (columnStartPoints) {
 
-        var max = 0, value = 0, refinedValue = [];
-        for (var keys in columnStartPoints) {
+        var max = 0, value = 0, refinedValue = [], keys = '';
+        for (keys in columnStartPoints) {
             value = columnStartPoints[keys];
             if (value > max) {
                 max = value;
             }
         }
 
-        for (var keys in columnStartPoints) {
+        for (keys in columnStartPoints) {
             value = columnStartPoints[keys];
             if (value === max) {
-                refinedValue.push(keys)
+                refinedValue.push(keys);
             }
         }
 
@@ -507,12 +511,12 @@ var tableAnnotator  = {
 
         var left = 0,
             min = tableAnnotator.INF,
-            max = 0,
+            max = 0, i = 0,
             itemIndex = [],
             leftPix = '',
             isEnoughInformationFount = false;
 
-        for (var i = 0; i < selectedElements.length; i++) {
+        for (i = 0; i < selectedElements.length; i++) {
 
             leftPix = selectedElements[i].style.left;
             left = tableAnnotator.getIntegerValue(leftPix);
@@ -546,35 +550,8 @@ var tableAnnotator  = {
         return {
             min : min,
             max : max
-        }
+        };
     },
-
-//    /**
-//     * Return is all the selected rows have same column size or not
-//     *
-//     * @param selectedElements
-//     */
-//    isSelectedTableInfoConsistent : function (selectedElements) {
-//
-//        console.log(selectedElements);
-//
-//
-//        var tempLength = selectedElements[0].length, isSameColumnSize = true;
-//        for (var i = 1; i < selectedElements.length; i++) {
-//
-//            console.log(selectedElements[i]);
-//
-//            if (tempLength !== selectedElements[i].length) {
-//                isSameColumnSize = false;
-//                break;
-//            }
-//        }
-//
-//        console.log('isSameColumnSize::' + isSameColumnSize);
-//
-//        return isSameColumnSize;
-//    },
-
 
     /**
      * Display the selected information in the table
@@ -587,7 +564,7 @@ var tableAnnotator  = {
             return;
         }
 
-        console.log(selectedElements);
+//        console.log(selectedElements);
 
         $("#annotateTableButton").text('Confirm annotation');
         $('#resetAnnotationButton').show();
@@ -603,8 +580,8 @@ var tableAnnotator  = {
 
         $('#viewSelectedInfoFromPfdTable').append('<br><br>');
         $('#viewSelectedInfoFromPfdTable').append(
-            "<table id='selectedInfoViewer' class = 'showResult' width='100%' >"+
-                "<tr class = 'showResult'>"+
+            "<table id='selectedInfoViewer' class = 'showResult' width='100%' >" +
+                "<tr class = 'showResult'>" +
                     tableHeader +
                 "</tr>" +
             "</table>"
@@ -616,14 +593,14 @@ var tableAnnotator  = {
 
             rowArrayValues = selectedElements[i];
             rows = '';
-            console.log(rowArrayValues);
+//            console.log(rowArrayValues);
 
             for (j = 0; j < rowArrayValues.length; j++) {
                 rows += "<td class = 'showResult' >" + rowArrayValues[j] + "</td>";
             }
 
             $('#selectedInfoViewer tr:last').after(
-                "<tr class = 'showResult'>"+
+                "<tr class = 'showResult'>" +
                     rows +
                 "</tr>"
             );

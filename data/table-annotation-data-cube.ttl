@@ -56,7 +56,9 @@ semann:columnHeader a rdf:Property ;
 # now come the _specific_ row and column types for _this_ table.
 #I.e. a row is not just a "row", but it has a more specific meaning.
 #Right now we don't know that in our example table a row corresponds to the real-world concept of a "football team",
-#as this will require further input from the user – but in future we will know it.  These specific properties are therefore placeholders to which this "further information" from the user will eventually be attached.
+#as this will require further input from the user – but in future we will know it.
+#These specific properties are therefore placeholders to which this "further information" from
+#the user will eventually be attached.
 
 ex:table1Row a rdf:Property, qb:DimensionProperty ;
   rdfs:subPropertyOf semann:row .
@@ -100,7 +102,7 @@ ex:table1SliceC1 a qb:Slice ;
   semann:columnHeader "ID" ;
   # This slice fixes the "column" dimension to 1.
   ex:table1Column 1 ;
-  qb:observation ex:table1R1C1 .
+  qb:Observation ex:table1R1C1 .
   # once we have more observations, i.e. more rows in this column, we add triples like
   # "ex:sliceC1 qb:observation ex:table1R3C1"
 
