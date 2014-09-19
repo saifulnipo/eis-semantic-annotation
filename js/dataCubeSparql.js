@@ -35,7 +35,9 @@ var dataCubeSparql  = {
      *
      * @return void
      */
-    addAnnotation: function (selectedTableCellTexts) {
+    addAnnotation: function (selectedTableCellTexts, isCallForTesting) {
+
+        var isCallForTesting = isCallForTesting || false;
 
         if ($.isEmptyObject(selectedTableCellTexts)) {
             return;
@@ -75,6 +77,12 @@ var dataCubeSparql  = {
                 format: "application/json"
             },
             success: function (response) {
+
+                if (isCallForTesting) {
+                    console.log('it was a call for unit testing');
+                    return;
+                }
+
                 scientificAnnotation.hideAnnotationDisplayTable();
                 progressbar.hideProgressBar();
                 messageHandler.showSuccessMessage('Table annotation successfully added');
@@ -82,6 +90,12 @@ var dataCubeSparql  = {
                 tableAnnotator.storedData = null;
             },
             error: function (jqXHR, exception) {
+
+                if (isCallForTesting) {
+                    console.log('it was a call for unit testing');
+                    return;
+                }
+
                 var errorTxt = sparql.getStandardErrorMessage(jqXHR, exception);
                 progressbar.hideProgressBar();
                 messageHandler.showErrorMessage(errorTxt);
