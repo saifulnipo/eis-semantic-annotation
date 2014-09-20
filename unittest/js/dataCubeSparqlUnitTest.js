@@ -16,39 +16,21 @@ var dataCubeSparqlUnitTest = {
      */
     testDataCube : function (QUnit) {
 
+
+
         var temp_name = scientificAnnotation.GRAPH_NAME_EIS;
         scientificAnnotation.GRAPH_NAME_EIS = 'TestEisAnnotation';
 
         dataCubeSparql.addAnnotation(dataCubeSparqlUnitTest.sampleData, true);
 
         QUnit.asyncTest( "Testing Dimension and property", function( assert ) {
-            expect( 1 );
+            expect( 4 );
+//            QUnit.stop();
             setTimeout(function() {
                 dataCubeSparqlUnitTest.isDimensionPropertyAvailable(assert);
-                QUnit.start();
-            }, 1000);
-        });
-
-        QUnit.asyncTest( "Testing data set insertion", function( assert ) {
-            expect( 1 );
-            setTimeout(function() {
                 dataCubeSparqlUnitTest.isDataSetInserted(assert);
-                QUnit.start();
-            }, 1000);
-        });
-
-        QUnit.asyncTest( "Testing Column header insertion", function( assert ) {
-            expect( 1 );
-            setTimeout(function() {
-                dataCubeSparqlUnitTest.isColumnHeaderInserted(assert);
-                QUnit.start();
-            }, 1000);
-        });
-
-        QUnit.asyncTest( "Testing rows insertion ", function( assert ) {
-            expect( 1 );
-            setTimeout(function() {
                 dataCubeSparqlUnitTest.isObserverInserted(assert);
+                dataCubeSparqlUnitTest.isColumnHeaderInserted(assert);
                 QUnit.start();
             }, 1000);
         });
@@ -59,7 +41,7 @@ var dataCubeSparqlUnitTest = {
                 dataCubeSparqlUnitTest.clearGraph(scientificAnnotation.GRAPH_NAME_EIS, assert);
                 scientificAnnotation.GRAPH_NAME_EIS = temp_name;
                 QUnit.start();
-            }, 1000);
+            }, 2000);
         });
     },
 
