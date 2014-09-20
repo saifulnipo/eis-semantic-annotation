@@ -68,6 +68,7 @@ var dataCubeSparql  = {
             '}';
 
 //        console.log(query);
+//        return;
 
         $.ajax({
             type: "POST",
@@ -228,7 +229,7 @@ var dataCubeSparql  = {
                 observationQuery +=
                     observationTitle + ' a qb:Observation ;' + '\n' +
                     'qb:dataSet ex:' + dataCubeSparql.TABLE_NAME + ' ;' + '\n' +
-                    'ex:' + dataCubeSparql.TABLE_NAME + 'Row ' + (i + 1) + ' ;' + '\n' +
+                    'ex:' + dataCubeSparql.TABLE_NAME + 'Row ' + j + ' ;' + '\n' +
                     'ex:' + dataCubeSparql.TABLE_NAME + 'Column ' + (i + 1) + ' ;' + '\n' +
                     'semann:value "' + selectedTableCellTexts[j][i] + '" .' + '\n\n';
 
