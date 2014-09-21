@@ -11,6 +11,8 @@
 
 var applicationSettings  = {
 
+    isUnitTestOngoing : false,
+
     setUp: function () {
         applicationSettings.setUpForDimensionProperty();
     },

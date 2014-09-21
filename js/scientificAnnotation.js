@@ -540,6 +540,11 @@ var scientificAnnotation  = {
  */
 $(function () {
     applicationSettings.setUp();
+
+    if (applicationSettings.isUnitTestOngoing) {
+        return;
+    }
+
     scientificAnnotation.init();
     highlight.init();
 });

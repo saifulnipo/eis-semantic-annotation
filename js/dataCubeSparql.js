@@ -80,7 +80,6 @@ var dataCubeSparql  = {
             success: function (response) {
 
                 if (isCallForTesting) {
-                    console.log('it was a call for unit testing');
                     return;
                 }
 
@@ -93,7 +92,6 @@ var dataCubeSparql  = {
             error: function (jqXHR, exception) {
 
                 if (isCallForTesting) {
-                    console.log('it was a call for unit testing');
                     return;
                 }
 

@@ -47,16 +47,12 @@ var sparql  = {
             '}';
 
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: sparql.SERVER_ADDRESS,
             data: {
                 query: selectQuery,
                 format: "application/json"
             },
-            async: true,
-            dataType: "jsonp",
-            crossDomain: true,
-            cache: false,
             success: function(response){
 
                 if( response!= null && response.results.bindings.length >0) {
@@ -112,16 +108,12 @@ var sparql  = {
                 '}';
 
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: sparql.SERVER_ADDRESS,
             data: {
                 query: insertQuery,
                 format: "application/json"
             },
-            async: true,
-            dataType: "jsonp",
-            crossDomain: true,
-            cache: false,
             success: function(response){
                 sparql.bindAutoCompleteProperty();
                 sparql.bindAutoCompleteObject();
@@ -156,16 +148,12 @@ var sparql  = {
         var source = null;
 
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: sparql.SERVER_ADDRESS,
             data: {
                 query: selectQuery,
                 format: "application/json"
             },
-            async: true,
-            dataType: "jsonp",
-            crossDomain: true,
-            cache: false,
             success: function(response){
                 source = sparqlResponseParser.parseProperty(response);
                 scientificAnnotation.setAutoComputeDataForPropertyField(source);
@@ -199,16 +187,12 @@ var sparql  = {
         var source = null;
 
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: sparql.SERVER_ADDRESS,
             data: {
                 query: selectQuery,
                 format: "application/json"
             },
-            async: true,
-            dataType: "jsonp",
-            crossDomain: true,
-            cache: false,
             success: function(response){
                 source = sparqlResponseParser.parseObject(response);
                 scientificAnnotation.setAutoComputeDataForObjectField(source);
@@ -258,16 +242,12 @@ var sparql  = {
         var source = null;
 
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: sparql.SERVER_ADDRESS,
             data: {
                 query: selectQuery,
                 format: "application/json"
             },
-            async: true,
-            dataType: "jsonp",
-            crossDomain: true,
-            cache: false,
             success: function(response){
                 source = sparqlResponseParser.parseSimilarSearch(response);
                 progressbar.hideProgressBar();

@@ -23,7 +23,7 @@ var dataCubeSparqlUnitTest = {
 
         QUnit.asyncTest( "Testing Dimension and property", function( assert ) {
             expect( 4 );
-            setTimeout(function() {
+                setTimeout(function() {
                 dataCubeSparqlUnitTest.isDimensionPropertyAvailable(assert);
                 dataCubeSparqlUnitTest.isDataSetInserted(assert);
                 dataCubeSparqlUnitTest.isObserverInserted(assert);
