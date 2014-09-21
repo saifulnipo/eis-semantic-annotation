@@ -51,8 +51,6 @@ var scientificAnnotation  = {
         $("#resetAnnotationButton").bind("click", function () {
             scientificAnnotation.resetAnnotation($(this));
         });
-
-
     },
 
 
@@ -69,6 +67,8 @@ var scientificAnnotation  = {
             simpleAnnotateWindow.fadeIn(500);
             button.text('Hide Simple Annotate Panel');
         }
+
+        scientificAnnotation.resetAnnotationTable();
     },
 
     /**

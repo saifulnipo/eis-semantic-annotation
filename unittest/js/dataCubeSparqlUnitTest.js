@@ -16,8 +16,6 @@ var dataCubeSparqlUnitTest = {
      */
     testDataCube : function (QUnit) {
 
-
-
         var temp_name = scientificAnnotation.GRAPH_NAME_EIS;
         scientificAnnotation.GRAPH_NAME_EIS = 'TestEisAnnotation';
 
@@ -25,7 +23,6 @@ var dataCubeSparqlUnitTest = {
 
         QUnit.asyncTest( "Testing Dimension and property", function( assert ) {
             expect( 4 );
-//            QUnit.stop();
             setTimeout(function() {
                 dataCubeSparqlUnitTest.isDimensionPropertyAvailable(assert);
                 dataCubeSparqlUnitTest.isDataSetInserted(assert);
