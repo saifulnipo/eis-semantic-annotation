@@ -101,18 +101,15 @@ var sparql  = {
         var insertQuery =
                 'prefix semann: <'+sparql.PREFIX_SEMANN+'>' +'\n'+
                 'prefix semannp: <'+sparql.PREFIX_SEMANNP+'>'+'\n'+
-            'INSERT DATA ' +'\n'+
-            '{ ' +'\n'+
-                'GRAPH <'+scientificAnnotation.GRAPH_NAME+'> ' +'\n'+
-                '{ ' +'\n'+
-                        q.File+' a ' +q.Publication+ '. '+'\n'+
-                        q.File+' ' + q.hasExcerpt + ' '+ q.Excerpt +' .'+'\n'+
-                        q.Excerpt +' ' + q.label + ' "'+subject+'"@en; ' +'\n'+
-                        'semannp:'+camelProp+' semann:'+camelObject+' .'+'\n'+
-                        'semannp:'+camelProp+'  ' + q.label + ' "'+property+'"@en. '+'\n'+
-                        'semann:'+camelObject+' ' + q.label + ' "'+object+'"@en. '+'\n'+
-                '} ' +'\n'+
-            '}';
+                'INSERT INTO GRAPH <'+scientificAnnotation.GRAPH_NAME+'> ' +'\n'+
+                    '{ ' +'\n'+
+                            q.File+' a ' +q.Publication+ '. '+'\n'+
+                            q.File+' ' + q.hasExcerpt + ' '+ q.Excerpt +' .'+'\n'+
+                            q.Excerpt +' ' + q.label + ' "'+subject+'"@en; ' +'\n'+
+                            'semannp:'+camelProp+' semann:'+camelObject+' .'+'\n'+
+                            'semannp:'+camelProp+'  ' + q.label + ' "'+property+'"@en. '+'\n'+
+                            'semann:'+camelObject+' ' + q.label + ' "'+object+'"@en. '+'\n'+
+                '}';
 
         $.ajax({
             type: "GET",
