@@ -21,45 +21,50 @@ var dataCubeSparqlUnitTest = {
 
         dataCubeSparql.addAnnotation(dataCubeSparqlUnitTest.sampleData, true);
 
-        QUnit.asyncTest( "Testing Dimension and property insertion", function( assert ) {
+        QUnit.test( "Testing Dimension and property insertion", function( assert ) {
+            stop();
             expect( 1 );
+            dataCubeSparqlUnitTest.isDimensionPropertyAvailable(assert);
                 setTimeout(function() {
-                dataCubeSparqlUnitTest.isDimensionPropertyAvailable(assert);
-                QUnit.start();
-            }, 1000);
+                start();
+            }, 500);
         });
 
-        QUnit.asyncTest( "Testing Data set insertion", function( assert ) {
+        QUnit.test( "Testing Data set insertion", function( assert ) {
+            stop();
             expect( 1 );
-                setTimeout(function() {
-                dataCubeSparqlUnitTest.isDataSetInserted(assert);
-                QUnit.start();
-            }, 1000);
-        });
-
-        QUnit.asyncTest( "Testing observation insertion", function( assert ) {
-            expect( 1 );
-                setTimeout(function() {
-                dataCubeSparqlUnitTest.isObserverInserted(assert);
-                QUnit.start();
-            }, 1000);
-        });
-
-        QUnit.asyncTest( "Testing column header insertion", function( assert ) {
-            expect( 1 );
-                setTimeout(function() {
-                dataCubeSparqlUnitTest.isColumnHeaderInserted(assert);
-                QUnit.start();
-            }, 1000);
-        });
-
-        QUnit.asyncTest( "Cleaning up the test database ", function( assert ) {
-            expect( 1 );
+            dataCubeSparqlUnitTest.isDataSetInserted(assert);
             setTimeout(function() {
-                dataCubeSparqlUnitTest.clearGraph(scientificAnnotation.GRAPH_NAME_EIS, assert);
-                scientificAnnotation.GRAPH_NAME_EIS = temp_name;
-                QUnit.start();
-            }, 2000);
+                start();
+            }, 500);
+        });
+
+        QUnit.test( "Testing observation insertion", function( assert ) {
+            stop();
+            expect( 1 );
+            dataCubeSparqlUnitTest.isObserverInserted(assert);
+            setTimeout(function() {
+                start();
+            }, 500);
+        });
+
+        QUnit.test( "Testing column header insertion", function( assert ) {
+            stop();
+            expect( 1 );
+            dataCubeSparqlUnitTest.isColumnHeaderInserted(assert);
+            setTimeout(function() {
+                start();
+            }, 500);
+        });
+
+        QUnit.test( "Cleaning up the test database ", function( assert ) {
+            stop();
+            expect( 1 );
+            dataCubeSparqlUnitTest.clearGraph(scientificAnnotation.GRAPH_NAME_EIS, assert);
+            scientificAnnotation.GRAPH_NAME_EIS = temp_name;
+            setTimeout(function() {
+                start();
+            }, 500);
         });
     },
 
