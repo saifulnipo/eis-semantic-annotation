@@ -178,7 +178,7 @@ var dataCubeSparqlUnitTest = {
             return;
         }
 
-        var query = "CLEAR GRAPH <" + graphName +">;";
+        var query = "CLEAR GRAPH <" + graphName +">";
 
         $.ajax({
             type: "POST",
