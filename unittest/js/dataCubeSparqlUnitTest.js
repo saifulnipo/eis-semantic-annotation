@@ -21,12 +21,33 @@ var dataCubeSparqlUnitTest = {
 
         dataCubeSparql.addAnnotation(dataCubeSparqlUnitTest.sampleData, true);
 
-        QUnit.asyncTest( "Testing Dimension and property", function( assert ) {
-            expect( 4 );
+        QUnit.asyncTest( "Testing Dimension and property insertion", function( assert ) {
+            expect( 1 );
                 setTimeout(function() {
                 dataCubeSparqlUnitTest.isDimensionPropertyAvailable(assert);
+                QUnit.start();
+            }, 1000);
+        });
+
+        QUnit.asyncTest( "Testing Data set insertion", function( assert ) {
+            expect( 1 );
+                setTimeout(function() {
                 dataCubeSparqlUnitTest.isDataSetInserted(assert);
+                QUnit.start();
+            }, 1000);
+        });
+
+        QUnit.asyncTest( "Testing observation insertion", function( assert ) {
+            expect( 1 );
+                setTimeout(function() {
                 dataCubeSparqlUnitTest.isObserverInserted(assert);
+                QUnit.start();
+            }, 1000);
+        });
+
+        QUnit.asyncTest( "Testing column header insertion", function( assert ) {
+            expect( 1 );
+                setTimeout(function() {
                 dataCubeSparqlUnitTest.isColumnHeaderInserted(assert);
                 QUnit.start();
             }, 1000);
