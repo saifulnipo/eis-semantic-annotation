@@ -142,8 +142,8 @@ var sparql  = {
             ' WHERE ' +'\n'+
             '{ ' +'\n'+
                 '?p ' + q.label + ' ?label ' +'\n'+
-                'FILTER(STRSTARTS(STR(?p), "'+sparql.PREFIX_SEMANNP+'"))' +'\n'+
-            '} ORDER BY fn:lower-case(?PROPERTY) LIMIT '+sparql.AUTO_COMPLETE_RESULT_LIMIT;
+                'FILTER(regex(STR(?p), "'+sparql.PREFIX_SEMANNP+'","i"))' +'\n'+
+            '} ORDER BY fn:lower-case(?label) LIMIT '+sparql.AUTO_COMPLETE_RESULT_LIMIT;
 
         var source = null;
 
@@ -181,8 +181,8 @@ var sparql  = {
             ' WHERE ' +'\n'+
             '{ ' +'\n'+
                 '?o ' + q.label + ' ?label ' +'\n'+
-                'FILTER(STRSTARTS(STR(?o), "'+sparql.PREFIX_SEMANN+'"))' +'\n'+
-            '} ORDER BY fn:lower-case(?OBJECT) LIMIT '+sparql.AUTO_COMPLETE_RESULT_LIMIT;
+                'FILTER(regex(STR(?o), "'+sparql.PREFIX_SEMANN+'","i"))' +'\n'+
+            '} ORDER BY fn:lower-case(?label) LIMIT '+sparql.AUTO_COMPLETE_RESULT_LIMIT;
 
         var source = null;
 
