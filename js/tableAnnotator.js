@@ -227,6 +227,7 @@ var tableAnnotator  = {
      */
     getRefinedColumnStructure : function (tableStruct) {
 
+        console.log(tableStruct);
         var cols = [], columnStartPoints = [],
             allColumnsIndex = [], previous = '', keys = '';
         for (keys in tableStruct) {

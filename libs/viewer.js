@@ -194,7 +194,6 @@ var PDFView = {
   // called once when the document is loaded
   initialize: function pdfViewInitialize() {
 
-    scientificAnnotation.resetAnnotationTable();
     var self = this;
     var container = this.container = document.getElementById('viewerContainer');
     this.pageViewScroll = {};
@@ -561,8 +560,6 @@ var PDFView = {
   open: function pdfViewOpen(url, scale, password,
                              pdfDataRangeTransport, args) {
 
-      scientificAnnotation.refreshOnNewPdfFileLoad();
-
     var parameters = {password: password};
     if (typeof url === 'string') { // URL
       this.setTitleUsingUrl(url);
@@ -850,8 +847,6 @@ var PDFView = {
   },
 
   load: function pdfViewLoad(pdfDocument, scale) {
-
-    scientificAnnotation.resetAnnotationTable();
 
 
     function bindOnAfterDraw(pageView, thumbnailView) {

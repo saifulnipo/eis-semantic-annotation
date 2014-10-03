@@ -59,13 +59,16 @@ var scientificAnnotation  = {
      * @param button
      */
     showSimpleAnnotatePanel : function (button) {
-        var simpleAnnotateWindow = $('#simpleAnnotatePanel');
+        var simpleAnnotateWindow = $('#simpleAnnotatePanel'),
+            tableAnnotationButton = $('#annotateTableButton');
         if (simpleAnnotateWindow.is(':visible')) {
             simpleAnnotateWindow.hide();
+            tableAnnotationButton.attr('disabled' , false);
             button.text('Show Simple Annotate Panel');
         } else {
             simpleAnnotateWindow.fadeIn(500);
             button.text('Hide Simple Annotate Panel');
+            tableAnnotationButton.attr('disabled' , true);
         }
 
         scientificAnnotation.resetAnnotationTable();
@@ -364,8 +367,11 @@ var scientificAnnotation  = {
      */
     refreshOnNewPdfFileLoad : function () {
         tableAnnotator.TABLE_ANNOTATION_COUNT = 1;
+        scientificAnnotation.clearInputField();
+        scientificAnnotation.resetAnnotationTable();
         scientificAnnotation.clearAnnotationDisplayPanel();
         scientificAnnotation.clearSimilarSearchResult();
+        highlight.init();
     },
 
     /**
@@ -384,14 +390,12 @@ var scientificAnnotation  = {
         similarPubsList.fadeOut(300);
     },
 
-
     /**
      * Reset the annotation display tables
      * @return void
      */
     resetAnnotationTable:function (){
-        $('#displayTableTitle').empty();
-        $('#displaySparqlTableRows').empty();
+        scientificAnnotation.hideAnnotationDisplayTable();
     },
 
     /**
@@ -460,7 +464,9 @@ var scientificAnnotation  = {
      * @return void
      */
     hideAnnotationDisplayTable:function(){
+        $('#displayTableTitle').empty();
         $('#displayTableTitle').hide();
+        $('#displaySparqlTableRows').empty();
         $('#displaySparqlTableRows').hide();
     },
 
@@ -472,6 +478,7 @@ var scientificAnnotation  = {
         var outputTable = $('#displaySparqlTableRows');
         var displayFileInfoTitle = $('#displayTableTitle');
         scientificAnnotation.clearSimilarSearchResult();
+        scientificAnnotation.resetAnnotation(null);
         progressbar.showProgressBar('Loading data ....');
         sparql.showDataFromSparql();
         outputTable.fadeIn(500);
@@ -499,12 +506,19 @@ var scientificAnnotation  = {
     },
 
 
+    /**
+     * Reset the annotation area
+     * @param button
+     */
     resetAnnotation : function(button) {
         $('#viewSelectedInfoFromPfdTable').empty();
         $('#viewSelectedInfoFromPfdTable').hide();
         $('#annotateTableButton').text('Annotate table');
         tableAnnotator.storedData = null;
-        button.hide();
+
+        if (button !== null) {
+            button.hide();
+        }
     },
 
     /**
@@ -523,11 +537,23 @@ var scientificAnnotation  = {
     },
 
     /**
+     *  An event that is fired by PDF.js when the pdf loads.
+     *  @return {void}
+     */
+    bindDocumentLoadEvent : function () {
+        window.addEventListener("documentload", function(evt) {
+            scientificAnnotation.refreshOnNewPdfFileLoad();
+        }, false);
+    },
+
+    /**
      * Initialize the document
      *
      * @return void
      */
     init:function(){
+        scientificAnnotation.refreshOnNewPdfFileLoad();
+        scientificAnnotation.bindDocumentLoadEvent();
         scientificAnnotation.bindClickEventForButtons();
         scientificAnnotation.bindMouseUpEventForPDFViewer();
         sparql.bindAutoCompleteProperty();
@@ -544,7 +570,5 @@ $(function () {
     if (applicationSettings.isUnitTestOngoing) {
         return;
     }
-
     scientificAnnotation.init();
-    highlight.init();
 });
