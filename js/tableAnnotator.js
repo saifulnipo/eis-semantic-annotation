@@ -128,7 +128,9 @@ var tableAnnotator  = {
             }
 
             while (treeWalker.nextNode()) {
-                selectedElements.push(treeWalker.currentNode);
+                if (tableAnnotator.isDivContainText(treeWalker.currentNode)) {
+                    selectedElements.push(treeWalker.currentNode);
+                }
             }
         }
         return selectedElements;
