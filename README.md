@@ -38,7 +38,7 @@ Eventually the two parallel forks will be merged into here.
 [Twitter bootstrap](http://getbootstrap.com/) - used for UI  
 [jQuery](http://jquery.com/) - used for DOM manipulations, required by Twitter bootstrap  
 [Typeahead.js](https://github.com/twitter/typeahead.js) - used for autosuggestion in input boxes  
-[Ranjy](https://code.google.com/p/rangy/) - A cross-browser JavaScript range and selection library.
+[Ranjy](https://code.google.com/p/rangy/) - A cross-browser JavaScript range and selection library.  
 [Qunit](http://qunitjs.com/) - JavaScript unit testing framework
 
 ## Backend Database Used
