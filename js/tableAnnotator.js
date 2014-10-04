@@ -1,10 +1,15 @@
 /**
  * This js file contains functionality for table annotation.
  *
- * @authors : A Q M Saiful Islam (Nipo)
- * @dependency: none
+ @authors : A Q M Saiful Islam (Nipo)
+ @dependency:
+ {
+  dataCubeSparql.js
+  messageHandler.sj
+ }
  */
-/*global scientificAnnotation :false, confirm: false,
+
+/*global $:false, scientificAnnotation :false, confirm: false,
  progressbar : false, sparql:false, messageHandler:false, plusplus: false  */
 
 /*jslint plusplus: true */
@@ -62,7 +67,7 @@ var tableAnnotator  = {
     /**
      * Display the user selected pdf info in to html view
      *
-     * @param selectedElements
+     * @param {Array} selectedElements
      * @return {void}
      */
     displayInfoIntoTable : function (selectedElements) {
@@ -99,8 +104,8 @@ var tableAnnotator  = {
     /**
      * Return all the selected element of the table which contain only text
      *
-     * @param win
-     * @returns {array}
+     * @param {window} win
+     * @returns {Array}
      */
     getSelectedElementTags: function (win) {
         var range, sel, selectedElements = [], treeWalker, containerElement;
@@ -140,7 +145,7 @@ var tableAnnotator  = {
     /**
      * Check if the selected div contain the text items
      *
-     * @param div
+     * @param {HTMLElement} div
      * @returns {boolean}
      */
     isDivContainText : function (div) {
@@ -155,7 +160,7 @@ var tableAnnotator  = {
     /**
      * Get refined table information from the initial selected elements which may contain all many broken elements
      *
-     * @param selectedElements
+     * @param {Array} selectedElements
      * @returns {Array}
      */
     getSelectedTableInfo: function (selectedElements) {
@@ -184,8 +189,8 @@ var tableAnnotator  = {
     /**
      * Get the all the broken columns structures of every selected rows
      *
-     * @param selectedElements
-     * @returns array of objects
+     * @param {Array} selectedElements
+     * @returns {Array}
      */
     getTableColumnStructureForEveryRows : function (selectedElements) {
         var x, y, tableStruct = {}, lastInsertedKey = null;
@@ -223,7 +228,7 @@ var tableAnnotator  = {
     /**
      * Return the list of all the column start points after eliminating un-necessary start points
      *
-     * @param tableStruct
+     * @param {Array} tableStruct
      * @returns {Array}
      */
     getRefinedColumnStructure : function (tableStruct) {
@@ -254,7 +259,7 @@ var tableAnnotator  = {
     /**
      * Return the selected text based on new column start points values
      *
-     * @param tableStruct
+     * @param {Array} tableStruct
      * @param columnStartPoints
      * @returns {{}}
      */
@@ -315,8 +320,8 @@ var tableAnnotator  = {
      * Get the integer value from the string containing pixel value
      *
      * i.e 165.12px = 165
-     * @param str
-     * @returns {*}
+     * @param {string} str
+     * @returns {int}
      */
     getIntegerValue : function (str) {
 
@@ -331,7 +336,7 @@ var tableAnnotator  = {
      * Get the last inserted key of the associated array
      *
      * @param tableStruct
-     * @returns {*}
+     * @returns {Array}
      */
     getLastInsertedKey : function (tableStruct) {
 
@@ -347,7 +352,7 @@ var tableAnnotator  = {
      * Validate the table selection and return necessary boundary value checking
      * It also traverse up and downwards and select the table remaining selection.
      *
-     * @param selectedElements
+     * @param {Array} selectedElements
      * @returns {*}
      */
     getValidatedTableSelectedInfo : function (selectedElements) {
@@ -396,8 +401,8 @@ var tableAnnotator  = {
     /**
      * Traverse upward until the  table top and return all the selected element inside the table
      *
-     * @param selectedElements
-     * @param selectedTableRange
+     * @param {HTMLElement} firstElement
+     * @param {Object} selectedTableRange
      * @returns {Array}
      */
     traverseTableUp : function (firstElement, selectedTableRange) {
@@ -440,8 +445,8 @@ var tableAnnotator  = {
     /**
      * Traverse downward until the table bottom and return all the traverse elements inside the table
      *
-     * @param selectedElements
-     * @param selectedTableRange
+     * @param {HTMLElement} lastItem
+     * @param {Object} selectedTableRange
      * @returns {Array}
      */
     traverseTableDown : function (lastItem, selectedTableRange) {
@@ -483,7 +488,7 @@ var tableAnnotator  = {
     /**
      * Removed the less frequent item for column start points
      *
-     * @param columnStartPoints
+     * @param {Array} columnStartPoints
      * @returns {Array}
      */
     discardUnwantedStartPoints : function (columnStartPoints) {
@@ -509,7 +514,7 @@ var tableAnnotator  = {
     /**
      * Return the range of the selected table
      *
-     * @param selectedElements
+     * @param {Array} selectedElements
      * @returns {{min: number, max: number}}
      */
     getSelectedTableRange: function (selectedElements) {
@@ -559,8 +564,10 @@ var tableAnnotator  = {
     },
 
     /**
-     * Display the selected information in the table
-     * @param selectedElements
+     * Generate the html table from the selected elements
+     *
+     * @param {Array} selectedElements
+     * @return {void}
      */
     generateHtmlTableForSelectedInfo : function (selectedElements) {
 

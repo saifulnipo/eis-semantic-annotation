@@ -1,16 +1,17 @@
 /**
- This file contain all the necessary sparql related queries,
+ This file contain all the necessary sparql related queries for data cube vocabulary
  that need to perform.
 
  @authors : A Q M Saiful Islam
  @dependency
  {
     scientificAnnotation.js
-    highlight.js
+    progressbar.js
+    messageHandler.js
  }
  */
 
-/*global scientificAnnotation :false, tableAnnotator: false,
+/*global $:false, document:false, scientificAnnotation :false, tableAnnotator: false,
 progressbar : false, sparql:false, messageHandler:false, plusplus: false  */
 
 /*jslint plusplus: true */
@@ -31,20 +32,20 @@ var dataCubeSparql  = {
 
     /**
      * prepare and send the ajax request for add annotation as a data cube
-     * @param selectedTableCellTexts
+     * @param {Array} selectedTableCellTexts
+     * @param  {boolean} isCallForTesting
      *
      * @return void
      */
     addAnnotation: function (selectedTableCellTexts, isCallForTesting) {
 
-        var isCallForTesting = isCallForTesting || false;
+        var isCallForTesting = isCallForTesting || false,
+            selectedColumns = selectedTableCellTexts[0].length,
+            query = '';
 
         if ($.isEmptyObject(selectedTableCellTexts)) {
             return;
         }
-
-        var selectedColumns = selectedTableCellTexts[0].length,
-            query = '';
 
         progressbar.showProgressBar('Adding annotation to the selected table...');
         query =
@@ -144,7 +145,6 @@ var dataCubeSparql  = {
     /**
      * Return the data set fo the data cube structure
      * @param {int} selectedColumns
-     * @param {int} tableNameCounter
      * @returns {string}
      */
     getDataSet: function (selectedColumns) {
@@ -202,7 +202,7 @@ var dataCubeSparql  = {
 
     /**
      * Get the observation and column slices based on selection
-     * @param selectedTableCellTexts
+     * @param {Array} selectedTableCellTexts
      * @returns {string}
      */
     getObservationsWithSlices: function (selectedTableCellTexts) {
