@@ -20,7 +20,8 @@ var tableAnnotator  = {
     storedData              : null,
 
     /**
-     * Add table annotation as data cube vocabulary
+     * Get the selected info from the pdf and generate the data cube vocabulary
+     * and finally add it to the backend
      *
      * @return void
      */
@@ -59,7 +60,7 @@ var tableAnnotator  = {
     },
 
     /**
-     * Prepare the selected table info into data cube.
+     * Display the user selected pdf info in to html view
      *
      * @param selectedElements
      * @return {void}
@@ -72,7 +73,7 @@ var tableAnnotator  = {
     },
 
     /**
-     * Return intersected Nodes
+     * Return intersected item as Nodes
      *
      * @param range
      * @param node
@@ -96,10 +97,10 @@ var tableAnnotator  = {
     },
 
     /**
-     * Return all the selected element inside a table
+     * Return all the selected element of the table which contain only text
      *
      * @param win
-     * @returns {*}
+     * @returns {array}
      */
     getSelectedElementTags: function (win) {
         var range, sel, selectedElements = [], treeWalker, containerElement;
@@ -152,7 +153,7 @@ var tableAnnotator  = {
     },
 
     /**
-     * Get total selected table information
+     * Get refined table information from the initial selected elements which may contain all many broken elements
      *
      * @param selectedElements
      * @returns {Array}
@@ -220,14 +221,14 @@ var tableAnnotator  = {
 
 
     /**
-     * Return the refined news column structure for all the rows
+     * Return the list of all the column start points after eliminating un-necessary start points
      *
      * @param tableStruct
      * @returns {Array}
      */
     getRefinedColumnStructure : function (tableStruct) {
 
-        console.log(tableStruct);
+//        console.log(tableStruct);
         var cols = [], columnStartPoints = [],
             allColumnsIndex = [], previous = '', keys = '';
         for (keys in tableStruct) {
@@ -251,7 +252,7 @@ var tableAnnotator  = {
     },
 
     /**
-     * Return the selected text based on refined column values
+     * Return the selected text based on new column start points values
      *
      * @param tableStruct
      * @param columnStartPoints
@@ -311,7 +312,7 @@ var tableAnnotator  = {
     },
 
     /**
-     * Get the integer value of a pixel representation
+     * Get the integer value from the string containing pixel value
      *
      * i.e 165.12px = 165
      * @param str
@@ -344,6 +345,7 @@ var tableAnnotator  = {
 
     /**
      * Validate the table selection and return necessary boundary value checking
+     * It also traverse up and downwards and select the table remaining selection.
      *
      * @param selectedElements
      * @returns {*}
