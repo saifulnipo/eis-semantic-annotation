@@ -73,8 +73,13 @@ var tableAnnotator  = {
     displayInfoIntoTable : function (selectedElements) {
         var tableInfo = tableAnnotator.getSelectedTableInfo(selectedElements);
         tableAnnotator.storedData = tableInfo;
-
+        if ($.isEmptyObject(selectedElements)) {
+            messageHandler.showErrorMessage('No selected data found to display', true);
+            return;
+        }
         tableAnnotator.generateHtmlTableForSelectedInfo(tableInfo);
+        dbPediaLookupUIOptions.showOntologyListOptions(tableInfo[0]);
+
     },
 
     /**
@@ -571,13 +576,6 @@ var tableAnnotator  = {
      */
     generateHtmlTableForSelectedInfo : function (selectedElements) {
 
-        if ($.isEmptyObject(selectedElements)) {
-            messageHandler.showErrorMessage('No selected data found to display', true);
-            return;
-        }
-
-//        console.log(selectedElements);
-
         $("#annotateTableButton").text('Confirm annotation');
         $('#resetAnnotationButton').show();
         $('#viewSelectedInfoFromPfdTable').empty();
@@ -590,7 +588,7 @@ var tableAnnotator  = {
             tableHeader += "<th class = 'showResult'>" + columnNames[i] + "</th>";
         }
 
-        $('#viewSelectedInfoFromPfdTable').append('<br><br>');
+        $('#viewSelectedInfoFromPfdTable').append('<br>');
         $('#viewSelectedInfoFromPfdTable').append(
             "<table id='selectedInfoViewer' class = 'showResult' width='100%' >" +
                 "<tr class = 'showResult'>" +

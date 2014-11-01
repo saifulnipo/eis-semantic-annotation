@@ -55,6 +55,8 @@
     <script type="text/javascript" src="./js/progressbar.js"></script>
     <script type="text/javascript" src="./js/tableAnnotator.js"></script>
     <script type="text/javascript" src="./js/dataCubeSparql.js"></script>
+    <script type="text/javascript" src="./js/dbPediaLookup.js"></script>
+    <script type="text/javascript" src="./js/dbPediaLookupUIOptions.js"></script>
   </head>
 
   <body tabindex="1">
@@ -320,7 +322,13 @@
         <!-- view results tables -->
         <div id="displayTableTitle"> </div>
         <div id="displaySparqlTableRows" style='overflow:auto; display:none ; width:600px; height:300px;'> </div>
-
+        <div id="ontologyClassSelectionContainer" style='display:none;'>
+            <br><br>
+            <p>Select the ontology class to lookup available Uri for columns :</p>
+            <div id="ontologyClassSelectionPanel" style='display:none ; overflow:auto; width:600px; height:auto;'> </div>
+            <br>
+            <button id="getResourceUriButton" class="btn btn-default">Get URI</button>
+        </div>
         <div id="viewSelectedInfoFromPfdTable" style='display:none ; overflow:auto; width:600px; height:400px;'> </div>
 
     </div>

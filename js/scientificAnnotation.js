@@ -14,6 +14,7 @@ var scientificAnnotation  = {
 
     GRAPH_NAME      : 'scientificAnnotation',
     GRAPH_NAME_EIS  : 'eisAnnotation',
+    DEBUG           : true,
 
     // selected text position info
     selectedTextPosition:null,
@@ -46,6 +47,7 @@ var scientificAnnotation  = {
 
         $("#annotateTableButton").bind("click", function () {
             scientificAnnotation.annotateTable($(this));
+//            dbPediaLookup.makeAjaxRequest('Bonn');
         });
 
         $("#resetAnnotationButton").bind("click", function () {
@@ -514,6 +516,10 @@ var scientificAnnotation  = {
         $('#viewSelectedInfoFromPfdTable').empty();
         $('#viewSelectedInfoFromPfdTable').hide();
         $('#annotateTableButton').text('Annotate table');
+
+        $('#ontologyClassSelectionPanel').empty();
+        $('#ontologyClassSelectionContainer').hide();
+
         tableAnnotator.storedData = null;
 
         if (button !== null) {
