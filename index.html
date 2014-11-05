@@ -12,6 +12,20 @@
     <!-- highlighting related -->
     <link rel="stylesheet" href="./css/highlight.css"/>
 
+      <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>-->
+      <!--<script src="http://twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.js"></script>-->
+      <!--<script src="http://static.scripting.com/bootstrap/1.4.0/js/bootstrap-modal.js"></script>-->
+      <!--<script src="http://static.scripting.com/bootstrap/1.4.0/js/bootstrap-alerts.js"></script>-->
+      <!--<script src="http://static.scripting.com/bootstrap/1.4.0/js/bootstrap-twipsy.js"></script>-->
+      <!--<script src="http://static.scripting.com/bootstrap/1.4.0/js/bootstrap-popover.js"></script>-->
+      <!--<script src="http://static.scripting.com/bootstrap/1.4.0/js/bootstrap-dropdown.js"></script>-->
+      <!--<script src="http://static.scripting.com/bootstrap/1.4.0/js/bootstrap-scrollspy.js"></script>-->
+      <!--<script src="http://static.scripting.com/bootstrap/1.4.0/js/bootstrap-tabs.js"></script>-->
+      <!--<script src="http://static.scripting.com/bootstrap/1.4.0/js/bootstrap-buttons.js"></script>-->
+      <!--<link href="http://static.scripting.com/bootstrap/1.4.0/bootstrap.css" rel="stylesheet">-->
+      <!--<link href="http://twitter.github.com/bootstrap/assets/css/docs.css" rel="stylesheet">-->
+      <!--<link href="http://twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.css" rel="stylesheet">-->
+
     <script type="text/javascript" src="./libs/jquery.min.js"></script>
     <script type="text/javascript" src="./libs/bootstrap.min.js"></script>
     <script type="text/javascript" src="./libs/typeahead.min.js"></script>
@@ -61,6 +75,8 @@
 
   <body tabindex="1">
     <div id="outerContainer" class="loadingInProgress">
+
+
 
       <div id="sidebarContainer">
         <div id="toolbarSidebar">
@@ -260,10 +276,17 @@
           <div class="clearBoth"></div>
           <textarea id="errorMoreInfo" hidden='true' readonly="readonly"></textarea>
         </div>
+
+
+
       </div> <!-- mainContainer -->
 
     </div> <!-- outerContainer -->
-    <div id="printContainer"></div>
+    <div id="printContainer">
+
+
+
+    </div>
 
 
 
@@ -328,9 +351,37 @@
             <div id="ontologyClassSelectionPanel" style='display:none ; overflow:auto; width:600px; height:auto;'> </div>
             <br>
             <button id="getResourceUriButton" class="btn btn-default">Get URI</button>
+
         </div>
         <div id="viewSelectedInfoFromPfdTable" style='display:none ; overflow:auto; width:600px; height:400px;'> </div>
 
+
+        <!-- tab model start -->
+        <div id="ontologySelectionModel" class="modal fade modal-width" role="dialog">
+
+                <div class="modal-header">
+                    <strong>Ontology Selection Panel</strong>
+                </div>
+                <div class="modal-body">
+
+                        <div class="tabbable"> <!-- Only required for left/right tabs -->
+                            <ul class="nav nav-tabs">
+                                <!--<li class="active"><a href="#tab1" data-toggle="tab">Section 1</a></li>-->
+                                <!--<li><a href="#tab2" data-toggle="tab">Section 2</a></li>-->
+                            </ul>
+                            <div class="tab-content">
+                                <!--<div class="tab-pane active" id="tab1"></div>-->
+                                <!--<div class="tab-pane" id="tab2"></div>-->
+                            </div>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" id="modal-close-btn" class="btn btn-primary">Close</a>
+                    <a href="#" id="modal-success-btn" class="btn btn-success">OK</a>
+                </div>
+
+        </div>
+        <!-- tab model end -->
     </div>
 
   </body>

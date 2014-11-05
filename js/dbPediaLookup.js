@@ -5,168 +5,129 @@
  @dependency
  {
     scientificAnnotation.js
-    sparql.js
     progressbar.js
     messageHandler.js
  }
  */
 
 var dbPediaLookup  = {
-    SERVICE_ADDRESS : "http://lookup.dbpedia.org/api/search/PrefixSearch",
-    PARAM_CLASS: "QueryClass",
+
+    SERVICE_ADDRESS : "http://lookup.dbpedia.org/api/search/",
+    REQUEST_TYPE_AUTO_SEARCH : "PrefixSearch",
+    REQUEST_TYPE_QUERY_CLASS : "KeywordSearch",
     PARAM_STRING: "QueryString",
+    PARAM_CLASS: "QueryClass",
     PARAM_MAXHITS: "MaxHits",
     MAX_HITS_COUNT: 5,
     dbResponse: null,
     dbSubjectResponse: null,
     dbObjectResponse: null,
 
+    lookUpResult : {},
+
     /**
      * prepare an ajax call for contacting DBpedia Lookup service. This allows us to transform literals into classes.
      *
      * @param {String} keyword to be passed on as a parameter to the service
-     * @return {void}
+     *
+     * @return {object}
      */
 
-    getResources: function(keyword) {
+    getResources: function(keyword, queryClass) {
 
         if (keyword === null || keyword === '') {
-            return;
+            return dbPediaLookup.parseResponse(null);
         }
 
-        var queryParameters = dbPediaLookup.queryParameters(keyword);
+        var lookupResponseOutput = null;
+
+        var queryParameters = dbPediaLookup.queryParametersForAutoSearch(keyword);
+        if(queryClass) {
+            queryParameters = dbPediaLookup.queryParametersForQueryClass(keyword, queryClass);
+        }
+
         var settings = {
             type: "GET",
-            url: dbPediaLookup.SERVICE_ADDRESS+"?"+queryParameters,
-            async: true,
+            url: dbPediaLookup.SERVICE_ADDRESS+queryParameters,
+            async: false,
             dataType: "json",
-            xhrFields: {
-                    withCredentials: false
-            },
             cache: false,
-            beforeSend: function(xhrObj) {
-                xhrObj.setRequestHeader("Accept","application/json");
-                progressbar.showProgressBar('Querying DBpedia Lookup...');
-                return true;
+            beforeSend: function(xhr) {
+                xhr.withCredentials = true;
             }
         }
-        // return deferred object
         $.ajax(settings)
             .fail(function(jqXHR, exception) { //what to do in case of error
-                    var errorTxt= dbPediaLookup.getStandardErrorMessage(jqXHR ,exception);
-                    messageHandler.showErrorMessage(errorTxt);
+                var errorTxt= dbPediaLookup.getStandardErrorMessage(jqXHR ,exception);
+                messageHandler.showErrorMessage(errorTxt);
+                progress.hideProgressBar();
+                lookupResponseOutput = dbPediaLookup.parseResponse(null);
+
             })
             .success(function(response) {
-                dbPediaLookup.formatResponse(response);
-            }).always(function() {
-                progressbar.hideProgressBar(); //after the request, hide progress bar
+                lookupResponseOutput = dbPediaLookup.parseResponse(response);
             });
+
+        return lookupResponseOutput;
     },
 
     /**
-     * Return the URI parameters to be used in querying.
+     * Return the URL parameters to be used in auto search querying.
      *
      * @param {string} searchKey search key
+     *
      * @returns {string} query parameter
      */
-    queryParameters :function (searchKey) {
-        var parameters = dbPediaLookup.PARAM_MAXHITS + '=' + dbPediaLookup.MAX_HITS_COUNT + '&' + dbPediaLookup.PARAM_STRING + "=" + encodeURIComponent(searchKey);
+    queryParametersForAutoSearch :function (searchKey) {
+        var parameters = dbPediaLookup.REQUEST_TYPE_AUTO_SEARCH + '?' + dbPediaLookup.PARAM_MAXHITS + '=' + dbPediaLookup.MAX_HITS_COUNT + '&' + dbPediaLookup.PARAM_STRING + "=" + encodeURIComponent(searchKey);
         return parameters;
     },
 
     /**
-     * Show the returned results from DBpedia Lookup in the div #displaySubjectURI.
-     * @param JSON response object.
-     * @return String containing formated DBpedia response,
+     * Return the URL parameters to be used in class search querying.
+     *
+     * @param {string} searchKey search key
+     * @param {string} className class name where to search
+     *
+     * @returns {string} query parameter
      */
-    formatResponse : function(response, targetInfoElement){
-        if (response.results.length > 0) {
-            var html = "";
-            var br = "";
-            $.each(response.results, function(i, item) {
-                var uriClasses = dbPediaLookup.getUriClasses(item.classes, "dbpedia.org");
-                var classes = "";
-                if (uriClasses.labels.length > 0) classes = "[" + uriClasses.labels.join(', ') + "]";
-                html += br;
-                html = html + htmlTemplate.replace("#href", item.uri).replace("#description", item.description).replace("#label", item.label).replace("#classes", classes).replace("#onclick", i);
-                br = "</br>"
-            });
-            if (html.length > 0) html = "Is this the same as any of the below?<br/>" + html;
-            return html;
-        } else {
-            return null;
-        }
+    queryParametersForQueryClass :function (searchKey, className) {
+        var parameters = dbPediaLookup.REQUEST_TYPE_QUERY_CLASS + '?' + dbPediaLookup.PARAM_CLASS + '=' + className + '&' + dbPediaLookup.PARAM_STRING + "=" + encodeURIComponent(searchKey);
+        return parameters;
     },
 
     /**
-     * fetches data associated with key = "classes" from json response based on given filter.
-     * @param JSON object
-     * @param String to filter uri values for, eg. "dbpedia.org"
-     * @return object containing URI and label arrays for the filtered data.
+     * Parse the response the return the URIs with their label
+     *
+     * @param {JSON} response object.
+     *
+     * @return String containing formatted DBpedia response,
      */
-    getUriClasses : function(classlist, filterDomain){
-        var classURIs = [];
-        var classLabels = [];
-        $.each(classlist, function(i, item) {
-            if (filterDomain && item.uri.toLowerCase().indexOf(filterDomain) >= 0) {
-                classURIs.push(item.uri);
-                classLabels.push(item.label);
+    parseResponse : function(response){
+
+        var uris = [], uriLabels = [],uriContents = null ;
+
+        if (response === null || response.results.length === 0) {
+
+            return {
+                URIs:       uris,
+                labels:     uriLabels
             }
-        });
-        //if (classLabels.length > 0) classLabels = "[" + classLabels + "]";
-        //if (scientificAnnotation.DEBUG) console.log("classURIs: " + classURIs.toString());
-        return {
-            URIs:       classURIs,
-            labels:     classLabels
+        }
+
+        if (response.results.length > 0) {
+
+            $.each(response.results, function(i, item) {
+                uris.push(item.uri);
+                uriLabels.push(item.label);
+            });
+
+            return {
+                URIs:       uris,
+                labels:     uriLabels
+            }
         }
     },
-//
-//    /**
-//     * Prepares necessary data before binding of URIs to its properties can take place.
-//     * @param refers to results[index] in JSON object dbSubjectResponse, initialised when user selects a subject from the list.
-//     * @return false, avoids opening the selected <href\> link in the browser.
-//     */
-//    getSubjectBindings : function(selection, index){
-//        var sourceElement = $(selection).closest('div'); //looking for
-//        var targetElement;
-//        var selectedResource;
-//        if (sourceElement.is(scientificAnnotation.DIV_SUBJECTS)) {
-//            targetElement = scientificAnnotation.INPUT_SUBJECT;
-//            selectedResource = dbLookup.dbSubjectResponse.results[index];
-//            if (scientificAnnotation.DEBUG) console.log("User selected subject URI = " + selectedResource.uri);
-//        }
-//        if (targetElement) {
-//            sparql.triple.set(targetElement, selectedResource.uri);
-//            sparql.triple.empty(scientificAnnotation.INPUT_PROPERTY);
-//            sparql.triple.empty(scientificAnnotation.INPUT_OBJECT);
-//        }
-//        scientificAnnotation.DIV_OBJECTS.hide();
-//		var relatedClasses = dbLookup.getUriClasses(selectedResource.classes, "dbpedia.org").URIs;
-//        var query = sparql.selectResourcePropertiesQuery(selectedResource.uri, relatedClasses);
-//        var myrequest = sparql.makeAjaxRequest(query);
-//        myrequest.done( function(response) {
-//            var properties = sparqlResponseParser.parseResource(response);
-//            messageHandler.displayInfo("Found "+properties.length+" related properties.", scientificAnnotation.DIV_PROPERTY_COUNT, true);
-//            if (properties.length > 0) {
-//                scientificAnnotation.setAutoComputeDataForField(properties, scientificAnnotation.INPUT_PROPERTY);
-//            } else { //no results, revert to default ones
-//                scientificAnnotation.setAutoComputeDataForField(sparql.defaultProperties, scientificAnnotation.INPUT_PROPERTY);
-//            }
-//        });
-//        return false;
-//    },
-//
-//    /**
-//     * Function is called when user selects on one of the suggested resource links for objects. Sets object uri value of a triple.
-//     * @param refers to results[index] in JSON object dbObjectResponse, initialised when user selects a subject from the list.
-//     * @return false, avoids opening the selected <href\> link in the browser.
-//     */
-//    getObjectBindings : function(index){
-//		var selectedResource = dbLookup.dbObjectResponse.results[index].uri;
-//		if (scientificAnnotation.DEBUG) console.log("User selected object URI = " + selectedResource);
-//        sparql.triple.set(scientificAnnotation.INPUT_OBJECT, selectedResource);
-//		return false;
-//    },
 
     /**
      * Return the standard error message if the server communication is failed
@@ -175,7 +136,7 @@ var dbPediaLookup  = {
      * @param jqXHR
      */
     getStandardErrorMessage:function(jqXHR, exception){
-        var errorTxt = "Error occurred when sending data to the server: "+ dbLookup.SERVICE_ADDRESS;
+        var errorTxt = "Error occurred when sending data to the server: "+ dbPediaLookup.SERVICE_ADDRESS;
 
         if (jqXHR.status === 0) {
             errorTxt = errorTxt + '<br>Not connected. Verify network.';
@@ -192,8 +153,11 @@ var dbPediaLookup  = {
         } else {
             errorTxt = errorTxt + '<br>Uncaught Error.\n' + jqXHR.responseText;
         }
-        if (scientificAnnotation.DEBUG) console.error(errorTxt);
+
+        if (scientificAnnotation.DEBUG) {
+            console.error(errorTxt);
+        }
+
         return errorTxt;
     }
-
 };

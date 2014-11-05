@@ -79,7 +79,6 @@ var tableAnnotator  = {
         }
         tableAnnotator.generateHtmlTableForSelectedInfo(tableInfo);
         dbPediaLookupUIOptions.showOntologyListOptions(tableInfo[0]);
-
     },
 
     /**

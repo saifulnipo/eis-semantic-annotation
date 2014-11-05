@@ -12,9 +12,10 @@ This file is the main entry point for this tools for all the event
 
 var scientificAnnotation  = {
 
-    GRAPH_NAME      : 'scientificAnnotation',
-    GRAPH_NAME_EIS  : 'eisAnnotation',
-    DEBUG           : true,
+    GRAPH_NAME            : 'scientificAnnotation',
+    GRAPH_NAME_EIS        : 'eisAnnotation',
+    DEBUG                 : true,
+    ONTOLOGY_SELECT_MODAL : '#ontologySelectionModel',
 
     // selected text position info
     selectedTextPosition:null,
@@ -47,14 +48,25 @@ var scientificAnnotation  = {
 
         $("#annotateTableButton").bind("click", function () {
             scientificAnnotation.annotateTable($(this));
-//            dbPediaLookup.makeAjaxRequest('Bonn');
         });
 
         $("#resetAnnotationButton").bind("click", function () {
             scientificAnnotation.resetAnnotation($(this));
         });
-    },
 
+        $("#getResourceUriButton").bind("click", function () {
+            dbPediaLookupUIOptions.getResultFromDbPediaLookup(tableAnnotator.storedData);
+            $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('show');
+        });
+
+        $("#modal-close-btn").bind("click", function () {
+            $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('hide');
+        });
+
+        $("#modal-success-btn").bind("click", function () {
+            $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('hide');
+        });
+    },
 
     /**
      * show the simple annotate panel
