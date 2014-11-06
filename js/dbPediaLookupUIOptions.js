@@ -11,21 +11,25 @@
 
 var dbPediaLookupUIOptions  = {
 
+    CLASS_NO_SELECTION   : '--none--',
+
+    CLASS_AUTO_SELECTION : 'auto',
     /**
      * Ontology look up classes
      */
     ontologyClasses : [ '--none--', 'auto', 'Place', 'Person', 'Work', 'Species', 'Organisation'],
 
     /**
-     * Current selected tab's class name
+     * Cache current selected tab's class name
      */
     selectedTabClass : null,
 
 
     /**
-     *
+     * Cache the radio items
      */
     radioInputNameValueMap : {},
+
 
     /**
      * Show the ontology class for each column
@@ -44,17 +48,20 @@ var dbPediaLookupUIOptions  = {
         ontologyDisplayOptionPanel.empty();
         ontologyDisplayOptionPanel.show();
 
-        var columnValue = '',i = 0;
+        var columnValue = '',i = 0,ontologyClassListId = '';
         for (i = 0; i < columnNames.length; i++) {
+            ontologyClassListId = dbPediaLookupUIOptions.getCustomId(columnNames[i]);
             columnValue += "<tr class = 'showResult'>";
             columnValue += "<td class = 'showResult'>" + columnNames[i] + "</td>";
-            columnValue += "<td class = 'showResult'>" + dbPediaLookupUIOptions.getListOptions('ontologyList' + i) + "</td>";
+            columnValue += "<td class = 'showResult'>" + dbPediaLookupUIOptions.getListOptions() + "</td>";
             columnValue += "</tr>";
         }
 
         ontologyDisplayOptionPanel.append(
             "<table class = 'showResult' width='auto'>" + columnValue + "</table>"
         );
+
+        dbPediaLookupUIOptions.bindOntologyClassListChangeEvent();
     },
 
     /**
@@ -64,11 +71,11 @@ var dbPediaLookupUIOptions  = {
      *
      * @returns {string} html
      */
-    getListOptions : function(id) {
+    getListOptions : function() {
 
-        var html = '<select>\n';
+        var html = '<select class="ontologyClassSelection">\n';
         $.each(dbPediaLookupUIOptions.ontologyClasses, function(index, value) {
-            html += '<option id="' + id + '" value="' + value + '" >' + value + '</option>\n';
+            html += '<option value="' + value + '" >' + value + '</option>\n';
         });
         html += '</select>';
         return html;
@@ -101,7 +108,7 @@ var dbPediaLookupUIOptions  = {
             }
             firstSearchKey = listValues[0];
             columnName = selectedElements[0][i];
-            tabId = dbPediaLookupUIOptions.getTabId(columnName);
+            tabId = dbPediaLookupUIOptions.getCustomId(columnName);
 
             // assign the 1st tab class name
             if (dbPediaLookupUIOptions.selectedTabClass === null) {
@@ -111,7 +118,7 @@ var dbPediaLookupUIOptions  = {
             var rightClass = 'modal-right '+tabId;
 
             tabLeftContent = "<div class='modal-left'>" + dbPediaLookupUIOptions.getRowsAsListView(listValues) +"</div>",
-            tabRightContent = "<div class='" + rightClass +"'>" + dbPediaLookupUIOptions.getTabTable(tabId, firstSearchKey)+ '</div>';
+                tabRightContent = "<div class='" + rightClass +"'>" + dbPediaLookupUIOptions.getTabTable(tabId, firstSearchKey)+ '</div>';
             tabContent = tabLeftContent+ tabRightContent;
             dbPediaLookupUIOptions.addTabContent(tabId, columnName, tabContent, isActiveTab);
         }
@@ -119,6 +126,25 @@ var dbPediaLookupUIOptions  = {
         dbPediaLookupUIOptions.bindListItemClickEvent();
         dbPediaLookupUIOptions.bindTabSelectEvent();
         dbPediaLookupUIOptions.bindCellRadioSelection();
+    },
+
+    /**
+     * Bind the list item click event
+     *
+     * @return void
+     */
+    bindOntologyClassListChangeEvent : function() {
+        $(".ontologyClassSelection").bind("change", function () {
+            $("#getResourceUriButton").attr('disabled' , true);
+            dbPediaLookup.clearDbPediaLookupResultCache();
+
+            $(".ontologyClassSelection").each(function() {
+                if ($(this).val() !== dbPediaLookupUIOptions.CLASS_NO_SELECTION) {
+                    $("#getResourceUriButton").attr('disabled' , false);
+                    return;
+                }
+            });
+        });
     },
 
     /**
@@ -140,6 +166,7 @@ var dbPediaLookupUIOptions  = {
     bindTabSelectEvent : function () {
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             dbPediaLookupUIOptions.selectedTabClass  = $(this).attr('class');
+            console.log(dbPediaLookupUIOptions.selectedTabClass);
         });
     },
 
@@ -158,7 +185,6 @@ var dbPediaLookupUIOptions  = {
                 id : id,
                 value : value
             }
-//            console.log('index::' + dbPediaLookupUIOptions.getIndexFromId(dbPediaLookupUIOptions.radioInputNameValueMap[name]));
         });
     },
 
@@ -189,10 +215,11 @@ var dbPediaLookupUIOptions  = {
 
         var uriClasses = dbPediaLookup.lookUpResult[searchKey];
         if (uriClasses === null || uriClasses === undefined) {
+            console.log('sss::'+searchKey);
             return '';
         }
 
-        var uriRadioInputName = dbPediaLookupUIOptions.getTabId(searchKey), checked = '';
+        var uriRadioInputName = dbPediaLookupUIOptions.getCustomId(searchKey), checked = '';
 
         var uris = uriClasses.URIs,
             classLabel =  uriClasses.labels, i = 0, tableHtml = '';
@@ -212,17 +239,17 @@ var dbPediaLookupUIOptions  = {
             }
             tableHtml += "<tr class = 'showResult'>";
             tableHtml += "<td class = 'showResult'>" + classLabel[i] + "</td>";
-            tableHtml += "<td class = 'showResult'><a href='" + uris[i] + "'>" + uris[i] + "</a></td>";
+            tableHtml += "<td class = 'showResult'><a href='" + uris[i] + "' target='_blank'>" + uris[i] + "</a></td>";
             tableHtml += "" +
                 "<td class = 'showResult'>" +
-                    "<input " +
-                        "type='radio' " +
-                        "id='" + uriRadioInputName + "_" + i + "' " + // keep track of the index id: name_index (loop)
-                        "class='cellRadioSelection' " +
-                        "name='" + uriRadioInputName +"' " +
-                        "value = '" + uris[i] + "'" +
-                        checked +
-                    ">" +
+                "<input " +
+                "type='radio' " +
+                "id='" + uriRadioInputName + "_" + i + "' " + // keep track of the index id: name_index (loop)
+                "class='cellRadioSelection' " +
+                "name='" + uriRadioInputName +"' " +
+                "value = '" + uris[i] + "'" +
+                checked +
+                ">" +
                 "</td>";
 
             tableHtml += "</tr>";
@@ -241,7 +268,12 @@ var dbPediaLookupUIOptions  = {
      */
     getResultFromDbPediaLookup : function(selectedElements) {
 
-        var classNames = ['person','place','place'];
+        var classNames = [];
+
+        $( ".ontologyClassSelection" ).each(function() {
+            classNames.push($( this ).val());
+        });
+
         progressbar.showProgressBar('Querying DBpedia Lookup..');
         var i = 0, j = 0, columnArrayValues = null, keyword = null, className = '';
         for (i = 1; i < selectedElements.length; i++) {
@@ -250,6 +282,8 @@ var dbPediaLookupUIOptions  = {
 
             for (j = 0; j < columnArrayValues.length; j++) {
                 keyword = columnArrayValues[j]
+
+                progressbar.showProgressBar('Querying in DBpedia Lookup..' + keyword);
 
                 if (dbPediaLookup.lookUpResult[keyword]  === undefined) {
                     dbPediaLookup.lookUpResult[keyword] = dbPediaLookup.getResources(keyword, classNames[j]);
@@ -323,7 +357,7 @@ var dbPediaLookupUIOptions  = {
      * @param str
      * @returns {string}
      */
-    getTabId : function (str) {
+    getCustomId : function (str) {
         return str.split(" ").join("");
     },
 
@@ -342,8 +376,8 @@ var dbPediaLookupUIOptions  = {
         var i = 0, index = 0, sub_str = '', id = radioInputId.id;
 
         if ((i = id.indexOf('_')) !== -1) {
-           sub_str = id.substring(i + 1);
-           index = parseInt(sub_str);
+            sub_str = id.substring(i + 1);
+            index = parseInt(sub_str);
         }
 
         if (isNaN(index)) {

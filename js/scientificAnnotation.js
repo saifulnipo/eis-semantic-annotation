@@ -381,10 +381,14 @@ var scientificAnnotation  = {
     },
 
     /**
-     *  Reset and refresh necessary parameter and variable once new pdf file has been laoded
+     *  Reset and refresh necessary parameter and variable once new pdf file has been loaded
      */
     refreshOnNewPdfFileLoad : function () {
         tableAnnotator.TABLE_ANNOTATION_COUNT = 1;
+
+        $("#getResourceUriButton").attr('disabled' , true);
+        dbPediaLookup.clearDbPediaLookupResultCache();
+
         scientificAnnotation.clearInputField();
         scientificAnnotation.resetAnnotationTable();
         scientificAnnotation.clearAnnotationDisplayPanel();
@@ -537,7 +541,8 @@ var scientificAnnotation  = {
         $('#ontologyClassSelectionContainer').hide();
 
         tableAnnotator.storedData = null;
-        dbPediaLookup.lookUpResult = {};
+        dbPediaLookup.clearDbPediaLookupResultCache();
+        $("#getResourceUriButton").attr('disabled' , true);
 
         if (button !== null) {
             button.hide();

@@ -42,10 +42,17 @@ var dbPediaLookup  = {
             return dbPediaLookup.parseResponse(null);
         }
 
+        if(queryClass && queryClass === dbPediaLookupUIOptions.CLASS_NO_SELECTION) {
+            return {
+                URIs:       [keyword],
+                labels:     [keyword]
+            }
+        }
+
         var lookupResponseOutput = null;
 
         var queryParameters = dbPediaLookup.queryParametersForAutoSearch(keyword);
-        if(queryClass) {
+        if(queryClass && queryClass !== dbPediaLookupUIOptions.CLASS_AUTO_SELECTION) {
             queryParameters = dbPediaLookup.queryParametersForQueryClass(keyword, queryClass);
         }
 
@@ -162,5 +169,14 @@ var dbPediaLookup  = {
         }
 
         return errorTxt;
+    },
+
+    /**
+     * Clear the looked up cache
+     */
+    clearDbPediaLookupResultCache : function() {
+        dbPediaLookup.lookUpResult = {}
     }
+
+
 };
