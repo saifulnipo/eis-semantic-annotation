@@ -21,6 +21,12 @@ var dbPediaLookupUIOptions  = {
      */
     selectedTabClass : null,
 
+
+    /**
+     *
+     */
+    radioInputNameValueMap : {},
+
     /**
      * Show the ontology class for each column
      *
@@ -78,7 +84,7 @@ var dbPediaLookupUIOptions  = {
 
         var i = 0, j = 0, listValues = [], firstSearchKey = null, columnName = '',
             tabId = null, tabLeftContent = '', tabRightContent = '', tabContent = '',
-            isActiveTab = false;
+            radioInputName = '', isActiveTab = false;
 
         dbPediaLookupUIOptions.resetOntologySelectionModalTabContent();
 
@@ -105,13 +111,14 @@ var dbPediaLookupUIOptions  = {
             var rightClass = 'modal-right '+tabId;
 
             tabLeftContent = "<div class='modal-left'>" + dbPediaLookupUIOptions.getRowsAsListView(listValues) +"</div>",
-            tabRightContent = "<div class='" + rightClass +"'>" + dbPediaLookupUIOptions.getTabTable(tabId, dbPediaLookup.lookUpResult[firstSearchKey])+ '</div>';
+            tabRightContent = "<div class='" + rightClass +"'>" + dbPediaLookupUIOptions.getTabTable(tabId, firstSearchKey)+ '</div>';
             tabContent = tabLeftContent+ tabRightContent;
             dbPediaLookupUIOptions.addTabContent(tabId, columnName, tabContent, isActiveTab);
         }
 
         dbPediaLookupUIOptions.bindListItemClickEvent();
         dbPediaLookupUIOptions.bindTabSelectEvent();
+        dbPediaLookupUIOptions.bindCellRadioSelection();
     },
 
     /**
@@ -137,6 +144,25 @@ var dbPediaLookupUIOptions  = {
     },
 
     /**
+     * Bind the list item click event
+     *
+     * @return void
+     */
+    bindCellRadioSelection : function() {
+        $(".cellRadioSelection").bind("click", function () {
+            var name = $(this).attr('name'),
+                id = $(this).attr('id'),
+                value = $(this).val();
+
+            dbPediaLookupUIOptions.radioInputNameValueMap[name] = {
+                id : id,
+                value : value
+            }
+//            console.log('index::' + dbPediaLookupUIOptions.getIndexFromId(dbPediaLookupUIOptions.radioInputNameValueMap[name]));
+        });
+    },
+
+    /**
      * Bind the click event for each list item
      *
      * @param item
@@ -146,8 +172,9 @@ var dbPediaLookupUIOptions  = {
     showTableOnListItemClick : function (item) {
         var selectClass = '.modal-right.' + dbPediaLookupUIOptions.selectedTabClass;
         $(selectClass).html(
-            dbPediaLookupUIOptions.getTabTable(dbPediaLookupUIOptions.selectedTabClass, dbPediaLookup.lookUpResult[item])
+            dbPediaLookupUIOptions.getTabTable(dbPediaLookupUIOptions.selectedTabClass, item)
         );
+        dbPediaLookupUIOptions.bindCellRadioSelection();
     },
 
     /**
@@ -158,9 +185,14 @@ var dbPediaLookupUIOptions  = {
      *
      * @return {string} html
      */
-    getTabTable : function (tabId, uriClasses) {
+    getTabTable : function (tabId, searchKey) {
 
-        var uriRadioInputName = tabId + 'radioInput';
+        var uriClasses = dbPediaLookup.lookUpResult[searchKey];
+        if (uriClasses === null || uriClasses === undefined) {
+            return '';
+        }
+
+        var uriRadioInputName = dbPediaLookupUIOptions.getTabId(searchKey), checked = '';
 
         var uris = uriClasses.URIs,
             classLabel =  uriClasses.labels, i = 0, tableHtml = '';
@@ -172,10 +204,27 @@ var dbPediaLookupUIOptions  = {
             "</tr>";
 
         for (i = 0; i < uris.length; i++) {
+
+            checked = '';
+
+            if (i === dbPediaLookupUIOptions.getIndexFromId(uriRadioInputName)) {
+                checked = 'checked';
+            }
             tableHtml += "<tr class = 'showResult'>";
             tableHtml += "<td class = 'showResult'>" + classLabel[i] + "</td>";
             tableHtml += "<td class = 'showResult'><a href='" + uris[i] + "'>" + uris[i] + "</a></td>";
-            tableHtml += "<td class = 'showResult'><input type='radio' id='#' name='" + uriRadioInputName +"'></td>";
+            tableHtml += "" +
+                "<td class = 'showResult'>" +
+                    "<input " +
+                        "type='radio' " +
+                        "id='" + uriRadioInputName + "_" + i + "' " + // keep track of the index id: name_index (loop)
+                        "class='cellRadioSelection' " +
+                        "name='" + uriRadioInputName +"' " +
+                        "value = '" + uris[i] + "'" +
+                        checked +
+                    ">" +
+                "</td>";
+
             tableHtml += "</tr>";
         }
 
@@ -214,7 +263,7 @@ var dbPediaLookupUIOptions  = {
     /**
      * Get the list view for each column's rows
      *
-     * @param {array} rows
+     * @param {object} rows
      *
      * @returns {string} html
      */
@@ -266,6 +315,7 @@ var dbPediaLookupUIOptions  = {
         $('.modal-right').html('');
         $('.nav-tabs').html('');
         $('.tab-content').html('');
+        dbPediaLookupUIOptions.radioInputNameValueMap = {}; // clear the cache
     },
 
     /**
@@ -275,5 +325,31 @@ var dbPediaLookupUIOptions  = {
      */
     getTabId : function (str) {
         return str.split(" ").join("");
+    },
+
+    /**
+     * Return the index from the id name i.e. 'sample_10' will return 10
+     * @return int
+     */
+    getIndexFromId : function (radioInputId) {
+
+        radioInputId = dbPediaLookupUIOptions.radioInputNameValueMap[radioInputId];
+
+        if (radioInputId === null || radioInputId === undefined){
+            return 0;
+        }
+
+        var i = 0, index = 0, sub_str = '', id = radioInputId.id;
+
+        if ((i = id.indexOf('_')) !== -1) {
+           sub_str = id.substring(i + 1);
+           index = parseInt(sub_str);
+        }
+
+        if (isNaN(index)) {
+            index = 0;
+        }
+
+        return index;
     }
 };

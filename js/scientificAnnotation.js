@@ -48,6 +48,7 @@ var scientificAnnotation  = {
 
         $("#annotateTableButton").bind("click", function () {
             scientificAnnotation.annotateTable($(this));
+
         });
 
         $("#resetAnnotationButton").bind("click", function () {
@@ -56,7 +57,10 @@ var scientificAnnotation  = {
 
         $("#getResourceUriButton").bind("click", function () {
             dbPediaLookupUIOptions.getResultFromDbPediaLookup(tableAnnotator.storedData);
-            $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('show');
+
+            if (!$.isEmptyObject(dbPediaLookup.lookUpResult)) {
+                $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('show');
+            }
         });
 
         $("#modal-close-btn").bind("click", function () {
@@ -521,7 +525,7 @@ var scientificAnnotation  = {
 
 
     /**
-     * Reset the annotation area
+     * Reset the annotation area and the stored data as well
      * @param button
      */
     resetAnnotation : function(button) {
@@ -533,6 +537,7 @@ var scientificAnnotation  = {
         $('#ontologyClassSelectionContainer').hide();
 
         tableAnnotator.storedData = null;
+        dbPediaLookup.lookUpResult = {};
 
         if (button !== null) {
             button.hide();

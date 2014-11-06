@@ -23,6 +23,9 @@ var dbPediaLookup  = {
     dbSubjectResponse: null,
     dbObjectResponse: null,
 
+    /**
+     * cache the dbpedia lookup searched result
+     */
     lookUpResult : {},
 
     /**
