@@ -581,7 +581,8 @@ var tableAnnotator  = {
         $('#viewSelectedInfoFromPfdTable').show();
 
         var columnNames = selectedElements[0], tableHeader = '',
-            i = 0, j = 0, rowArrayValues = null, rows = '', tempRowValue = '',radioInputName = '';
+            i = 0, j = 0, rowArrayValues = null, rows = '',
+            tempRowValue = '',radioInputName = '', mapResult = null;
 
         for (i = 0; i < columnNames.length; i++) {
             tableHeader += "<th class = 'showResult'>" + columnNames[i] + "</th>";
@@ -606,10 +607,11 @@ var tableAnnotator  = {
             for (j = 0; j < rowArrayValues.length; j++) {
 
                 tempRowValue = rowArrayValues[j];
-                radioInputName = dbPediaLookupUIOptions.getCustomId(tempRowValue)
+                radioInputName = dbPediaLookupUIOptions.getCustomId(tempRowValue);
+                mapResult = dbPediaLookupUIOptions.searchKeyValueRadioInputMap[radioInputName];
 
-                if (dbPediaLookupUIOptions.searchKeyValueRadioInputMap[radioInputName] !== undefined) {
-                    tempRowValue = "<a href='" + dbPediaLookupUIOptions.searchKeyValueRadioInputMap[radioInputName].value +"' target='_blank'>" + tempRowValue + "</a>";
+                if (mapResult !== undefined && mapResult.value.indexOf("http://") !== -1) {
+                    tempRowValue = "<a href='" + mapResult.value +"' target='_blank'>" + tempRowValue + "</a>";
                 }
 
                 rows += "<td class = 'showResult' >" + tempRowValue + "</td>";

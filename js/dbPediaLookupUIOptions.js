@@ -92,8 +92,6 @@ var dbPediaLookupUIOptions  = {
             tabId = null, tabLeftContent = '', tabRightContent = '', tabContent = '',
             radioInputName = '', isActiveTab = false;
 
-
-
         for (i = 0; i<selectedElements[0].length; i++) {
 
             isActiveTab = false;
@@ -392,7 +390,7 @@ var dbPediaLookupUIOptions  = {
     },
 
     /**
-     *
+     * Map the dbPediaResult with searched keys
      */
     mapDbPediaResultWithSearchKey : function(searchKey, uri) {
         var uriRadioInputName  = dbPediaLookupUIOptions.getCustomId(searchKey);
