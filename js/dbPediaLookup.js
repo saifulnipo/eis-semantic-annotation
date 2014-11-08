@@ -175,7 +175,8 @@ var dbPediaLookup  = {
      * Clear the looked up cache
      */
     clearDbPediaLookupResultCache : function() {
-        dbPediaLookup.lookUpResult = {}
+        dbPediaLookup.lookUpResult = {};
+        dbPediaLookupUIOptions.searchKeyValueRadioInputMap = {};
     }
 
 
