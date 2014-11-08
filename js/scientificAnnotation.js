@@ -68,6 +68,7 @@ var scientificAnnotation  = {
         });
 
         $("#modal-success-btn").bind("click", function () {
+            dbPediaLookupUIOptions.getSelectedValueFromModel();
             $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('hide');
         });
     },

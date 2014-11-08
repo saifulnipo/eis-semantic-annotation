@@ -26,10 +26,9 @@ var dbPediaLookupUIOptions  = {
 
 
     /**
-     * Cache the radio items
+     * Map the the search key with radio items id, names and values
      */
-    radioInputNameValueMap : {},
-
+    searchKeyValueRadioInputMap : {},
 
     /**
      * Show the ontology class for each column
@@ -93,7 +92,7 @@ var dbPediaLookupUIOptions  = {
             tabId = null, tabLeftContent = '', tabRightContent = '', tabContent = '',
             radioInputName = '', isActiveTab = false;
 
-        dbPediaLookupUIOptions.resetOntologySelectionModalTabContent();
+
 
         for (i = 0; i<selectedElements[0].length; i++) {
 
@@ -166,7 +165,6 @@ var dbPediaLookupUIOptions  = {
     bindTabSelectEvent : function () {
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             dbPediaLookupUIOptions.selectedTabClass  = $(this).attr('class');
-            console.log(dbPediaLookupUIOptions.selectedTabClass);
         });
     },
 
@@ -181,10 +179,10 @@ var dbPediaLookupUIOptions  = {
                 id = $(this).attr('id'),
                 value = $(this).val();
 
-            dbPediaLookupUIOptions.radioInputNameValueMap[name] = {
-                id : id,
-                value : value
-            }
+            var previous = dbPediaLookupUIOptions.searchKeyValueRadioInputMap[name];
+                previous.id = id;
+                previous.value = value;
+                dbPediaLookupUIOptions.searchKeyValueRadioInputMap[name] = previous;
         });
     },
 
@@ -215,7 +213,6 @@ var dbPediaLookupUIOptions  = {
 
         var uriClasses = dbPediaLookup.lookUpResult[searchKey];
         if (uriClasses === null || uriClasses === undefined) {
-            console.log('sss::'+searchKey);
             return '';
         }
 
@@ -224,10 +221,15 @@ var dbPediaLookupUIOptions  = {
         var uris = uriClasses.URIs,
             classLabel =  uriClasses.labels, i = 0, tableHtml = '';
 
+        if ($.isEmptyObject(uris)) {
+            return '';
+        }
+
+
+
         tableHtml += "<tr class = 'showResult'>" +
             "<th class = 'showResult'>Class Label " + "</th>" +
             "<th class = 'showResult'>Class URIs</th>" +
-            "<th class = 'showResult'>Selection</th>" +
             "</tr>";
 
         for (i = 0; i < uris.length; i++) {
@@ -238,19 +240,19 @@ var dbPediaLookupUIOptions  = {
                 checked = 'checked';
             }
             tableHtml += "<tr class = 'showResult'>";
-            tableHtml += "<td class = 'showResult'>" + classLabel[i] + "</td>";
-            tableHtml += "<td class = 'showResult'><a href='" + uris[i] + "' target='_blank'>" + uris[i] + "</a></td>";
             tableHtml += "" +
                 "<td class = 'showResult'>" +
-                "<input " +
-                "type='radio' " +
-                "id='" + uriRadioInputName + "_" + i + "' " + // keep track of the index id: name_index (loop)
-                "class='cellRadioSelection' " +
-                "name='" + uriRadioInputName +"' " +
-                "value = '" + uris[i] + "'" +
-                checked +
-                ">" +
+                    "<input " +
+                        "type='radio' " +
+                        "id='" + uriRadioInputName + "_" + i + "' " + // keep track of the index id: name_index (loop)
+                        "class='cellRadioSelection' " +
+                        "name='" + uriRadioInputName +"' " +
+                        "value = '" + uris[i] + "'" +
+                        checked +
+                    ">&nbsp;&nbsp;" + classLabel[i]
                 "</td>";
+
+            tableHtml += "<td class = 'showResult'><a href='" + uris[i] + "' target='_blank'>" + uris[i] + "</a></td>";
 
             tableHtml += "</tr>";
         }
@@ -268,12 +270,12 @@ var dbPediaLookupUIOptions  = {
      */
     getResultFromDbPediaLookup : function(selectedElements) {
 
-        var classNames = [];
+        var classNames = [], dbPediaResult = null ;
 
         $( ".ontologyClassSelection" ).each(function() {
             classNames.push($( this ).val());
         });
-
+        dbPediaLookupUIOptions.resetOntologySelectionModalTabContent();
         progressbar.showProgressBar('Querying DBpedia Lookup..');
         var i = 0, j = 0, columnArrayValues = null, keyword = null, className = '';
         for (i = 1; i < selectedElements.length; i++) {
@@ -286,7 +288,9 @@ var dbPediaLookupUIOptions  = {
                 progressbar.showProgressBar('Querying in DBpedia Lookup..' + keyword);
 
                 if (dbPediaLookup.lookUpResult[keyword]  === undefined) {
-                    dbPediaLookup.lookUpResult[keyword] = dbPediaLookup.getResources(keyword, classNames[j]);
+                    dbPediaResult = dbPediaLookup.getResources(keyword, classNames[j]);
+                    dbPediaLookup.lookUpResult[keyword] = dbPediaResult;
+                    dbPediaLookupUIOptions.mapDbPediaResultWithSearchKey(keyword, dbPediaResult.URIs[0]);
                 }
             }
         }
@@ -349,7 +353,7 @@ var dbPediaLookupUIOptions  = {
         $('.modal-right').html('');
         $('.nav-tabs').html('');
         $('.tab-content').html('');
-        dbPediaLookupUIOptions.radioInputNameValueMap = {}; // clear the cache
+        dbPediaLookupUIOptions.searchKeyValueRadioInputMap = {}; // clear the cache
     },
 
     /**
@@ -367,7 +371,7 @@ var dbPediaLookupUIOptions  = {
      */
     getIndexFromId : function (radioInputId) {
 
-        radioInputId = dbPediaLookupUIOptions.radioInputNameValueMap[radioInputId];
+        radioInputId = dbPediaLookupUIOptions.searchKeyValueRadioInputMap[radioInputId];
 
         if (radioInputId === null || radioInputId === undefined){
             return 0;
@@ -385,5 +389,24 @@ var dbPediaLookupUIOptions  = {
         }
 
         return index;
+    },
+
+    /**
+     *
+     */
+    mapDbPediaResultWithSearchKey : function(searchKey, uri) {
+        var uriRadioInputName  = dbPediaLookupUIOptions.getCustomId(searchKey);
+        dbPediaLookupUIOptions.searchKeyValueRadioInputMap[uriRadioInputName] = {
+            id : '',
+            value : uri,
+            searchKey : searchKey
+        }
+    },
+
+    /**
+     * Get all the value from the model
+     */
+    getSelectedValueFromModel : function() {
+        tableAnnotator.generateHtmlTableForSelectedInfo(tableAnnotator.storedData);
     }
 };

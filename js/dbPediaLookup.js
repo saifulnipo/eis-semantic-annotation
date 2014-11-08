@@ -120,8 +120,8 @@ var dbPediaLookup  = {
         if (response === null || response.results.length === 0) {
 
             return {
-                URIs:       uris,
-                labels:     uriLabels
+                URIs:       [''],
+                labels:     ['']
             }
         }
 
