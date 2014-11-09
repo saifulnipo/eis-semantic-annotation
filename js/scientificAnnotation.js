@@ -495,6 +495,7 @@ var scientificAnnotation  = {
         $('#displayTableTitle').hide();
         $('#displaySparqlTableRows').empty();
         $('#displaySparqlTableRows').hide();
+        $('#ontologyClassSelectionContainer').hide();
     },
 
     /**

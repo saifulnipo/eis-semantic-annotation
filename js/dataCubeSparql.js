@@ -85,10 +85,12 @@ var dataCubeSparql  = {
                 }
 
                 scientificAnnotation.hideAnnotationDisplayTable();
+
                 progressbar.hideProgressBar();
                 messageHandler.showSuccessMessage('Table annotation successfully added');
                 tableAnnotator.TABLE_ANNOTATION_COUNT++;
                 tableAnnotator.storedData = null;
+                dbPediaLookup.clearDbPediaLookupResultCache();
             },
             error: function (jqXHR, exception) {
 
@@ -229,6 +231,7 @@ var dataCubeSparql  = {
                     'qb:dataSet ex:' + dataCubeSparql.TABLE_NAME + ' ;' + '\n' +
                     'ex:' + dataCubeSparql.TABLE_NAME + 'Row ' + j + ' ;' + '\n' +
                     'ex:' + dataCubeSparql.TABLE_NAME + 'Column ' + (i + 1) + ' ;' + '\n' +
+                    dataCubeSparql.getResourceUri(selectedTableCellTexts[j][i])+ '\n' +
                     'semann:value "' + selectedTableCellTexts[j][i] + '" .' + '\n\n';
 
                 sliceRowList += observationTitle + ',';
@@ -245,5 +248,20 @@ var dataCubeSparql  = {
         }
 
         return query;
+    },
+
+    /**
+     * Get the cell resource Uri if it's available
+     * @param {string} key search item
+     * @returns {string} resource uri syntax for data cube
+     */
+    getResourceUri : function (key) {
+        var resourceUri = '', mapResult = null;
+        key = dbPediaLookupUIOptions.getCustomId(key);
+        mapResult = dbPediaLookupUIOptions.searchKeyValueRadioInputMap[key];
+        if (mapResult !== undefined && mapResult.value.indexOf("http://") !== -1) {
+            resourceUri = 'semann:resource <' + mapResult.value + '> ;'
+        }
+        return resourceUri;
     }
 };

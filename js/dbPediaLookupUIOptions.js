@@ -269,6 +269,10 @@ var dbPediaLookupUIOptions  = {
      */
     getResultFromDbPediaLookup : function(selectedElements) {
 
+        if ($.isEmptyObject(selectedElements)) {
+            return;
+        }
+
         var classNames = [], dbPediaResult = null, i = 0, j = 0,
             columnArrayValues = null, keyword = null, className = '';
 
@@ -306,6 +310,10 @@ var dbPediaLookupUIOptions  = {
      * @return void
      */
     getResultFromDbPediaLookupUsingAutoSearch : function(selectedElements) {
+
+        if ($.isEmptyObject(selectedElements)) {
+            return;
+        }
 
         var classNames = [], dbPediaResult = null ,i = 0, j = 0,
             columnArrayValues = null, keyword = null, className = '';
