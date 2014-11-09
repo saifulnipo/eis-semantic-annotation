@@ -43,8 +43,9 @@ var dbPediaLookup  = {
 
         if(queryClass && queryClass === dbPediaLookupUIOptions.CLASS_NO_SELECTION) {
             return {
-                URIs:       [keyword],
-                labels:     [keyword]
+                URIs     : [keyword],
+                labels   : [keyword],
+                classUri : [keyword]
             }
         }
 
@@ -114,14 +115,15 @@ var dbPediaLookup  = {
      */
     parseResponse : function(response){
 
-        var uris = [], uriLabels = [],uriContents = null ;
+        var uris = [], uriLabels = [], classUri = [], uriContents = null ;
 
         if (response === null || response.results.length === 0) {
 
             return {
                 URIs:       [''],
-                labels:     ['']
-            }
+                labels:     [''],
+                classUri:   ['']
+             }
         }
 
         if (response.results.length > 0) {
@@ -129,13 +131,28 @@ var dbPediaLookup  = {
             $.each(response.results, function(i, item) {
                 uris.push(item.uri);
                 uriLabels.push(item.label);
+                classUri.push(dbPediaLookup.getClassUri(item.classes));
             });
 
             return {
                 URIs:       uris,
-                labels:     uriLabels
+                labels:     uriLabels,
+                classUri:   classUri
             }
         }
+    },
+
+    /**
+     * fetches data associated with key = "classes" from json response based on given filter.
+     * @param JSON object
+     * @return {string} class uri
+     */
+    getClassUri : function(classlist){
+
+        if ($.isEmptyObject(classlist)) {
+            return '';
+        }
+        return classlist[0].uri;
     },
 
     /**
@@ -178,6 +195,4 @@ var dbPediaLookup  = {
         dbPediaLookupUIOptions.searchKeyValueRadioInputMap = {};
         dbPediaLookupUIOptions.IS_AUTO_SEARCHED_TRIGGERED_YET = false;
     }
-
-
 };

@@ -294,7 +294,7 @@ var dbPediaLookupUIOptions  = {
                 if (dbPediaLookup.lookUpResult[keyword]  === undefined) {
                     dbPediaResult = dbPediaLookup.getResources(keyword, classNames[j]);
                     dbPediaLookup.lookUpResult[keyword] = dbPediaResult;
-                    dbPediaLookupUIOptions.mapDbPediaResultWithSearchKey(keyword, dbPediaResult.URIs[0]);
+                    dbPediaLookupUIOptions.mapDbPediaResultWithSearchKey(keyword, dbPediaResult);
                 }
             }
         }
@@ -336,7 +336,7 @@ var dbPediaLookupUIOptions  = {
                 if (dbPediaLookup.lookUpResult[keyword]  === undefined) {
                     dbPediaResult = dbPediaLookup.getResources(keyword, dbPediaLookupUIOptions.CLASS_AUTO_SELECTION);
                     dbPediaLookup.lookUpResult[keyword] = dbPediaResult;
-                    dbPediaLookupUIOptions.mapDbPediaResultWithSearchKey(keyword, dbPediaResult.URIs[0]);
+                    dbPediaLookupUIOptions.mapDbPediaResultWithSearchKey(keyword, dbPediaResult);
                 }
             }
         }
@@ -440,12 +440,17 @@ var dbPediaLookupUIOptions  = {
 
     /**
      * Map the dbPediaResult with searched keys
+     * @param {string} searchKey
+     * @param {object} dbPediaResult
+     * @return void
      */
-    mapDbPediaResultWithSearchKey : function(searchKey, uri) {
+    mapDbPediaResultWithSearchKey : function(searchKey, dbPediaResult) {
+
         var uriRadioInputName  = dbPediaLookupUIOptions.getCustomId(searchKey);
         dbPediaLookupUIOptions.searchKeyValueRadioInputMap[uriRadioInputName] = {
-            id : '',
-            value : uri,
+            id        : '',
+            value     : dbPediaResult.URIs[0],
+            classUri  : dbPediaResult.classUri[0],
             searchKey : searchKey
         }
     },

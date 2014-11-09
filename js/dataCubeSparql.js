@@ -217,6 +217,7 @@ var dataCubeSparql  = {
             query += 'ex:' + dataCubeSparql.TABLE_NAME + 'SliceC' + index + ' a qb:Slice ; ' + '\n' +
                 'qb:sliceStructure ex:sliceTable1ByRow ; ' + '\n' +
                 'semann:columnHeader "' + columnNames[i] + '" ; ' + '\n' +
+
                 'ex:' + dataCubeSparql.TABLE_NAME + 'Column ' + index + ' ;' + '\n';
 
             sliceRowList = '';
@@ -231,7 +232,8 @@ var dataCubeSparql  = {
                     'qb:dataSet ex:' + dataCubeSparql.TABLE_NAME + ' ;' + '\n' +
                     'ex:' + dataCubeSparql.TABLE_NAME + 'Row ' + j + ' ;' + '\n' +
                     'ex:' + dataCubeSparql.TABLE_NAME + 'Column ' + (i + 1) + ' ;' + '\n' +
-                    dataCubeSparql.getResourceUri(selectedTableCellTexts[j][i])+ '\n' +
+                    dataCubeSparql.getResourceUri(selectedTableCellTexts[j][i]) + '\n' +
+                    dataCubeSparql.getSliceClassUri(selectedTableCellTexts[j][i]) + '\n' +
                     'semann:value "' + selectedTableCellTexts[j][i] + '" .' + '\n\n';
 
                 sliceRowList += observationTitle + ',';
@@ -261,6 +263,21 @@ var dataCubeSparql  = {
         mapResult = dbPediaLookupUIOptions.searchKeyValueRadioInputMap[key];
         if (mapResult !== undefined && mapResult.value.indexOf("http://") !== -1) {
             resourceUri = 'semann:resource <' + mapResult.value + '> ;'
+        }
+        return resourceUri;
+    },
+
+    /**
+     * Get the cell resource Uri if it's available
+     * @param {string} key search item
+     * @returns {string} resource uri syntax for data cube
+     */
+    getSliceClassUri : function (key) {
+        var resourceUri = '', mapResult = null;
+        key = dbPediaLookupUIOptions.getCustomId(key);
+        mapResult = dbPediaLookupUIOptions.searchKeyValueRadioInputMap[key];
+        if (mapResult !== undefined && mapResult.classUri.indexOf("http://") !== -1) {
+            resourceUri = 'semann:class <' + mapResult.classUri + '> ;'
         }
         return resourceUri;
     }
