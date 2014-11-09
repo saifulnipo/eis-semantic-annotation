@@ -63,6 +63,10 @@ var scientificAnnotation  = {
             }
         });
 
+        $("#getAutoUriButton").bind("click", function () {
+            dbPediaLookupUIOptions.getResultFromDbPediaLookupUsingAutoSearch(tableAnnotator.storedData);
+        });
+
         $("#modal-close-btn").bind("click", function () {
             $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('hide');
         });
@@ -387,7 +391,7 @@ var scientificAnnotation  = {
     refreshOnNewPdfFileLoad : function () {
         tableAnnotator.TABLE_ANNOTATION_COUNT = 1;
 
-        $("#getResourceUriButton").attr('disabled' , true);
+        dbPediaLookupUIOptions.deactivateManualSearchButton();
         dbPediaLookup.clearDbPediaLookupResultCache();
 
         scientificAnnotation.clearInputField();
@@ -543,7 +547,7 @@ var scientificAnnotation  = {
 
         tableAnnotator.storedData = null;
         dbPediaLookup.clearDbPediaLookupResultCache();
-        $("#getResourceUriButton").attr('disabled' , true);
+        dbPediaLookupUIOptions.deactivateManualSearchButton();
 
         if (button !== null) {
             button.hide();

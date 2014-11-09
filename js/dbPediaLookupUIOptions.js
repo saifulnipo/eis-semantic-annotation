@@ -24,11 +24,13 @@ var dbPediaLookupUIOptions  = {
      */
     selectedTabClass : null,
 
-
     /**
      * Map the the search key with radio items id, names and values
      */
     searchKeyValueRadioInputMap : {},
+
+
+    IS_AUTO_SEARCHED_TRIGGERED_YET : false,
 
     /**
      * Show the ontology class for each column
@@ -132,12 +134,11 @@ var dbPediaLookupUIOptions  = {
      */
     bindOntologyClassListChangeEvent : function() {
         $(".ontologyClassSelection").bind("change", function () {
-            $("#getResourceUriButton").attr('disabled' , true);
+            dbPediaLookupUIOptions.deactivateManualSearchButton();
             dbPediaLookup.clearDbPediaLookupResultCache();
-
             $(".ontologyClassSelection").each(function() {
                 if ($(this).val() !== dbPediaLookupUIOptions.CLASS_NO_SELECTION) {
-                    $("#getResourceUriButton").attr('disabled' , false);
+                    dbPediaLookupUIOptions.activateURIManualSearchButton();
                     return;
                 }
             });
@@ -268,14 +269,15 @@ var dbPediaLookupUIOptions  = {
      */
     getResultFromDbPediaLookup : function(selectedElements) {
 
-        var classNames = [], dbPediaResult = null ;
+        var classNames = [], dbPediaResult = null, i = 0, j = 0,
+            columnArrayValues = null, keyword = null, className = '';
 
         $( ".ontologyClassSelection" ).each(function() {
             classNames.push($( this ).val());
         });
+
         dbPediaLookupUIOptions.resetOntologySelectionModalTabContent();
-        progressbar.showProgressBar('Querying DBpedia Lookup..');
-        var i = 0, j = 0, columnArrayValues = null, keyword = null, className = '';
+
         for (i = 1; i < selectedElements.length; i++) {
             columnArrayValues = selectedElements[i];
             className = classNames[i];
@@ -294,6 +296,45 @@ var dbPediaLookupUIOptions  = {
         }
         dbPediaLookupUIOptions.buildOntologySelectionModal(selectedElements);
         progressbar.hideProgressBar();
+    },
+
+    /**
+     * Request to the dbpedia lookup to get all the auto search result
+     *
+     * @param {object} selectedElements
+     *
+     * @return void
+     */
+    getResultFromDbPediaLookupUsingAutoSearch : function(selectedElements) {
+
+        var classNames = [], dbPediaResult = null ,i = 0, j = 0,
+            columnArrayValues = null, keyword = null, className = '';
+
+        dbPediaLookupUIOptions.deactivateManualSearchButton();
+
+        if (!dbPediaLookupUIOptions.IS_AUTO_SEARCHED_TRIGGERED_YET) {
+            dbPediaLookup.clearDbPediaLookupResultCache();
+        }
+
+        for (i = 1; i < selectedElements.length; i++) {
+            columnArrayValues = selectedElements[i];
+            className = classNames[i];
+
+            for (j = 0; j < columnArrayValues.length; j++) {
+                keyword = columnArrayValues[j]
+
+                progressbar.showProgressBar('Querying in DBpedia Lookup..' + keyword);
+
+                if (dbPediaLookup.lookUpResult[keyword]  === undefined) {
+                    dbPediaResult = dbPediaLookup.getResources(keyword, dbPediaLookupUIOptions.CLASS_AUTO_SELECTION);
+                    dbPediaLookup.lookUpResult[keyword] = dbPediaResult;
+                    dbPediaLookupUIOptions.mapDbPediaResultWithSearchKey(keyword, dbPediaResult.URIs[0]);
+                }
+            }
+        }
+        tableAnnotator.generateHtmlTableForSelectedInfo(tableAnnotator.storedData);
+        progressbar.hideProgressBar();
+        dbPediaLookupUIOptions.IS_AUTO_SEARCHED_TRIGGERED_YET = true;
     },
 
     /**
@@ -406,5 +447,21 @@ var dbPediaLookupUIOptions  = {
      */
     getSelectedValueFromModel : function() {
         tableAnnotator.generateHtmlTableForSelectedInfo(tableAnnotator.storedData);
+    },
+
+    /**
+     * Activate the manual search button
+     * @return void
+     */
+    activateURIManualSearchButton : function () {
+        $("#getResourceUriButton").attr('disabled' , false);
+    },
+
+    /**
+     * Deactivate the manual search button
+     * @return void
+     */
+    deactivateManualSearchButton : function () {
+        $("#getResourceUriButton").attr('disabled' , true);
     }
 };

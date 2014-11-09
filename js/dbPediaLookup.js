@@ -27,7 +27,6 @@ var dbPediaLookup  = {
      * cache the dbpedia lookup searched result
      */
     lookUpResult : {},
-
     /**
      * prepare an ajax call for contacting DBpedia Lookup service. This allows us to transform literals into classes.
      *
@@ -177,6 +176,7 @@ var dbPediaLookup  = {
     clearDbPediaLookupResultCache : function() {
         dbPediaLookup.lookUpResult = {};
         dbPediaLookupUIOptions.searchKeyValueRadioInputMap = {};
+        dbPediaLookupUIOptions.IS_AUTO_SEARCHED_TRIGGERED_YET = false;
     }
 
 
