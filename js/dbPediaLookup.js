@@ -41,7 +41,7 @@ var dbPediaLookup  = {
             return dbPediaLookup.parseResponse(null);
         }
 
-        if ($.isNumeric(keyword) || (queryClass && queryClass === dbPediaLookupUIOptions.CLASS_NO_SELECTION)) {
+        if (dbPediaLookup.isNumeric(keyword) || (queryClass && queryClass === dbPediaLookupUIOptions.CLASS_NO_SELECTION)) {
             return {
                 URIs     : [keyword],
                 labels   : [keyword],
@@ -194,5 +194,20 @@ var dbPediaLookup  = {
         dbPediaLookup.lookUpResult = {};
         dbPediaLookupUIOptions.searchKeyValueRadioInputMap = {};
         dbPediaLookupUIOptions.IS_AUTO_SEARCHED_TRIGGERED_YET = false;
+    },
+
+    /**
+     * Is string is a number or not
+     * @param n
+     * @returns {boolean}
+     */
+    isNumeric : function (n) {
+
+        if (n === undefined || n === null) {
+            return false;
+        }
+        // keeping only the numbers and all other chars will be replaced
+        n = n.replace(/[^\d\.]/g, '');
+        return $.isNumeric(n);
     }
 };
