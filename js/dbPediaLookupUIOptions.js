@@ -153,7 +153,19 @@ var dbPediaLookupUIOptions  = {
     bindListItemClickEvent : function() {
         $(".list").bind("click", function () {
             dbPediaLookupUIOptions.showTableOnListItemClick($(this).text());
+            dbPediaLookupUIOptions.changeListItemBackGroundColor($(this));
         });
+    },
+
+    /**
+     * Change list item background color
+     * @param selectedItem
+     */
+    changeListItemBackGroundColor : function(selectedItem) {
+        $('.list').css('color','#2a9fd6');
+        $('.list-group-item').css('background-color','white');
+        selectedItem.css('color', 'white'); // change the text color
+        selectedItem.parent().css('background-color', '#2a9fd6'); // change the background color
     },
 
     /**
