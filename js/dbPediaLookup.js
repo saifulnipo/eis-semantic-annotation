@@ -41,7 +41,7 @@ var dbPediaLookup  = {
             return dbPediaLookup.parseResponse(null);
         }
 
-        if(queryClass && queryClass === dbPediaLookupUIOptions.CLASS_NO_SELECTION) {
+        if ($.isNumeric(keyword) || (queryClass && queryClass === dbPediaLookupUIOptions.CLASS_NO_SELECTION)) {
             return {
                 URIs     : [keyword],
                 labels   : [keyword],
