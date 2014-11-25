@@ -15,7 +15,9 @@
 
 var sparql  = {
 
+    // sparql end points
     SERVER_ADDRESS : "http://localhost:8890/sparql",
+    DBPEDIA_SERVER_ADDRESS : "http://dbpedia.org/sparql",
 
     // annotation properties
     PREFIX_FILE : "http://eis.iai.uni-bonn.de/semann/pdf/",

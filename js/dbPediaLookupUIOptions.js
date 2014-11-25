@@ -11,13 +11,9 @@
 
 var dbPediaLookupUIOptions  = {
 
-    CLASS_NO_SELECTION   : '--none--',
+    CLASS_NO_SELECTION   : '--None--',
 
-    CLASS_AUTO_SELECTION : 'auto',
-    /**
-     * Ontology look up classes
-     */
-    ontologyClasses : [ '--none--', 'auto', 'Place', 'Person', 'Work', 'Species', 'Organisation'],
+    CLASS_AUTO_SELECTION : 'Auto',
 
     /**
      * Cache current selected tab's class name
@@ -75,8 +71,8 @@ var dbPediaLookupUIOptions  = {
     getListOptions : function() {
 
         var html = '<select class="ontologyClassSelection">\n';
-        $.each(dbPediaLookupUIOptions.ontologyClasses, function(index, value) {
-            html += '<option value="' + value + '" >' + value + '</option>\n';
+        $.each(dbPediaOwlType.owlClassList, function(index, value) {
+            html += '<option value="' + value + '" >' + index + '</option>\n';
         });
         html += '</select>';
         return html;

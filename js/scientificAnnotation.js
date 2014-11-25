@@ -592,6 +592,7 @@ var scientificAnnotation  = {
         scientificAnnotation.bindMouseUpEventForPDFViewer();
         sparql.bindAutoCompleteProperty();
         sparql.bindAutoCompleteObject();
+        dbPediaOwlType.loadClasses();
     }
 };
 
