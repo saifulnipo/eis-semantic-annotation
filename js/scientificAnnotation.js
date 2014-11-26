@@ -593,6 +593,7 @@ var scientificAnnotation  = {
         sparql.bindAutoCompleteProperty();
         sparql.bindAutoCompleteObject();
         dbPediaOwlType.loadClasses();
+        tableAnnotator.deactivateTableSuggestion = true;
     }
 };
 

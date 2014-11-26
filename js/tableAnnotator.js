@@ -23,6 +23,7 @@ var tableAnnotator  = {
     TABLE_SELECTION_ABORT   : 2000,
     INVALID                 : -1,
     storedData              : null,
+    deactivateTableSuggestion : false,
 
     /**
      * Get the selected info from the pdf and generate the data cube vocabulary
@@ -53,7 +54,7 @@ var tableAnnotator  = {
             return;
         }
 
-        if (validatedTableInfo.isSelectionSuggestionPossible === true) {
+        if (validatedTableInfo.isSelectionSuggestionPossible === true && !tableAnnotator.deactivateTableSuggestion) {
 
             isConfirmSuggestion =  confirm('Your selection is part of a full table.\nDid you intend to select the whole table?');
             if (isConfirmSuggestion) {
@@ -383,17 +384,19 @@ var tableAnnotator  = {
             };
         }
 
-        traversedUpItems = tableAnnotator.traverseTableUp(selectedElements[0], selectedTableRange);
-        traversedDownItems = tableAnnotator.traverseTableDown(
-            selectedElements[selectedElements.length - 1], selectedTableRange
-        );
+        if (!tableAnnotator.deactivateTableSuggestion) {
+            traversedUpItems = tableAnnotator.traverseTableUp(selectedElements[0], selectedTableRange);
+            traversedDownItems = tableAnnotator.traverseTableDown(
+                selectedElements[selectedElements.length - 1], selectedTableRange
+            );
 
-        if (!$.isEmptyObject(traversedUpItems) || !$.isEmptyObject(traversedDownItems)) {
-            isSelectionSuggestionPossible = true;
+            if (!$.isEmptyObject(traversedUpItems) || !$.isEmptyObject(traversedDownItems)) {
+                isSelectionSuggestionPossible = true;
+            }
+
+            selectedElements = $.merge(traversedUpItems, selectedElements);
+            selectedElements = $.merge(selectedElements, traversedDownItems);
         }
-
-        selectedElements = $.merge(traversedUpItems, selectedElements);
-        selectedElements = $.merge(selectedElements, traversedDownItems);
 
         return {
             isGetTableRangeSuccess        : isGetTableRangeSuccess,
@@ -401,6 +404,7 @@ var tableAnnotator  = {
             selectedElements              : selectedElements
         };
     },
+
 
     /**
      * Traverse upward until the  table top and return all the selected element inside the table
@@ -431,7 +435,7 @@ var tableAnnotator  = {
                 hasMore = false;
                 break;
             }
-//            console.log('pre::' +  itemLeftPositionBeforeFirstSelectedItem + ' txt:: ' + itemBeforeFirst.next());
+            console.log('pre::' +  itemLeftPositionBeforeFirstSelectedItem + ' txt:: ' + itemBeforeFirst[0].textContent);
 
             selectedItem.push(itemBeforeFirst[0]);
             itemBeforeFirst = $(itemBeforeFirst.prev());
