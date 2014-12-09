@@ -403,6 +403,7 @@ var scientificAnnotation  = {
         scientificAnnotation.clearAnnotationDisplayPanel();
         scientificAnnotation.clearSimilarSearchResult();
         highlight.init();
+        scientificAnnotation.resetAnnotation($("#resetAnnotationButton"));
     },
 
     /**

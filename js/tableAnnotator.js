@@ -49,12 +49,12 @@ var tableAnnotator  = {
 
         var selectedTableValue = tableAnnotator.getSelectedTableValues(selectedElements);
 
-        if (tableAnnotator.isTableSelectionNotValid(selectedTableValue)) {
-            messageHandler.showErrorMessage('Table selection does not seems proper. ' +
-                '<br> Please select atleast first 3 rows includeing column names ' +
-                '<br> and try again!!');
-            return;
-        }
+//        if (tableAnnotator.isTableSelectionNotValid(selectedTableValue)) {
+//            messageHandler.showErrorMessage('Table selection does not seems proper. ' +
+//                '<br> Please select atleast first 3 rows includeing column names ' +
+//                '<br> and try again!!');
+//            return;
+//        }
 
         tableAnnotator.showSelectedTableInHtml(selectedTableValue);
 
