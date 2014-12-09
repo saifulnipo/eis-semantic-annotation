@@ -21,9 +21,13 @@ var tableAnnotator  = {
     TABLE_ANNOTATION_COUNT  : 1,
     INF                     : 100000,
     TABLE_SELECTION_ABORT   : 2000,
+    TABLE_COLUMN_STEP: 2000,
     INVALID                 : -1,
+    NEW_COLUMN: 2,
     storedData              : null,
     deactivateTableSuggestion : false,
+    COLUMN_WIDTH_THRESHOLD: 0,
+    CSV_FILE_NAME : 'pdfdata.csv',
 
     /**
      * Get the selected info from the pdf and generate the data cube vocabulary
@@ -36,7 +40,6 @@ var tableAnnotator  = {
         var selectedElements = tableAnnotator.getSelectedElementTags(window),
             isConfirmSuggestion = false,
             validatedTableInfo = null;
-
         messageHandler.clearMessage();
 
         if ($.isEmptyObject(selectedElements)) {
@@ -44,25 +47,54 @@ var tableAnnotator  = {
             return;
         }
 
+        var selectedTableValue = tableAnnotator.getSelectedTableValues(selectedElements);
 
-        validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
-
-        if (validatedTableInfo.isGetTableRangeSuccess === false) {
+        if (tableAnnotator.isTableSelectionNotValid(selectedTableValue)) {
             messageHandler.showErrorMessage('Table selection does not seems proper. ' +
                 '<br> Please select atleast first 3 rows includeing column names ' +
                 '<br> and try again!!');
             return;
         }
 
-        if (validatedTableInfo.isSelectionSuggestionPossible === true && !tableAnnotator.deactivateTableSuggestion) {
+        tableAnnotator.showSelectedTableInHtml(selectedTableValue);
 
-            isConfirmSuggestion =  confirm('Your selection is part of a full table.\nDid you intend to select the whole table?');
-            if (isConfirmSuggestion) {
-                tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
-            }
-        } else {
-            tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
+//        validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
+
+//        if (validatedTableInfo.isGetTableRangeSuccess === false) {
+//            messageHandler.showErrorMessage('Table selection does not seems proper. ' +
+//                '<br> Please select atleast first 3 rows includeing column names ' +
+//                '<br> and try again!!');
+//            return;
+//        }
+
+//        if (validatedTableInfo.isSelectionSuggestionPossible === true && !tableAnnotator.deactivateTableSuggestion) {
+//
+//            isConfirmSuggestion =  confirm('Your selection is part of a full table.\nDid you intend to select the whole table?');
+//            if (isConfirmSuggestion) {
+//                tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
+//            }
+//        } else {
+//            tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
+//        }
+
+//        tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
+//        tableAnnotator.displayInfoIntoTable(selectedElements);
+    },
+
+    /**
+     * Display the user selected pdf info in to html view
+     *
+     * @param {Array} selectedElements
+     * @return {void}
+     */
+    showSelectedTableInHtml: function (selectedElements) {
+        tableAnnotator.storedData = selectedElements;
+        if ($.isEmptyObject(selectedElements)) {
+            messageHandler.showErrorMessage('No selected data found to display', true);
+            return;
         }
+        tableAnnotator.generateHtmlTableForSelectedInfo(selectedElements);
+        dbPediaLookupUIOptions.showOntologyListOptions(selectedElements[0]);
     },
 
     /**
@@ -230,6 +262,151 @@ var tableAnnotator  = {
     },
 
 
+    getSelectedTableValues: function (selectedElements) {
+
+
+        var i = 0, nextDivStartPoint = 0, currentDiv = null, nextDiv = null, tempText = '',
+            tableStructure = [], rows = [], currentDivStartPoint = 0;
+
+
+        for (i = 0; i < selectedElements.length; i++) {
+
+            currentDiv = selectedElements[i];
+            currentDivStartPoint = tableAnnotator.getIntegerValue(currentDiv.style.left);
+            if ((i + 1) < selectedElements.length) {
+                nextDiv = selectedElements[i + 1];
+                nextDivStartPoint = tableAnnotator.getIntegerValue(currentDiv.style.left);
+            } else {
+                nextDiv = null;
+            }
+
+            if (tempText === '') {
+                tempText = currentDiv.textContent;
+            }
+
+            if (tableAnnotator.isInSameCell(currentDiv, nextDiv)) {
+                tempText += ' ' + nextDiv.textContent;
+            } else {
+//                console.log(tempText);
+                if (tableAnnotator.isNewRow(currentDiv, nextDiv)) {
+                    rows.push ($.trim(tempText));
+                    tableStructure.push(rows);
+                    rows = [];
+                } else {
+                    rows.push ($.trim(tempText));
+                }
+                tempText = '';
+            }
+        }
+
+        if (!$.isEmptyObject(rows)) {
+            tableStructure.push(rows);
+        }
+        return tableStructure;
+    },
+
+
+    /**
+     * Get the all the broken columns structures of every selected rows
+     *
+     * @param {Array} selectedElements
+     * @returns {Array}
+     */
+    getTableColumnStructureForEveryRowsModified: function (selectedElements) {
+        var x, y = 0, updateTableStruct = {}, tableStruct = {},
+            lastInsertedKey = null, added = '', i = 0, previousDivStartPos = 0,
+            currentDiv = null, preDiv = null, nextDiv = null, lastRowValue = null, rowIndex = 0,
+            currentColumn = 0, columnPosWithWidth = 0, columnStartPos = 0, currentDivStartPoint = 0;
+
+        for (i = 0; i < selectedElements.length; i++) {
+            currentDiv = selectedElements[i];
+            if ((i + 1) < selectedElements.length) {
+                nextDiv = selectedElements[i + 1];
+            }
+
+            preDiv = null;
+            if ((i - 1) > 0) {
+                preDiv = selectedElements[i - 1];
+            }
+
+            x = currentDiv.style.top;
+            currentDivStartPoint = tableAnnotator.getIntegerValue(currentDiv.style.left);
+
+            if (preDiv === null) {
+                previousDivStartPos = 0;
+            } else {
+                previousDivStartPos = tableAnnotator.getIntegerValue(preDiv.style.left);
+            }
+
+            lastRowValue = tableAnnotator.getLastRowItemValue(x, tableStruct, columnStartPos, currentDivStartPoint);
+            currentColumn = lastRowValue.y + currentDivStartPoint;
+            console.log(lastRowValue);
+
+            if (preDiv !== null && preDiv.style.left === currentDiv.style.left) {
+                var row = tableStruct[preDiv.style.top];
+                if (row === undefined) {
+                    y = tableAnnotator.TABLE_COLUMN_STEP;
+                } else {
+                    y = row[row.length - 1].y;
+                }
+            } else if (lastRowValue.y === 0) { // new row
+                y = tableAnnotator.TABLE_COLUMN_STEP;
+            } else if (currentColumn > lastRowValue.y && lastRowValue.status === 0) {
+                y = lastRowValue.y + tableAnnotator.TABLE_COLUMN_STEP;
+            } else if (currentColumn === lastRowValue.y) {
+                y = currentColumn - currentDivStartPoint;
+            } else if (lastRowValue.status === 1) {
+                y = lastRowValue.y;
+                updateTableStruct = tableAnnotator.mergeSplitRows(lastRowValue.x, updateTableStruct, currentDiv.textContent);
+                continue;
+            }
+
+            if (lastRowValue.status === tableAnnotator.NEW_COLUMN) {
+                rowIndex++;
+            }
+
+            if (y === tableAnnotator.TABLE_COLUMN_STEP) {
+                columnStartPos = currentDivStartPoint;
+            }
+
+            if (lastRowValue.status === 1) {
+                lastInsertedKey = lastRowValue.x;
+            } else {
+                lastInsertedKey = x;
+            }
+
+            if (tableStruct[x] === undefined) {
+                tableStruct[x] = [];
+            }
+
+            if (updateTableStruct[lastInsertedKey] === undefined) {
+                updateTableStruct[lastInsertedKey] = [];
+            }
+
+            updateTableStruct[lastInsertedKey].push({ y: y, cellText: currentDiv.textContent, index: rowIndex});
+            tableStruct[x].push({ y: y, cellText: currentDiv.textContent });
+        }
+
+        console.log(updateTableStruct);
+//        console.log(tableStruct);
+        return updateTableStruct;
+    },
+
+
+    /**
+     *
+     * @param tableStruct
+     */
+    getRowValues: function (tableStruct) {
+
+        var cols = [], columnStartPoints = [],
+            allColumnsIndex = [], previous = '', keys = '';
+        for (keys in tableStruct) {
+            cols = tableStruct[keys];
+        }
+
+    },
+
     /**
      * Return the list of all the column start points after eliminating un-necessary start points
      *
@@ -330,11 +507,35 @@ var tableAnnotator  = {
      */
     getIntegerValue : function (str) {
 
+        if (isNum(str)) {
+            return str;
+        }
+
         if (str === null || str === undefined || $.trim(str) === '') {
             return tableAnnotator.INVALID;
         }
 
         return parseInt(str.substr(0, str.length - 2));
+    },
+
+    /**
+     * Get the integer value from the string containing pixel value
+     *
+     * i.e 165.12px = 165
+     * @param {string} str
+     * @returns {int}
+     */
+    getFoatValue: function (str) {
+
+        if (isNum(str)) {
+            return str;
+        }
+
+        if (str === null || str === undefined || $.trim(str) === '') {
+            return tableAnnotator.INVALID;
+        }
+
+        return parseFloat(str.substr(0, str.length - 2));
     },
 
     /**
@@ -528,8 +729,8 @@ var tableAnnotator  = {
     getSelectedTableRange: function (selectedElements) {
 
         var left = 0,
-            min = tableAnnotator.INF,
-            max = 0, i = 0,
+            min = null,
+            max = null, i = 0,
             itemIndex = [],
             leftPix = '',
             isEnoughInformationFount = false;
@@ -539,16 +740,16 @@ var tableAnnotator  = {
             leftPix = selectedElements[i].style.left;
             left = tableAnnotator.getIntegerValue(leftPix);
 
-            if (min > left) {
+            if (min === null || min > left) {
                 min = left;
             }
 
-            if (max < left) {
+            if (max === null || max < left) {
                 max = left;
             }
 
             if (itemIndex[leftPix] === undefined) {
-                itemIndex[leftPix] = {count : 0, left : left};
+                itemIndex[leftPix] = {count: 0, left: left};
             }
 
             itemIndex[leftPix].count++;
@@ -627,5 +828,179 @@ var tableAnnotator  = {
                 "</tr>"
             );
         }
+    },
+
+    /**
+     * Get the current div text width
+     * @param div
+     * @returns {*}
+     */
+    getDivTextWidth: function (div) {
+        if (div !== undefined && div.hasAttribute('data-canvas-width')) {
+            return parseInt($(div).attr('data-canvas-width'));
+        }
+        return 0;
+    },
+
+    /**
+     *
+     * @param currentIndex
+     * @param tableStruct
+     * @returns {int}
+     */
+    getLastRowItemValue: function (currentIndex, tableStruct, columnStartPos, currentDivStartPoint) {
+
+        var status = 0, x = currentIndex, value = 0;
+        if ($.isEmptyObject(tableStruct)) {
+            return {
+                x: x,
+                y: value,
+                status: status
+            };
+        }
+
+        var rows = tableStruct[currentIndex];
+
+        if (rows === undefined) {
+            var lastKey = tableAnnotator.getLastInsertedKey(tableStruct);
+            if (lastKey === null) {
+                value = 0;
+            } else {
+                rows = tableStruct[lastKey];
+                if (currentDivStartPoint <= columnStartPos) {
+                    value = 0;
+                    status = tableAnnotator.NEW_COLUMN;
+                } else if (rows.length > 1) {
+                    value = rows[rows.length - 1].y;
+                    x = lastKey;
+                    status = 1; // linked to previous rows
+                }
+            }
+        } else {
+            value = rows[rows.length - 1].y;
+        }
+
+        return {
+            x: x,
+            y: value,
+            status: status
+        };
+    },
+
+    /**
+     *
+     * @param x
+     * @param tableStruct
+     * @param mergeText
+     * @returns {*}
+     */
+    mergeSplitRows: function (x, tableStruct, mergeText) {
+
+        var rows = tableStruct[x],
+            lastValue = rows.pop();
+        lastValue.cellText += ' ' + mergeText;
+        rows.push(lastValue);
+        tableStruct[x] = rows;
+        return tableStruct;
+    },
+
+    /**
+     * Check if the column values are in the same cells
+     * @param currentDiv
+     * @param nextDiv
+     * @returns {boolean}
+     */
+    isInSameCell: function (currentDiv, nextDiv) {
+
+        if (currentDiv === null || nextDiv === null) {
+            return false;
+        }
+
+        var currentDivWidth = tableAnnotator.getDivTextWidth(currentDiv),
+            nextDivWidth = tableAnnotator.getDivTextWidth(nextDiv),
+            currentDivStartPoint = tableAnnotator.getIntegerValue(currentDiv.style.left),
+            nextDivStartPoint = tableAnnotator.getIntegerValue(nextDiv.style.left),
+            currentDivEndPoint = currentDivStartPoint + currentDivWidth,
+            nextDivEndPoint = nextDivStartPoint + nextDivWidth, type = '',
+            output = false;
+
+//        console.log('comparing text ::' + currentDiv.textContent + '::::' + nextDiv.textContent);
+
+        if (currentDivStartPoint === nextDivStartPoint) {
+            output = true;
+            type = 'left align';
+        } else if (currentDivEndPoint === nextDivEndPoint) {
+            output = true;
+            type = 'right align';
+        } else if (currentDivStartPoint >= nextDivStartPoint && currentDivEndPoint <= nextDivEndPoint) {
+            output = true;
+            type = 'complete overlap bottom is big';
+        } else if (currentDivStartPoint < nextDivStartPoint && currentDivEndPoint > nextDivEndPoint) {
+            output = true;
+            type = 'complete overlap top is big';
+        } else if (currentDivStartPoint < nextDivStartPoint
+            && currentDivEndPoint < nextDivEndPoint
+            && currentDivEndPoint > nextDivStartPoint) {
+            output = true;
+            type = 'partially overlap left';
+        } else if (currentDivStartPoint > nextDivStartPoint
+            && currentDivEndPoint > nextDivEndPoint
+            && currentDivStartPoint < nextDivEndPoint) {
+            output = true;
+            type = 'partially overlap right';
+        } else {
+            output = false;
+        }
+//        console.log(type);
+        return output;
+    },
+
+
+    /**
+     *  Return if it's a news rows
+     *
+     * @param currentDiv
+     * @param nextDiv
+     * @returns {boolean}
+     */
+    isNewRow:function (currentDiv, nextDiv) {
+
+        if (currentDiv === null || nextDiv === null) {
+            return false;
+        }
+
+        var output = false, currentDivWidth = tableAnnotator.getDivTextWidth(currentDiv),
+            nextDivWidth = tableAnnotator.getDivTextWidth(nextDiv),
+            currentDivStartPoint = tableAnnotator.getIntegerValue(currentDiv.style.left),
+            nextDivStartPoint = tableAnnotator.getIntegerValue(nextDiv.style.left),
+            currentDivEndPoint = currentDivStartPoint + currentDivWidth;
+
+        if (currentDivEndPoint > nextDivStartPoint){
+            output = true;
+        }
+
+        return output;
+    },
+
+    /**
+     * Check if the table is properly selected
+     * @param selectedElements
+     * @returns {boolean}
+     */
+    isTableSelectionNotValid : function(selectedElements) {
+
+        if ($.isEmptyObject(selectedElements)) {
+            return true;
+        }
+
+        var i, tempLenght = selectedElements[0].length, output = false;
+        for (i = 1; i < selectedElements.length; i++) {
+
+            if (selectedElements[i].length !== tempLenght) {
+                output = true;
+                break;
+            }
+        }
+        return output;
     }
 };

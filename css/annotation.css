@@ -98,9 +98,9 @@ th.showResult {
 }
 
 .modal.modal-width{
-    width: 70%;
+    width: 80%;
     margin: 10% auto;
-    height: 350px;
+    height: 400px;
     background-color: #d3d3d3;
     color: #000000;
     z-index: 999999;

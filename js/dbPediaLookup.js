@@ -58,7 +58,7 @@ var dbPediaLookup  = {
 
         var settings = {
             type: "GET",
-            url: dbPediaLookup.SERVICE_ADDRESS+queryParameters,
+            url: dbPediaLookup.SERVICE_ADDRESS + queryParameters,
             async: false,
             dataType: "json",
             cache: false,
@@ -68,9 +68,8 @@ var dbPediaLookup  = {
         }
         $.ajax(settings)
             .fail(function(jqXHR, exception) { //what to do in case of error
-                var errorTxt= dbPediaLookup.getStandardErrorMessage(jqXHR ,exception);
-                messageHandler.showErrorMessage(errorTxt);
-                progress.hideProgressBar();
+                messageHandler.showErrorMessage('Auto search is currenty not avaialble. Please try manual search.');
+                progressbar.hideProgressBar();
                 lookupResponseOutput = dbPediaLookup.parseResponse(null);
 
             })

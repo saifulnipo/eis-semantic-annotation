@@ -67,6 +67,10 @@ var scientificAnnotation  = {
             dbPediaLookupUIOptions.getResultFromDbPediaLookupUsingAutoSearch(tableAnnotator.storedData);
         });
 
+        $("#exportCSVButton").bind("click", function () {
+            csvExporter.exportAsCSV(tableAnnotator.storedData, tableAnnotator.CSV_FILE_NAME);
+        });
+
         $("#modal-close-btn").bind("click", function () {
             $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('hide');
         });
@@ -546,6 +550,7 @@ var scientificAnnotation  = {
         $('#ontologyClassSelectionPanel').empty();
         $('#ontologyClassSelectionContainer').hide();
 
+        messageHandler.clearMessage();
         tableAnnotator.storedData = null;
         dbPediaLookup.clearDbPediaLookupResultCache();
         dbPediaLookupUIOptions.deactivateManualSearchButton();

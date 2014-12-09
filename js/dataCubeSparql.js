@@ -210,11 +210,15 @@ var dataCubeSparql  = {
     getObservationsWithSlices: function (selectedTableCellTexts) {
 
         var observationTitle = '', columnNames =  selectedTableCellTexts[0],
-            observationQuery = '', i = 0, j = 0, index = 0, query = '', sliceRowList = '';
+            owlClassList = dataCubeSparql.getOwlClassListValue(),
+            observationQuery = '', i = 0, j = 0, index = 0, sliceValue = '',
+            query = '', cellName = '', sliceName = '', sliceRowList = '';
 
         for (i = 0; i < columnNames.length; i++) {
             index = (i + 1);
-            query += 'ex:' + dataCubeSparql.TABLE_NAME + 'SliceC' + index + ' a qb:Slice ; ' + '\n' +
+            sliceName = dataCubeSparql.TABLE_NAME + 'SliceC' + index;
+
+            query += 'ex:' + sliceName + ' a qb:Slice ; ' + '\n' +
                 'qb:sliceStructure ex:sliceTable1ByRow ; ' + '\n' +
                 'semann:columnHeader "' + columnNames[i] + '" ; ' + '\n' +
 
@@ -225,22 +229,27 @@ var dataCubeSparql  = {
 
             // skipping the 1st row as that is the column header
             for (j = 1; j < selectedTableCellTexts.length; j++) {
-                observationTitle = 'ex:' + dataCubeSparql.TABLE_NAME + 'R' + j + 'C' + (i + 1);
+                cellName = dataCubeSparql.TABLE_NAME + 'R' + j + 'C' + (i + 1);
+                observationTitle = 'ex:' + cellName;
 
                 observationQuery +=
                     observationTitle + ' a qb:Observation ;' + '\n' +
                     'qb:dataSet ex:' + dataCubeSparql.TABLE_NAME + ' ;' + '\n' +
                     'ex:' + dataCubeSparql.TABLE_NAME + 'Row ' + j + ' ;' + '\n' +
                     'ex:' + dataCubeSparql.TABLE_NAME + 'Column ' + (i + 1) + ' ;' + '\n' +
-                    dataCubeSparql.getResourceUri(selectedTableCellTexts[j][i]) + '\n' +
-                    dataCubeSparql.getSliceClassUri(selectedTableCellTexts[j][i]) + '\n' +
-                    'semann:value "' + selectedTableCellTexts[j][i] + '" .' + '\n\n';
+                    dataCubeSparql.getCellUriValue(selectedTableCellTexts[j][i],cellName) + '.' + '\n\n';
 
                 sliceRowList += observationTitle + ',';
             }
 
             // remove the last comma from the string;
             sliceRowList = sliceRowList.substring(0, sliceRowList.length - 1);
+
+            sliceValue = dataCubeSparql.getSliceUriInfo(sliceName, columnNames[i], owlClassList[i]);
+            if (sliceValue !== '') {
+                sliceRowList += ';\n' + sliceValue;
+            }
+
 
             // adding the rows to slice definition
             query += 'qb:observation ' + sliceRowList + '.' + '\n\n';
@@ -262,9 +271,33 @@ var dataCubeSparql  = {
         key = dbPediaLookupUIOptions.getCustomId(key);
         mapResult = dbPediaLookupUIOptions.searchKeyValueRadioInputMap[key];
         if (mapResult !== undefined && mapResult.value.indexOf("http://") !== -1) {
-            resourceUri = 'semann:resource <' + mapResult.value + '> ;'
+            resourceUri =  mapResult.value;
         }
         return resourceUri;
+    },
+
+    /**
+     * Get the slice info
+     * @param sliceName
+     * @param classLabel
+     * @param owlClassUri
+     * @returns {string}
+     */
+    getSliceUriInfo : function (sliceName, classLabel, owlClassUri) {
+
+        if (owlClassUri === dbPediaLookupUIOptions.CLASS_NO_SELECTION
+            || owlClassUri === dbPediaLookupUIOptions.CLASS_AUTO_SELECTION) {
+
+            return '';
+        }
+
+        var sliceClassName = 'ex:' + sliceName + 'Class',
+            sliceInfo = 'semann:class ' + sliceClassName +' .\n' +
+            sliceClassName + '\n' +
+            ' rdfs:label "' + classLabel +'" ;' +'\n' +
+            ' owl:sameAs <' + owlClassUri + '>';
+
+        return sliceInfo;
     },
 
     /**
@@ -272,13 +305,33 @@ var dataCubeSparql  = {
      * @param {string} key search item
      * @returns {string} resource uri syntax for data cube
      */
-    getSliceClassUri : function (key) {
-        var resourceUri = '', mapResult = null;
-        key = dbPediaLookupUIOptions.getCustomId(key);
-        mapResult = dbPediaLookupUIOptions.searchKeyValueRadioInputMap[key];
-        if (mapResult !== undefined && mapResult.classUri.indexOf("http://") !== -1) {
-            resourceUri = 'semann:class <' + mapResult.classUri + '> ;'
+    getCellUriValue : function (key, cellName) {
+        var uri = dataCubeSparql.getResourceUri(key),
+            value = 'semann:value ';
+
+        if (uri === '') {
+            return value + '"' +key +'"';
         }
-        return resourceUri;
+
+        cellName = ' ex:' + cellName + 'Value';
+        value += cellName + '.\n' +
+            cellName + '\n' +
+            ' rdfs:label "' + key + '" ;' + '\n' +
+            ' owl:sameAs <' + uri + '> ';
+
+        return value;
+    },
+
+    /**
+     *
+     */
+    getOwlClassListValue : function() {
+        var classNames = [];
+
+        $( ".ontologyClassSelection" ).each(function() {
+            classNames.push($( this ).val().trim());
+        });
+
+        return classNames;
     }
 };

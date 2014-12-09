@@ -112,7 +112,7 @@ var dbPediaLookupUIOptions  = {
 
             var rightClass = 'modal-right '+tabId;
 
-            tabLeftContent = "<div class='modal-left'>" + dbPediaLookupUIOptions.getRowsAsListView(listValues) +"</div>",
+            tabLeftContent = "<div class='modal-left' style='height: 200px; overflow:auto;'>" + dbPediaLookupUIOptions.getRowsAsListView(listValues) +"</div>",
                 tabRightContent = "<div class='" + rightClass +"'>" + dbPediaLookupUIOptions.getTabTable(tabId, firstSearchKey)+ '</div>';
             tabContent = tabLeftContent+ tabRightContent;
             dbPediaLookupUIOptions.addTabContent(tabId, columnName, tabContent, isActiveTab);
@@ -285,7 +285,7 @@ var dbPediaLookupUIOptions  = {
             columnArrayValues = null, keyword = null, className = '';
 
         $( ".ontologyClassSelection" ).each(function() {
-            classNames.push($( this ).val());
+            classNames.push($( this ).find('option:selected').text().trim());
         });
 
         dbPediaLookupUIOptions.resetOntologySelectionModalTabContent();

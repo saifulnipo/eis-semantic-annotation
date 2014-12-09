@@ -57,6 +57,7 @@
     <script type="text/javascript" src="./js/dbPediaLookup.js"></script>
     <script type="text/javascript" src="./js/dbPediaLookupUIOptions.js"></script>
     <script type="text/javascript" src="./js/dbPediaOwlTypes.js"></script>
+    <script type="text/javascript" src="./js/csvExporter.js"></script>
   </head>
 
   <body tabindex="1">
@@ -145,14 +146,14 @@
           <div id="toolbarContainer">
             <div id="toolbarViewer">
               <div id="toolbarViewerLeft">
-                <button id="sidebarToggle" class="toolbarButton" title="Toggle Sidebar" tabindex="4">
+                  <button id="sidebarToggle" class="toolbarButton" title="Toggle Sidebar" tabindex="4" style="display: none">
                   <span>Toggle Sidebar</span>
                 </button>
                 <div class="toolbarButtonSpacer"></div>
                 <button id="viewFind" class="toolbarButton group hiddenSmallView" title="Find in Document" tabindex="5">
                    <span>Find</span>
                 </button>
-                <div class="splitToolbarButton">
+                <div class="splitToolbarButton" style="display: none">
                   <button class="toolbarButton pageUp" title="Previous Page" id="previous" tabindex="6">
                     <span>Previous</span>
                   </button>
@@ -334,12 +335,12 @@
         <div id="displayTableTitle"> </div>
         <div id="displaySparqlTableRows" style='overflow:auto; display:none ; width:600px; height:300px;'> </div>
         <div id="ontologyClassSelectionContainer" style='display:none;'>
-            <br><br>
             <p>Select the ontology class to lookup available Uri for columns :</p>
             <div id="ontologyClassSelectionPanel" style='display:none ; overflow:auto; width:600px; height:auto;'> </div>
             <br>
             <button id="getResourceUriButton" class="btn btn-default" >Manual URI Search</button>
             <button id="getAutoUriButton" class="btn btn-default" >Auto URI Search</button>
+            <button id="exportCSVButton" class="btn btn-default" >Export as CSV</button>
 
         </div>
         <div id="viewSelectedInfoFromPfdTable" style='display:none ; overflow:auto; width:600px; height:300px;'> </div>
