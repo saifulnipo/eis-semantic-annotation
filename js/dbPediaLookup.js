@@ -155,38 +155,6 @@ var dbPediaLookup  = {
     },
 
     /**
-     * Return the standard error message if the server communication is failed
-     *
-     * @param exception
-     * @param jqXHR
-     */
-    getStandardErrorMessage:function(jqXHR, exception){
-        var errorTxt = "Error occurred when sending data to the server: "+ dbPediaLookup.SERVICE_ADDRESS;
-
-        if (jqXHR.status === 0) {
-            errorTxt = errorTxt + '<br>Not connected. Verify network.';
-        } else if (jqXHR.status == 404) {
-            errorTxt = errorTxt + '<br>Request cannot be fulfilled by the server. Check whether the \n(a) DBpedia Lookup Service is available at the above address \n(b) query contains bad syntax.';
-        } else if (jqXHR.status == 500) {
-            errorTxt = errorTxt + '<br>Internal server error [500].';
-        } else if (exception === 'parsererror') {
-            errorTxt = errorTxt + '<br>Requested JSON parse failed, possibly due to no results being returned.';
-        } else if (exception === 'timeout') {
-            errorTxt = errorTxt + '<br>Timeout error.';
-        } else if (exception === 'abort') {
-            errorTxt = errorTxt + '<br>Ajax request aborted.';
-        } else {
-            errorTxt = errorTxt + '<br>Uncaught Error.\n' + jqXHR.responseText;
-        }
-
-        if (scientificAnnotation.DEBUG) {
-            console.error(errorTxt);
-        }
-
-        return errorTxt;
-    },
-
-    /**
      * Clear the looked up cache
      */
     clearDbPediaLookupResultCache : function() {

@@ -1,10 +1,9 @@
 /**
  This file contain all the necessary DBpedia Lookup (https://github.com/dbpedia/lookup) related queries,
 
- @authors : Jaana Takis, AQM Saiful Islam
+ @authors : AQM Saiful Islam
  @dependency
  {
-    scientificAnnotation.js
     progressbar.js
     messageHandler.js
  }
@@ -18,11 +17,9 @@ var dbPediaOwlType  = {
     owlClassList : {},
 
     /**
-     * prepare an ajax call for contacting DBpedia Lookup service. This allows us to transform literals into classes.
+     * Load the list of ontology classes from dbpedia.org to support user selection for search vocabularies.
      *
-     * @param {String} keyword to be passed on as a parameter to the service
-     *
-     * @return {object}
+     * @return {void}
      */
 
     loadClasses: function() {
@@ -53,7 +50,7 @@ var dbPediaOwlType  = {
                 progressbar.hideProgressBar();
             },
             error: function(jqXHR, exception){
-                var errorTxt= sparql.getStandardErrorMessage(jqXHR,exception);
+                var errorTxt= messageHandler.getStandardErrorMessage(jqXHR,exception,sparql.DBPEDIA_SERVER_ADDRESS);
                 progressbar.hideProgressBar();
                 messageHandler.showErrorMessage(errorTxt);
             }
@@ -87,39 +84,7 @@ var dbPediaOwlType  = {
     },
 
     /**
-     * Return the standard error message if the server communication is failed
-     *
-     * @param exception
-     * @param jqXHR
-     */
-    getStandardErrorMessage:function(jqXHR, exception){
-        var errorTxt = "Error occurred when sending data to the server: "+ dbPediaLookup.SERVICE_ADDRESS;
-
-        if (jqXHR.status === 0) {
-            errorTxt = errorTxt + '<br>Not connected. Verify network.';
-        } else if (jqXHR.status == 404) {
-            errorTxt = errorTxt + '<br>Request cannot be fulfilled by the server. Check whether the \n(a) DBpedia Lookup Service is available at the above address \n(b) query contains bad syntax.';
-        } else if (jqXHR.status == 500) {
-            errorTxt = errorTxt + '<br>Internal server error [500].';
-        } else if (exception === 'parsererror') {
-            errorTxt = errorTxt + '<br>Requested JSON parse failed, possibly due to no results being returned.';
-        } else if (exception === 'timeout') {
-            errorTxt = errorTxt + '<br>Timeout error.';
-        } else if (exception === 'abort') {
-            errorTxt = errorTxt + '<br>Ajax request aborted.';
-        } else {
-            errorTxt = errorTxt + '<br>Uncaught Error.\n' + jqXHR.responseText;
-        }
-
-        if (scientificAnnotation.DEBUG) {
-            console.error(errorTxt);
-        }
-
-        return errorTxt;
-    },
-
-    /**
-     *
+     * Capitalize as camel case
      * @param string
      * @returns {string}
      */

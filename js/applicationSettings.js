@@ -54,7 +54,7 @@ var applicationSettings  = {
                 applicationSettings.insertDimensionAndProperty(response.boolean);
             },
             error: function (jqXHR, exception) {
-                var errorTxt = sparql.getStandardErrorMessage(jqXHR, exception);
+                var errorTxt = messageHandler.getStandardErrorMessage(jqXHR, exception, sparql.SERVER_ADDRESS);
                 messageHandler.showErrorMessage(errorTxt);
             }
         });
@@ -104,7 +104,7 @@ var applicationSettings  = {
                 messageHandler.showSuccessMessage('Application set up for dimension property success');
             },
             error: function (jqXHR, exception) {
-                var errorTxt = sparql.getStandardErrorMessage(jqXHR, exception);
+                var errorTxt = messageHandler.getStandardErrorMessage(jqXHR, exception, sparql.SERVER_ADDRESS);
                 progressbar.hideProgressBar();
                 messageHandler.showErrorMessage(errorTxt);
             }

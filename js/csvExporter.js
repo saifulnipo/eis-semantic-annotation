@@ -1,7 +1,7 @@
 /**
-Export array as csv
+Export array as csv file
 
- @authors : A Q M Saiful Islam
+ @authors : AQM Saiful Islam
 
  @dependency
  null
@@ -13,6 +13,7 @@ var csvExporter  = {
      * Export as csv file
      * @param selectedTableInfo
      * @param filename
+     *
      * @return void
      */
     exportAsCSV : function (selectedTableInfo, filename) {

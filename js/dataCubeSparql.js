@@ -98,7 +98,7 @@ var dataCubeSparql  = {
                     return;
                 }
 
-                var errorTxt = sparql.getStandardErrorMessage(jqXHR, exception);
+                var errorTxt = messageHandler.getStandardErrorMessage(jqXHR, exception, sparql.SERVER_ADDRESS);
                 progressbar.hideProgressBar();
                 messageHandler.showErrorMessage(errorTxt);
             }
@@ -114,34 +114,6 @@ var dataCubeSparql  = {
             tableName = '?name=' + dataCubeSparql.TABLE_NAME,
             documentURI = sparql.PREFIX_FILE + encodeURI(document.title.toString()) + pageNumber + tableName;
         return documentURI;
-    },
-
-    /**
-     * Return the standard error message if the server communication is failed
-     *
-     * @param exception
-     * @param jqXHR
-     */
-    getStandardErrorMessage : function (jqXHR, exception) {
-        var errorTxt = "Error occurred when sending data to the server: " + sparql.SERVER_ADDRESS;
-
-        if (jqXHR.status === 0) {
-            errorTxt = errorTxt + '<br>Not connected. Verify network.';
-        } else if (jqXHR.status === 404) {
-            errorTxt = errorTxt + '<br>Request cannot be fulfilled by the server. Check whether the <br />(a) sparql endpoint is available at the above address <br>(b) query contains bad syntax.';
-        } else if (jqXHR.status === 500) {
-            errorTxt = errorTxt + '<br>Internal server error [500].';
-        } else if (exception === 'parsererror') {
-            errorTxt = errorTxt + '<br>Requested JSON parse failed.';
-        } else if (exception === 'timeout') {
-            errorTxt = errorTxt + '<br>Timeout error.';
-        } else if (exception === 'abort') {
-            errorTxt = errorTxt + '<br>Ajax request aborted.';
-        } else {
-            errorTxt = errorTxt + '<br>Uncaught Error.\n' + jqXHR.responseText;
-        }
-
-        return errorTxt;
     },
 
     /**
