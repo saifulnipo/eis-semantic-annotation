@@ -87,17 +87,25 @@ var scientificAnnotation  = {
      */
     showSimpleAnnotatePanel : function (button) {
         var simpleAnnotateWindow = $('#simpleAnnotatePanel'),
-            tableAnnotationButton = $('#annotateTableButton');
+            tableAnnotationButton = $('#annotateTableButton'),
+            resetAnnotationButton = $('#resetAnnotationButton'),
+            ontologyClassSelectionContainer = $('#ontologyClassSelectionContainer'),
+            viewSelectedInfoFromPfdTable = $('#viewSelectedInfoFromPfdTable');
         if (simpleAnnotateWindow.is(':visible')) {
             simpleAnnotateWindow.hide();
+            ontologyClassSelectionContainer.fadeIn(500);
+            viewSelectedInfoFromPfdTable.fadeIn(500);
             tableAnnotationButton.attr('disabled' , false);
+            resetAnnotationButton.attr('disabled' , false);
             button.text('Show Simple Annotate Panel');
         } else {
             simpleAnnotateWindow.fadeIn(500);
+            ontologyClassSelectionContainer.hide();
+            viewSelectedInfoFromPfdTable.hide();
             button.text('Hide Simple Annotate Panel');
             tableAnnotationButton.attr('disabled' , true);
+            resetAnnotationButton.attr('disabled' , true);
         }
-
         scientificAnnotation.resetAnnotationTable();
     },
 
@@ -500,7 +508,6 @@ var scientificAnnotation  = {
         $('#displayTableTitle').hide();
         $('#displaySparqlTableRows').empty();
         $('#displaySparqlTableRows').hide();
-        $('#ontologyClassSelectionContainer').hide();
     },
 
     /**
