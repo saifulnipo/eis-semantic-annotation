@@ -68,8 +68,8 @@ var dataCubeSparql  = {
 
             '}';
 
-//        console.log(query);
-//        return;
+        console.log(query);
+        return;
 
         $.ajax({
             type: "POST",
@@ -258,8 +258,8 @@ var dataCubeSparql  = {
     getSliceUriInfo : function (sliceName, classLabel, owlClassUri) {
 
         if (owlClassUri === dbPediaLookupUIOptions.CLASS_NO_SELECTION
-            || owlClassUri === dbPediaLookupUIOptions.CLASS_AUTO_SELECTION) {
-
+            || owlClassUri === dbPediaLookupUIOptions.CLASS_AUTO_SELECTION
+            || dbPediaLookupUIOptions.IS_AUTO_SEARCHED_TRIGGERED_YET) {
             return '';
         }
 
