@@ -71,6 +71,7 @@ var dbPediaOwlType  = {
         $.each(response, function(name, value) {
             if(name == 'results'){
                 dbPediaOwlType.owlClassList[dbPediaLookupUIOptions.CLASS_NO_SELECTION] = dbPediaLookupUIOptions.CLASS_NO_SELECTION;
+                dbPediaOwlType.owlClassList[dbPediaLookupUIOptions.CLASS_CUSTOM_SELECTION] = dbPediaLookupUIOptions.CLASS_CUSTOM_SELECTION;
                 dbPediaOwlType.owlClassList[dbPediaLookupUIOptions.CLASS_AUTO_SELECTION] = dbPediaLookupUIOptions.CLASS_AUTO_SELECTION;
                 $.each(value.bindings, function(index,item) {
                     typeName = dbPediaOwlType.capitalise(item.name.value);

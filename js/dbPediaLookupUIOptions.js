@@ -15,6 +15,8 @@ var dbPediaLookupUIOptions  = {
 
     CLASS_AUTO_SELECTION : 'Auto',
 
+    CLASS_CUSTOM_SELECTION : '-- Custom --',
+
     /**
      * Cache current selected tab's class name
      */
@@ -51,6 +53,7 @@ var dbPediaLookupUIOptions  = {
             columnValue += "<tr class = 'showResult'>";
             columnValue += "<td class = 'showResult'>" + columnNames[i] + "</td>";
             columnValue += "<td class = 'showResult'>" + dbPediaLookupUIOptions.getListOptions() + "</td>";
+            columnValue += "<td class = 'showResult'>" + dbPediaLookupUIOptions.getCustomClassInputField(ontologyClassListId) + "</td>";
             columnValue += "</tr>";
         }
 
@@ -76,6 +79,19 @@ var dbPediaLookupUIOptions  = {
         });
         html += '</select>';
         return html;
+    },
+
+
+    /**
+     * Return html input text field
+     *
+     * @param {string} id
+     *
+     * @returns {string}
+     */
+    getCustomClassInputField : function (id) {
+        id = 'customClassInput_'+id;
+        return '<input type="text" class="form-control" id="'+ id +'" placeholder="Custom Class" disabled  style="width:200px; height: 30px;" >';
     },
 
     /**
@@ -132,12 +148,22 @@ var dbPediaLookupUIOptions  = {
         $(".ontologyClassSelection").bind("change", function () {
             dbPediaLookupUIOptions.deactivateManualSearchButton();
             dbPediaLookup.clearDbPediaLookupResultCache();
-            $(".ontologyClassSelection").each(function() {
-                if ($(this).val() !== dbPediaLookupUIOptions.CLASS_NO_SELECTION) {
-                    dbPediaLookupUIOptions.activateURIManualSearchButton();
-                    return;
-                }
-            });
+
+            var nextTextField = $(this).closest('td').next('td').find('input:text');
+            nextTextField.prop( "disabled", true );
+            nextTextField.val('');
+
+            if ($(this).val() == dbPediaLookupUIOptions.CLASS_CUSTOM_SELECTION) {
+                nextTextField.prop( "disabled", false );
+                return;
+            }
+
+            if ($(this).val() === dbPediaLookupUIOptions.CLASS_NO_SELECTION
+                || $(this).val() === dbPediaLookupUIOptions.CLASS_AUTO_SELECTION) {
+                return;
+            }
+
+            dbPediaLookupUIOptions.activateURIManualSearchButton();
         });
     },
 

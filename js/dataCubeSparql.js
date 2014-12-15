@@ -68,8 +68,8 @@ var dataCubeSparql  = {
 
             '}';
 
-        console.log(query);
-        return;
+//        console.log(query);
+//        return;
 
         $.ajax({
             type: "POST",
@@ -257,6 +257,10 @@ var dataCubeSparql  = {
      */
     getSliceUriInfo : function (sliceName, classLabel, owlClassUri) {
 
+        if (owlClassUri === dbPediaLookupUIOptions.CLASS_CUSTOM_SELECTION) {
+            return dataCubeSparql.getCustomUriClassValue(sliceName, classLabel);
+        }
+
         if (owlClassUri === dbPediaLookupUIOptions.CLASS_NO_SELECTION
             || owlClassUri === dbPediaLookupUIOptions.CLASS_AUTO_SELECTION
             || dbPediaLookupUIOptions.IS_AUTO_SEARCHED_TRIGGERED_YET) {
@@ -305,5 +309,30 @@ var dataCubeSparql  = {
         });
 
         return classNames;
+    },
+
+    /**
+     * Return the custom Uri class input bye the user
+     *
+     * @param sliceName
+     * @param columnName
+     * @returns {string}
+     */
+    getCustomUriClassValue : function(sliceName, columnName) {
+
+        var id = '#customClassInput_'+dbPediaLookupUIOptions.getCustomId(columnName),
+            customUriInputValue = $(id).val();
+
+        if (customUriInputValue === null || customUriInputValue.trim() === '') {
+            return '';
+        }
+
+        var sliceClassName = 'ex:' + sliceName + 'Class',
+        sliceInfo = 'semann:class ' + sliceClassName +' .\n' +
+            sliceClassName + '\n' +
+            ' rdfs:label "' + columnName +'" ;' +'\n' +
+            ' semann:customUri "' + customUriInputValue +'" ';
+
+        return sliceInfo;
     }
 };
