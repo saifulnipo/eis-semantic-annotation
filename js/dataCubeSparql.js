@@ -85,6 +85,7 @@ var dataCubeSparql  = {
                 }
 
                 scientificAnnotation.hideAnnotationDisplayTable();
+                scientificAnnotation.resetAnnotation(null);
 
                 progressbar.hideProgressBar();
                 messageHandler.showSuccessMessage('Table annotation successfully added');
