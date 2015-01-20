@@ -13,7 +13,7 @@ This file is the main entry point for this tools for all the event
 var scientificAnnotation  = {
 
     GRAPH_NAME            : 'scientificAnnotation',
-    GRAPH_NAME_EIS        : 'eisAnnotation',
+    GRAPH_NAME_EIS        : 'eis.iai.uni-bonn-table-annotation',
     DEBUG                 : true,
     ONTOLOGY_SELECT_MODAL : '#ontologySelectionModel',
 
