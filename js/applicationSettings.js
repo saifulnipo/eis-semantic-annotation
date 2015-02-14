@@ -18,12 +18,25 @@ var applicationSettings  = {
 
     isUnitTestOngoing : false,
 
+    isLoggingOn : false,
+
     /**
      * Set up the environment for property and dimensions
      * @return {void}
      */
     setUp: function () {
         applicationSettings.setUpForDimensionProperty();
+    },
+
+    /**
+     * Setting up the google analytics
+     */
+    setUpGoogleAnalytics : function() {
+
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-1234-1"]);
+        _gaq.push(["_setDomainName", "none"]);
+        _gaq.push(["_trackPageview"]);
     },
 
     /**

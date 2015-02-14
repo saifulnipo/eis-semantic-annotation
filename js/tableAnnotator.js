@@ -43,6 +43,7 @@ var tableAnnotator  = {
         messageHandler.clearMessage();
 
         if ($.isEmptyObject(selectedElements)) {
+            ga('send', 'event', 'Button', 'click','Try to annotate without selection');
             messageHandler.showErrorMessage('Please open pdf file and select a table to annotate and try again!!', true);
             return;
         }
@@ -57,6 +58,7 @@ var tableAnnotator  = {
 //        }
 
         tableAnnotator.showSelectedTableInHtml(selectedTableValue);
+        ga('send', 'event', 'Button', 'click','Preview the table');
 
 //        validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
 

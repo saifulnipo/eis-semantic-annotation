@@ -53,6 +53,7 @@ var scientificAnnotation  = {
 
         $("#resetAnnotationButton").bind("click", function () {
             scientificAnnotation.resetAnnotation($(this));
+            ga('send', 'event', 'Button', 'click','resetAnnotation');
         });
 
         $("#getResourceUriButton").bind("click", function () {
@@ -60,15 +61,18 @@ var scientificAnnotation  = {
 
             if (!$.isEmptyObject(dbPediaLookup.lookUpResult)) {
                 $(scientificAnnotation.ONTOLOGY_SELECT_MODAL).modal('show');
+                ga('send', 'event', 'Button', 'click','Manual Uri search');
             }
         });
 
         $("#getAutoUriButton").bind("click", function () {
             dbPediaLookupUIOptions.getResultFromDbPediaLookupUsingAutoSearch(tableAnnotator.storedData);
+            ga('send', 'event', 'Button', 'click','Auto Uri search');
         });
 
         $("#exportCSVButton").bind("click", function () {
             csvExporter.exportAsCSV(tableAnnotator.storedData, tableAnnotator.CSV_FILE_NAME);
+            ga('send', 'event', 'Button', 'Export as csv');
         });
 
         $("#modal-close-btn").bind("click", function () {
@@ -541,6 +545,7 @@ var scientificAnnotation  = {
 
             if (tableAnnotator.storedData !== null) {
                 dataCubeSparql.addAnnotation(tableAnnotator.storedData);
+                ga('send', 'event', 'Button', 'click','annotation insert as datacube');
             }
         }
     },
@@ -566,6 +571,7 @@ var scientificAnnotation  = {
         if (button !== null) {
             button.hide();
         }
+
     },
 
     /**
@@ -614,7 +620,9 @@ var scientificAnnotation  = {
  * document on ready method
  */
 $(function () {
+
     applicationSettings.setUp();
+    applicationSettings.setUpGoogleAnalytics();
 
     if (applicationSettings.isUnitTestOngoing) {
         return;
