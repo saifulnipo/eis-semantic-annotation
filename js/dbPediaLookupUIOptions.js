@@ -146,6 +146,7 @@ var dbPediaLookupUIOptions  = {
      */
     bindOntologyClassListChangeEvent : function() {
         $(".ontologyClassSelection").bind("change", function () {
+            ga('send', 'event', 'ontology class selection',$(this).val());
             dbPediaLookupUIOptions.deactivateManualSearchButton();
             dbPediaLookup.clearDbPediaLookupResultCache();
 
@@ -176,6 +177,8 @@ var dbPediaLookupUIOptions  = {
         $(".list").bind("click", function () {
             dbPediaLookupUIOptions.showTableOnListItemClick($(this).text());
             dbPediaLookupUIOptions.changeListItemBackGroundColor($(this));
+            ga('send', 'event', 'Item clicked in ontology selection list',$(this).text());
+
         });
     },
 
@@ -198,6 +201,7 @@ var dbPediaLookupUIOptions  = {
     bindTabSelectEvent : function () {
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             dbPediaLookupUIOptions.selectedTabClass  = $(this).attr('class');
+            ga('send', 'event', 'Ontology Tab selected', $(this).text());
         });
     },
 
@@ -216,6 +220,8 @@ var dbPediaLookupUIOptions  = {
                 previous.id = id;
                 previous.value = value;
                 dbPediaLookupUIOptions.searchKeyValueRadioInputMap[name] = previous;
+
+            ga('send', 'event', 'Resource URI selected',$(this).text());
         });
     },
 

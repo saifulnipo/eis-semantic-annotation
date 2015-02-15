@@ -43,7 +43,7 @@ var tableAnnotator  = {
         messageHandler.clearMessage();
 
         if ($.isEmptyObject(selectedElements)) {
-            ga('send', 'event', 'Button', 'click','Try to annotate without selection');
+            ga('send', 'event', 'Button', 'Try to annotate without selection');
             messageHandler.showErrorMessage('Please open pdf file and select a table to annotate and try again!!', true);
             return;
         }
@@ -58,7 +58,7 @@ var tableAnnotator  = {
 //        }
 
         tableAnnotator.showSelectedTableInHtml(selectedTableValue);
-        ga('send', 'event', 'Button', 'click','Preview the table');
+        ga('send', 'event', 'Button', 'Preview the table');
 
 //        validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
 
@@ -830,6 +830,18 @@ var tableAnnotator  = {
                 "</tr>"
             );
         }
+
+        tableAnnotator.tableItemBindClickEvent();
+    },
+
+    /**
+     * Add google analytics to table item how has href
+     */
+    tableItemBindClickEvent: function() {
+        $("#selectedInfoViewer td.showResult a").unbind('click');
+        $("#selectedInfoViewer td.showResult a").bind("click", function () {
+            ga('send', 'event', 'Selected Uri clicked to check', $(this).text());
+        });
     },
 
     /**
