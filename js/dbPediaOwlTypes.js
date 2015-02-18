@@ -30,14 +30,14 @@ var dbPediaOwlType  = {
 
         progressbar.showProgressBar('Please wait a moment!! Loading owl class types from dbpedia.org');
 
-        var selectQuery = "SELECT distinct str(?label) as ?name, ?type " + '\n' +
+        var selectQuery = "SELECT distinct str(LCASE(?label)) as ?name, ?type " + '\n' +
             "WHERE " + '\n' +
                 "{ " + '\n' +
                     "?type a owl:Class . " + '\n' +
                     "?type rdfs:label  ?label " + '\n' +
                     "FILTER (lang(?label) = 'en') " + '\n' +
                 "}" + '\n' +
-            "Order by (LCASE(str(?name)))";
+            "Order by (str(LCASE(?name)))";
         $.ajax({
             type: "POST",
             url: sparql.DBPEDIA_SERVER_ADDRESS,
