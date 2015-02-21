@@ -1,2 +1,1 @@
-## This folder contain sparql data structure related files
-- table data cube structure
+## This folder contain sample data set to evaluate the system
