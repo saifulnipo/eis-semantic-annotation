@@ -1,12 +1,12 @@
-# Semantic Table Annotation Tool for EIS related PDF documents
+# Semantic annotation of tabular data in PDF documents via crowdsourcing
 
-It is a web-based semantic annotation tool for annotating table information in a pdf documents <br>
+It is a web-based semantic annotation tool for annotating table information in a pdf documents. <br>
+This tool has been developed as part of Masters thesis work. <br>
 Using this tool one can annotate a table text in the form of tripple.<br> 
 This tool transform selected table information in to the [RDF Data Cube Vocabulary](http://www.w3.org/TR/vocab-data-cube/).
 
-
 ## Project Current state
-Following are the working features and ongoing works details.<br>
+Following are the working features of the current thesis work.<br>
 
 ### Currently working features:
 - [Table auto annotation](http://youtu.be/i4oXo01cpVY)
@@ -19,7 +19,7 @@ Following are the working features and ongoing works details.<br>
 
 ## Related Work in progress:
 
-There is another project  done as a masters thesis, 
+There is another related project  done as a masters thesis, focusing mainly on text based annotation in PDF document. <br>
  - https://github.com/jaanatak/eis-semantic-annotation concentrates on the further development of the [find similar publications](https://github.com/AKSW/semann/wiki/Documentation#find-similar-publications) functionality. 
 Eventually the two parallel forks will be merged into here.
 
