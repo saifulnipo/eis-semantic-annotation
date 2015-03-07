@@ -156,11 +156,19 @@ var dbPediaLookupUIOptions  = {
 
             if ($(this).val() == dbPediaLookupUIOptions.CLASS_CUSTOM_SELECTION) {
                 nextTextField.prop( "disabled", false );
-                return;
             }
 
-            if ($(this).val() === dbPediaLookupUIOptions.CLASS_NO_SELECTION
-                || $(this).val() === dbPediaLookupUIOptions.CLASS_AUTO_SELECTION) {
+            var count = 0;
+            $(".ontologyClassSelection").each(function(){
+
+                if ($(this).val() === dbPediaLookupUIOptions.CLASS_NO_SELECTION
+                    || $(this).val() === dbPediaLookupUIOptions.CLASS_CUSTOM_SELECTION
+                ) {
+                    count++;
+                }
+            });
+
+            if (count === $(".ontologyClassSelection").length) {
                 return;
             }
 

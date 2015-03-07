@@ -101,7 +101,9 @@ var scientificAnnotation  = {
             viewSelectedInfoFromPfdTable = $('#viewSelectedInfoFromPfdTable');
         if (simpleAnnotateWindow.is(':visible')) {
             simpleAnnotateWindow.hide();
-            ontologyClassSelectionContainer.fadeIn(500);
+            if (resetAnnotationButton.is(':visible')) {
+                ontologyClassSelectionContainer.fadeIn(500);
+            }
             viewSelectedInfoFromPfdTable.fadeIn(500);
             tableAnnotationButton.attr('disabled' , false);
             resetAnnotationButton.attr('disabled' , false);
