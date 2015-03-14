@@ -43,44 +43,16 @@ var tableAnnotator  = {
         messageHandler.clearMessage();
 
         if ($.isEmptyObject(selectedElements)) {
-            ga('send', 'event', 'Button', 'Try to annotate without selection');
+            googleAnalytics.logEvent('send', 'event', 'Button', 'Try to annotate without selection');
             messageHandler.showErrorMessage('Please open pdf file and select a table to annotate and try again!!', true);
             return;
         }
 
         var selectedTableValue = tableAnnotator.getSelectedTableValues(selectedElements);
 
-//        if (tableAnnotator.isTableSelectionNotValid(selectedTableValue)) {
-//            messageHandler.showErrorMessage('Table selection does not seems proper. ' +
-//                '<br> Please select atleast first 3 rows includeing column names ' +
-//                '<br> and try again!!');
-//            return;
-//        }
-
         tableAnnotator.showSelectedTableInHtml(selectedTableValue);
-        ga('send', 'event', 'Button', 'Preview the table');
+        googleAnalytics.logEvent('send', 'event', 'Button', 'Preview the table');
 
-//        validatedTableInfo = tableAnnotator.getValidatedTableSelectedInfo(selectedElements);
-
-//        if (validatedTableInfo.isGetTableRangeSuccess === false) {
-//            messageHandler.showErrorMessage('Table selection does not seems proper. ' +
-//                '<br> Please select atleast first 3 rows includeing column names ' +
-//                '<br> and try again!!');
-//            return;
-//        }
-
-//        if (validatedTableInfo.isSelectionSuggestionPossible === true && !tableAnnotator.deactivateTableSuggestion) {
-//
-//            isConfirmSuggestion =  confirm('Your selection is part of a full table.\nDid you intend to select the whole table?');
-//            if (isConfirmSuggestion) {
-//                tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
-//            }
-//        } else {
-//            tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
-//        }
-
-//        tableAnnotator.displayInfoIntoTable(validatedTableInfo.selectedElements);
-//        tableAnnotator.displayInfoIntoTable(selectedElements);
     },
 
     /**
@@ -217,8 +189,6 @@ var tableAnnotator  = {
             tableRowsAndColumn.push(
                 selectedTableInfo[rows]
             );
-
-//            console.log(selectedTableInfo[rows]);
         }
 
         return tableRowsAndColumn;
@@ -289,7 +259,6 @@ var tableAnnotator  = {
             if (tableAnnotator.isInSameCell(currentDiv, nextDiv)) {
                 tempText += ' ' + nextDiv.textContent;
             } else {
-//                console.log(tempText);
                 if (tableAnnotator.isNewRow(currentDiv, nextDiv)) {
                     rows.push ($.trim(tempText));
                     tableStructure.push(rows);
@@ -390,7 +359,6 @@ var tableAnnotator  = {
         }
 
         console.log(updateTableStruct);
-//        console.log(tableStruct);
         return updateTableStruct;
     },
 
@@ -417,7 +385,6 @@ var tableAnnotator  = {
      */
     getRefinedColumnStructure : function (tableStruct) {
 
-//        console.log(tableStruct);
         var cols = [], columnStartPoints = [],
             allColumnsIndex = [], previous = '', keys = '';
         for (keys in tableStruct) {
@@ -840,7 +807,7 @@ var tableAnnotator  = {
     tableItemBindClickEvent: function() {
         $("#selectedInfoViewer td.showResult a").unbind('click');
         $("#selectedInfoViewer td.showResult a").bind("click", function () {
-            ga('send', 'event', 'Selected Uri clicked to check', $(this).text());
+            googleAnalytics.logEvent('send', 'event', 'Selected Uri clicked to check', $(this).text());
         });
     },
 

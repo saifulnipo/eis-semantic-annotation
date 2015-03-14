@@ -12,9 +12,9 @@
  progressbar : false, sparql:false, messageHandler:false, plusplus: false  */
 
 /*jslint plusplus: true */
+var applicationSettings
 
-
-var applicationSettings  = {
+applicationSettings  = {
 
     isUnitTestOngoing : false,
 
