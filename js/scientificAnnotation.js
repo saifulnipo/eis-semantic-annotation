@@ -659,13 +659,11 @@ var scientificAnnotation  = {
         if (!scientificAnnotation.DIV_DATACUBES.is(':visible')) {
             tableAnnotator.annotateSelectedTable();
         } else {
-            button.text('Annotate table');
-            scientificAnnotation.BTN_RESET.hide();
-            scientificAnnotation.DIV_DATACUBES.hide();
-
             if (tableAnnotator.storedData !== null) {
                 dataCubeSparql.addAnnotation(tableAnnotator.storedData);
                 googleAnalytics.logEvent('send', 'event', 'Button', 'Table annotations insert into virtuoso as datacube');
+            } else {
+                messageHandler.showSuccessMessage('No table annotation is applied!!!');
             }
         }
     },

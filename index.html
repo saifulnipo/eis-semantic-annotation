@@ -254,6 +254,13 @@
             <!--End : Simple Annotation panel div -->
         </div>
 
+        <!-- message boxes start -->
+        <div class="alert alert-success" style="display: none"></div>
+        <div class="alert alert-danger" style="display: none"></div>
+        <div class="alert alert-warning" style="display: none"></div>
+        <!-- message boxes end -->
+
+
         <div class="tab-pane" id="tableAnnotations">
             <button id="annotateTableButton" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Annotate table</button>
             <button id="resetAnnotationButton" class="btn btn-default" style="display: none"> Reset Selection</button>
@@ -267,7 +274,7 @@
 
             <div id="ontologyClassSelectionContainer" style='display:none;'>
                 <p>Select the ontology class to lookup available Uri for columns :</p>
-                <div id="ontologyClassSelectionPanel" style='display:none ; overflow:auto; width:auto; height:180px;'> </div>
+                <div id="ontologyClassSelectionPanel" style='display:none ; overflow:auto; width:auto; height:auto; max-height:180px;'> </div>
                 <br>
                 <button id="getResourceUriButton" class="btn btn-default" >Manual URI Search</button>
                 <button id="getAutoUriButton" class="btn btn-default" >Auto URI Search</button>
@@ -314,11 +321,6 @@
     </div>
 
     <button id="test" class="btn btn-default" style="display: none">Test</button></br>
-    <!-- message boxes start -->
-    <div class="alert alert-success" style="display: none"></div>
-    <div class="alert alert-danger" style="display: none"></div>
-    <div class="alert alert-warning" style="display: none"></div>
-    <!-- message boxes end -->
 
     <!-- progress bar end -->
 

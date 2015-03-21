@@ -83,15 +83,17 @@ var dataCubeSparql  = {
                 if (isCallForTesting) {
                     return;
                 }
-
                 scientificAnnotation.hideAnnotationDisplayTable();
                 scientificAnnotation.resetAnnotation(null);
-
                 progressbar.hideProgressBar();
                 messageHandler.showSuccessMessage('Table annotation successfully added');
                 tableAnnotator.TABLE_ANNOTATION_COUNT++;
                 tableAnnotator.storedData = null;
                 dbPediaLookup.clearDbPediaLookupResultCache();
+                scientificAnnotation.BTN_RESET.hide();
+                scientificAnnotation.DIV_DATACUBES.hide();
+                scientificAnnotation.BTN_TABLE.text('Annotate table');
+
             },
             error: function (jqXHR, exception) {
 
