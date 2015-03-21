@@ -1,50 +1,88 @@
 /**
-Parse the json response from virtuso server
+ Parse the json response from virtuso server
 
  @authors : A Q M Saiful Islam, Jaana Takis
 
  @dependency
  null
  */
-
+"use strict";
 var sparqlResponseParser  = {
 
     /**
-     * Parse the json response form db and render the tabular view, while display available annotations
+     * Parse the json response form db and render a tabular view of the results
      *
-     * @param response
+     * @param JSON response
      */
     parseResponse:function(response) {
-	var fragments = [];
+        highlight.importedAnnotations.emptyAll(); //reset imported annotations
         $.each(response, function(name, value) {
             if(name == 'results'){
                 $.each(value.bindings, function(index,item) {
+                    var property = (jQuery.isEmptyObject(item.PROPERTY)) ? "": item.PROPERTY.value;
+                    var object = (jQuery.isEmptyObject(item.OBJECT)) ? "": item.OBJECT.value;
                     scientificAnnotation.addDataToSparqlTableView(
                         item.SUBJECT.value,
-                        item.PROPERTY.value,
-                        item.OBJECT.value
+                        property,
+                        object
                     );
-		            fragments.push(sparqlResponseParser.getURLParameters(item.excerpt.value, "rangyFragment"));
+                    var fragment = sparqlResponseParser.getURLParameters(item.excerpt.value, "id");
+                    var pageNum = sparqlResponseParser.getPageParameter(item.excerpt.value);
+                    highlight.importedAnnotations.set(pageNum, fragment);
                 });
             }
         });
-	    return fragments;
+    },
+
+    /**
+     * Parse the json response and return as an array of objects
+     *
+     * @param response
+     * @returns {Array of objects}
+     */
+    parseResource:function(response) {
+        var map = []; //maps labels to properties (URIs), eg  
+        /*
+         [
+         {
+         "value": "long distance piste kilometre (?)",
+         "uri": "http://dbpedia.org/ontology/longDistancePisteKilometre"
+         },
+         {
+         "value": "long distance piste number",
+         "uri": "http://dbpedia.org/ontology/longDistancePisteNumber"
+         }
+         ]
+         */
+        var resource = 'PROPERTY'; //by default we check for properties
+        $.each(response, function(name, value) {
+            if(name == 'results'){
+                $.each(value.bindings, function(index,item) {
+                    if (item.OBJECT && index == 0) resource = 'OBJECT'; //response contains "OBJECT", not "PROPERTY"
+                    map.push({
+                        "value": item.LABEL.value, "uri": item[resource].value
+                    });
+                });
+            }
+        });
+        if (scientificAnnotation.DEBUG) console.log("Returned " +map.length+ " "+resource+ "s. " /*+JSON.stringify(map, null, 4)*/ );
+        return map;
     },
 
     /**
      * Parse the json response and return as array
      *
-     * @param response
-     * @returns {Array}
+     * @param JSON response
+     * @returns {Array} of results
      */
-    parseProperty:function(response) {
+    parseLoadOntology:function(response) {
 
         var items = [];
 
         $.each(response, function(name, value) {
             if(name == 'results'){
                 $.each(value.bindings, function(index,item) {
-                    items.push(item.PROPERTY.value);
+                    items.push(item.count.value);
                 });
             }
         });
@@ -52,45 +90,151 @@ var sparqlResponseParser  = {
     },
 
     /**
-     * Parse the json response and return as array
+     * Parse the json response and return as array. Also initialises the global variable of ontologies.
      *
-     * @param response
-     * @returns {Array}
+     * @param JSON response
+     * @param {String} Ontology identifier
+     * @returns {Object} of ontology classes
      */
-    parseSimilarSearch:function(response) {
+    parseOntologyClasses:function(response, ontologyURL) {
 
-        var items = [];
+        var items = { classes: {} };
+        var restrictedItems = [];
 
         $.each(response, function(name, value) {
             if(name == 'results'){
                 $.each(value.bindings, function(index,item) {
-                    items.push(item.file.value);
+                    var classLabel = (jQuery.isEmptyObject(item.classLabel)) ? null: item.classLabel.value;
+                    var classComment = (jQuery.isEmptyObject(item.classComment)) ? null: item.classComment.value;
+                    items.classes[item.class.value] = { "label" : classLabel, "comment" : classComment };
                 });
             }
         });
-        return items;
+        sparql.ontologies[ontologyURL] = items; //assign global var
+        restrictedItems = $.map( sparql.ontologies[ontologyURL].classes, function( value, key ) {
+            return { "value": value.label, "uri": key };
+        });
+        return restrictedItems;
     },
 
     /**
-     * Parse the json response and return as array
+     * Parse the json response and return as array. Also initialises the global variable of ontologies.
      *
-     * @param response
-     * @returns {Array}
+     * @param JSON response
+     * @param {String} Ontology identifier
+     * @returns {Object} of ontology properties
      */
-    parseObject:function(response) {
+    parseOntologyProperties:function(response, ontologyURL) {
 
-        var items = [];
+        var items = { properties: {} };
+        var restrictedItems = [];
 
         $.each(response, function(name, value) {
             if(name == 'results'){
                 $.each(value.bindings, function(index,item) {
-                    items.push(item.OBJECT.value);
+                    var propertyLabel = (jQuery.isEmptyObject(item.propertyLabel)) ? null: item.propertyLabel.value;
+                    var propertyComment = (jQuery.isEmptyObject(item.propertyComment)) ? null: item.propertyComment.value;
+                    items.properties[item.property.value] = { "label" : propertyLabel, "comment" : propertyComment };
                 });
             }
         });
-        return items;
+        sparql.ontologies[ontologyURL] = items; //assign global var
+        restrictedItems = $.map( sparql.ontologies[ontologyURL].properties, function( value, key ) {
+            return { "value": value.label, "uri": key };
+        });
+        return restrictedItems;
     },
-    
+
+    /**
+     * Parse json response of recommendations which share the same SKOS category.
+     *
+     * @return JSON response
+     * @returns {Object} of recommendations
+     */
+    parseRecommendationsBySKOSCategory :function(response){
+
+        $.each(response, function(name, value) {
+            if(name == 'results'){
+                $.each(value.bindings, function(index,item) {
+                    var categoryLabel = (jQuery.isEmptyObject(item.category_label)) ? null: item.category_label.value;
+                    //var skosValues = { "curr_a" : item.curr_a.value, "curr_aType": item.curr_aType.value, "a": item.a.value, "aType": item.aType.value, "curr_category": item.curr_category.value, "category_label" : categoryLabel };
+                    sparql.recommendations.papers[item.file.value] = (jQuery.isEmptyObject(sparql.recommendations.papers[item.file.value])) ? { "label": item.fileLabel.value, "annotations": {} } : sparql.recommendations.papers[item.file.value];
+                    var ann = sparql.recommendations.papers[item.file.value];
+                    ann.annotations[item.a.value] = (jQuery.isEmptyObject(ann[item.a.value])) ? { "label": item.aLabel.value, "skos": {}} : ann[item.a.value];
+                    var cat = ann.annotations[item.a.value];
+                    cat.skos[item.curr_category.value] = (jQuery.isEmptyObject(cat.skos[item.curr_category.value])) ? { "thisAnnotation": item.curr_a.value, "label": categoryLabel, "subjectOf":  item.aType.value, "thisSubjectOf": item.curr_aType.value } : cat.skos[item.curr_category.value];
+                });
+            }
+        });
+        return sparql.recommendations;
+    },
+
+    /**
+     * Parse json response of recommendations which share the same DBpedia resource.
+     *
+     * @return JSON response
+     * @returns {Object} of recommendations
+     */
+    parseRecommendationsByDBpedia :function(response){
+
+        $.each(response, function(name, value) {
+            if(name == 'results'){
+                $.each(value.bindings, function(index,item) {
+                    sparql.recommendations.papers[item.file.value] = (jQuery.isEmptyObject(sparql.recommendations.papers[item.file.value])) ? { "label": item.fileLabel.value, "annotations": {}} : sparql.recommendations.papers[item.file.value];
+                    var ann = sparql.recommendations.papers[item.file.value];
+                    ann.annotations[item.a.value] = (jQuery.isEmptyObject(ann[item.a.value])) ? { "label": item.aLabel.value, "dbpedia": {}} : ann[item.a.value];
+                    var cat = ann.annotations[item.a.value];
+                    cat.dbpedia[item.aType.value] = (jQuery.isEmptyObject(cat[item.aType.value])) ? { "thisAnnotation": item.curr_a.value, "label": null } : cat.dbpedia[item.aType.value];
+                });
+            }
+        });
+        return sparql.recommendations;
+    },
+
+    /**
+     * Parse json response of recommendation contexts.
+     *
+     * @return JSON response
+     * @returns {Object} of recommendations
+     */
+    parseCommonContextQuery :function(response){
+
+        var results = {};
+        var explanationDivs = $('#'+scientificAnnotation.DIV_RECOMMENDATIONS.prop("id")+' .explanation');
+        console.log("expl. "+ explanationDivs.length + " " +explanationDivs);
+        $.each(response, function(name, value) {
+            if(name == 'results'){
+                $.each(value.bindings, function(index,item) {
+                    $.each(explanationDivs, function(index,div) {
+                        var annotation = $(div).attr("annotation");
+                        var thisAnnotation = $(div).attr("thisAnnotation");
+                        if (annotation === item.annotation.value && thisAnnotation === item.thisAnnotation.value) {
+                            //$(div).after( '<span class="label label-warning">New</span>' );
+                            var label = item.parentType.value;
+                            label = label.split("#");
+                            label = label[label.length-1];
+                            var divContent = $(div).html();
+                            divContent = divContent + '<span class="label label-warning" title="' +item.label.value+ '">' +label+ '</span>' ;
+                            $(div).html(divContent);
+                        }
+                        //console.log($(item).attr("annotation"));
+                        //console.log(JSON.stringify(item, null, 4));
+                        //console.log(JSON.stringify(index, null, 4));
+                    });
+                    results["thisAnnotation"] = item.thisAnnotation.value;
+                    //sparql.recommendations.papers[item.file.value] = (jQuery.isEmptyObject(sparql.recommendations.papers[item.file.value])) ? { "label": item.fileLabel.value, "annotations": {}} : sparql.recommendations.papers[item.file.value];
+                    //var ann = sparql.recommendations.papers[item.file.value];
+                    //ann.annotations[item.a.value] = (jQuery.isEmptyObject(ann[item.a.value])) ? { "label": item.aLabel.value, "dbpedia": {}} : ann[item.a.value];
+                    //var cat = ann.annotations[item.a.value];
+                    //cat.dbpedia[item.aType.value] = (jQuery.isEmptyObject(cat[item.aType.value])) ? { "thisAnnotation": item.curr_a.value, "label": null } : cat.dbpedia[item.aType.value];
+
+                });
+            }
+        });
+        return results;
+        //return sparql.recommendations;
+    },
+
     /**
      * Filters out given URI parameter value from the sURL and returns the values as a string array.
      *
@@ -120,6 +264,25 @@ var sparqlResponseParser  = {
             }
             return "No Parameters Found";
         }
+    },
+
+    /**
+     * Retrieves "page" parameter from the given URL.
+     *
+     * @param {String} URL string
+     * @returns {Integer} page number
+     */
+    getPageParameter: function (sURL) {
+        var start = sURL.indexOf("#") ;
+        var end = sURL.indexOf("?") ;
+        var result;
+        if (start && end && start < end) {
+            start++;
+            result = sURL.substring(start, end); //"page=2" e.g.
+            result = result.split("=")[1]; //2 e.g.
+            result = parseInt(result);
+        }
+        return result;
     }
 };
 

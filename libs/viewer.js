@@ -2026,8 +2026,6 @@ window.addEventListener('scalechange', function scalechange(evt) {
 }, true);
 
 window.addEventListener('pagechange', function pagechange(evt) {
-
-  highlight.init();
   var page = evt.pageNumber;
   if (PDFView.previousPageNumber !== page) {
     document.getElementById('pageNumber').value = page;

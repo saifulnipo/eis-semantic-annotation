@@ -428,13 +428,13 @@ var dbPediaLookupUIOptions  = {
             activeClass = 'active'
         }
 
-        $('.nav-tabs').append(
+        $('#ontologySelectionModel').find('.nav-tabs').append(
             $('<li class="' + activeClass + '"></li>').append(
                 $("<a>"+ tabTitle +"</a>").attr('href','#'+tabId).attr('data-toggle','tab').addClass(tabId)
             )
         );
 
-        $('.tab-content').append(
+        $('#ontologySelectionModel').find('.tab-content').append(
             $('<div></div>').addClass('tab-pane ' + activeClass).attr('id', tabId).append(tabContent)
         );
     },
@@ -446,8 +446,8 @@ var dbPediaLookupUIOptions  = {
     resetOntologySelectionModalTabContent : function () {
         $('.modal-left').html('');
         $('.modal-right').html('');
-        $('.nav-tabs').html('');
-        $('.tab-content').html('');
+        $('#ontologySelectionModel').find('.nav-tabs').html('');
+        $('#ontologySelectionModel').find('.tab-content').html('');
         dbPediaLookupUIOptions.searchKeyValueRadioInputMap = {}; // clear the cache
     },
 

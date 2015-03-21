@@ -64,6 +64,22 @@ var messageHandler  = {
     },
 
     /**
+     * Display message in given element
+     * @param {String} message
+     * @param {Object} element where to display the message
+     * @param optional boolean value to define whether to show message temporarily only.
+     * @return void
+     */
+    displayInfo:function(message, displayInElement, isHide) {
+        var isHide = isHide || false; //optional parameter
+        displayInElement.html(message);
+        if (!displayInElement.is(':visible')) displayInElement.fadeIn(1000);
+        if(isHide == true) {
+            displayInElement.delay(1500).fadeOut();
+        }
+    },
+
+    /**
      * Return the standard error message if the server communication is failed
      *
      * @param exception
